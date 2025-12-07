@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PMAM - Sistema de Documentos Oficiais</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        /* Estilos otimizados para GitHub Pages */
         :root {
             --pm-azul: #1e3a8a;
             --pm-azul-claro: #3b82f6;
@@ -23,1396 +23,1121 @@
             --pm-raio: 8px;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 0;
+            background-color: var(--pm-cinza-claro);
             color: var(--pm-azul-escuro);
-            line-height: 1.6;
+            display: flex;
             min-height: 100vh;
-            padding: 20px;
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: var(--pm-branco);
-            border-radius: var(--pm-raio);
+        /* Estrutura Principal */
+        .sidebar {
+            width: 280px;
+            background-color: var(--pm-azul-escuro);
+            color: var(--pm-branco);
+            padding: 20px;
             box-shadow: var(--pm-sombra);
-            overflow: hidden;
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            flex-grow: 1;
+            padding: 20px 30px;
         }
 
         /* Cabeçalho */
-        .cabecalho {
-            background: linear-gradient(135deg, var(--pm-azul), var(--pm-azul-claro));
-            color: white;
-            padding: 24px 32px;
+        .header {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            position: relative;
-        }
-
-        .cabecalho::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .logo-container {
-            display: flex;
             align-items: center;
-            gap: 16px;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--pm-borda);
         }
 
         .logo {
-            width: 50px;
-            height: 50px;
-            background: white;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--pm-azul);
-            font-weight: bold;
             font-size: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .titulos h1 {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .titulos .subtitulo {
-            font-size: 14px;
-            opacity: 0.9;
-            font-weight: 400;
-        }
-
-        .usuario {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 8px 16px;
-            border-radius: var(--pm-raio);
-            backdrop-filter: blur(10px);
-        }
-
-        .avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: white;
-            color: var(--pm-azul);
-            display: flex;
-            align-items: center;
-            justify-content: center;
             font-weight: bold;
-        }
-
-        .detalhes-usuario h3 {
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .detalhes-usuario p {
-            font-size: 12px;
-            opacity: 0.8;
-        }
-
-        /* Layout Principal */
-        .layout-principal {
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            min-height: calc(100vh - 180px);
-        }
-
-        /* Painel Lateral */
-        .painel-lateral {
-            background: var(--pm-cinza-claro);
-            padding: 24px;
-            border-right: 1px solid var(--pm-borda);
-        }
-
-        .secao-painel {
-            margin-bottom: 32px;
-        }
-
-        .secao-painel:last-child {
-            margin-bottom: 0;
-        }
-
-        .titulo-secao {
             color: var(--pm-azul);
-            font-size: 13px;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin-bottom: 16px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid var(--pm-borda);
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
-        .titulo-secao i {
+        /* Navegação Lateral */
+        .navegacao h3 {
             color: var(--pm-destaque);
-        }
-
-        .lista-navegacao {
-            list-style: none;
+            font-size: 14px;
+            margin-top: 30px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
         }
 
         .item-navegacao {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px;
+            padding: 12px 15px;
+            margin-bottom: 5px;
             border-radius: var(--pm-raio);
-            color: var(--pm-cinza);
-            text-decoration: none;
-            margin-bottom: 8px;
-            transition: all 0.3s;
             cursor: pointer;
-            font-weight: 500;
-            border: 1px solid transparent;
+            transition: background-color 0.2s, color 0.2s;
+            font-size: 15px;
         }
 
+        .item-navegacao.ativo,
         .item-navegacao:hover {
-            background: white;
-            color: var(--pm-azul);
-            border-color: var(--pm-borda);
-            transform: translateX(4px);
-        }
-
-        .item-navegacao.ativo {
-            background: linear-gradient(135deg, var(--pm-azul), var(--pm-azul-claro));
-            color: white;
-            border-color: var(--pm-azul);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
-        }
-
-        .item-navegacao.ativo i {
-            color: white;
+            background-color: var(--pm-azul);
+            color: var(--pm-branco);
         }
 
         .item-navegacao i {
+            margin-right: 12px;
             width: 20px;
             text-align: center;
         }
 
-        .badge {
-            margin-left: auto;
-            background: var(--pm-destaque);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 11px;
+        /* Cartões de Conteúdo */
+        .cartao-conteudo {
+            background-color: var(--pm-branco);
+            padding: 30px;
+            border-radius: var(--pm-raio);
+            box-shadow: var(--pm-sombra);
+            margin-bottom: 30px;
+        }
+
+        .conteudo-aba {
+            display: none;
+        }
+
+        .conteudo-aba.ativo {
+            display: block;
+        }
+
+        /* Formulário */
+        .campo-grupo {
+            margin-bottom: 20px;
+        }
+
+        .campo-grupo label {
+            display: block;
             font-weight: 600;
-            min-width: 20px;
-            text-align: center;
+            margin-bottom: 8px;
+            color: var(--pm-azul-escuro);
+        }
+
+        .campo-grupo input[type="text"],
+        .campo-grupo input[type="date"],
+        .campo-grupo select,
+        .campo-grupo textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--pm-borda);
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 15px;
+            background-color: #fcfcfc;
+        }
+
+        .campo-grupo textarea {
+            resize: vertical;
+            min-height: 100px;
         }
 
         /* Botões */
-        .botao {
-            padding: 10px 16px;
+        .btn {
+            padding: 12px 20px;
             border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
+            border-radius: var(--pm-raio);
             cursor: pointer;
-            transition: all 0.3s;
+            font-weight: 600;
+            transition: background-color 0.2s, opacity 0.2s;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
             justify-content: center;
+            margin-right: 10px;
         }
 
-        .botao-primario {
-            background: linear-gradient(135deg, var(--pm-azul), var(--pm-azul-claro));
-            color: white;
+        .btn i {
+            margin-right: 8px;
         }
 
-        .botao-primario:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+        .btn-primario {
+            background-color: var(--pm-azul-claro);
+            color: var(--pm-branco);
         }
 
-        .botao-secundario {
-            background: white;
-            color: var(--pm-azul);
-            border: 2px solid var(--pm-borda);
+        .btn-primario:hover {
+            background-color: var(--pm-azul);
         }
 
-        .botao-secundario:hover {
-            background: var(--pm-cinza-claro);
-        }
-
-        .botao-sucesso {
-            background: var(--pm-verde);
-            color: white;
-        }
-
-        .botao-perigo {
-            background: var(--pm-vermelho);
-            color: white;
-        }
-
-        .grupo-botoes {
-            display: flex;
-            gap: 12px;
-            margin-top: 24px;
-            flex-wrap: wrap;
-        }
-
-        /* Área de Conteúdo */
-        .area-conteudo {
-            padding: 32px;
-            background: white;
-        }
-
-        /* Abas */
-        .abas {
-            display: flex;
-            gap: 2px;
-            margin-bottom: 24px;
-            border-bottom: 2px solid var(--pm-borda);
-            overflow-x: auto;
-        }
-
-        .aba {
-            padding: 12px 20px;
-            background: transparent;
-            border: none;
-            border-bottom: 3px solid transparent;
-            cursor: pointer;
-            font-weight: 600;
+        .btn-secundario {
+            background-color: var(--pm-cinza-claro);
             color: var(--pm-cinza);
-            transition: all 0.3s;
-            white-space: nowrap;
-            font-size: 14px;
+            border: 1px solid var(--pm-borda);
         }
 
-        .aba:hover {
-            color: var(--pm-destaque);
+        .btn-secundario:hover {
+            background-color: var(--pm-borda);
         }
 
-        .aba.ativo {
-            color: var(--pm-azul);
-            border-bottom-color: var(--pm-destaque);
-            background: linear-gradient(to bottom, rgba(14, 165, 233, 0.05), transparent);
-        }
-
-        /* Cartão de Conteúdo */
-        .cartao-conteudo {
-            background: white;
+        /* Alertas/Mensagens */
+        .alerta {
+            padding: 15px;
             border-radius: var(--pm-raio);
-            padding: 24px;
-            box-shadow: var(--pm-sombra);
-            margin-bottom: 24px;
-        }
-
-        .cartao-conteudo:last-child {
-            margin-bottom: 0;
-        }
-
-        /* Formulários */
-        .grupo-form {
             margin-bottom: 20px;
-        }
-
-        .grupo-form label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--pm-azul-escuro);
-            margin-bottom: 6px;
-        }
-
-        .grupo-form label.obrigatorio::after {
-            content: " *";
-            color: var(--pm-vermelho);
-        }
-
-        .controle-form {
-            width: 100%;
-            padding: 10px 12px;
-            border: 2px solid var(--pm-borda);
-            border-radius: 6px;
-            font-size: 14px;
-            transition: all 0.3s;
-            background: white;
-        }
-
-        .controle-form:focus {
-            outline: none;
-            border-color: var(--pm-destaque);
-            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
-        }
-
-        textarea.controle-form {
-            min-height: 120px;
-            resize: vertical;
-            font-family: inherit;
-        }
-
-        .linha-form {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-
-        @media (max-width: 768px) {
-            .linha-form {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Pré-visualização */
-        .cabecalho-previa {
+            font-size: 15px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 2px solid var(--pm-borda);
         }
 
-        .cabecalho-previa h2 {
-            color: var(--pm-azul);
-            font-size: 20px;
-            font-weight: 700;
+        .alerta i {
+            margin-right: 10px;
         }
 
-        .acoes-previa {
-            display: flex;
-            gap: 12px;
+        .alerta-erro {
+            background-color: #fee2e2;
+            color: var(--pm-vermelho);
+            border: 1px solid #fca5a5;
+        }
+
+        .alerta-sucesso {
+            background-color: #d1fae5;
+            color: var(--pm-verde);
+            border: 1px solid #6ee7b7;
+        }
+        
+        .alerta-info {
+            background-color: #eff6ff;
+            color: var(--pm-destaque);
+            border: 1px solid #bfdbfe;
+        }
+
+        /* Área de Pré-visualização */
+        .previa-container {
+            border: 1px solid var(--pm-borda);
+            padding: 20px;
+            min-height: 500px;
+            overflow-y: auto;
+            background-color: #fff;
         }
 
         .previa-documento {
-            background: var(--pm-cinza-claro);
-            border: 2px solid var(--pm-borda);
-            border-radius: 6px;
-            padding: 32px;
-            font-family: 'Times New Roman', Times, serif;
-            max-height: 600px;
-            overflow-y: auto;
-            line-height: 1.8;
-        }
-
-        .previa-documento h1 {
-            text-align: center;
-            margin-bottom: 32px;
-            color: var(--pm-azul-escuro);
-            font-size: 22px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .previa-documento h2 {
-            text-align: center;
-            margin-bottom: 24px;
-            color: var(--pm-azul-escuro);
-            font-size: 18px;
-            border-bottom: 1px solid var(--pm-borda);
-            padding-bottom: 12px;
-        }
-
-        .previa-documento h3 {
-            color: var(--pm-azul-escuro);
-            margin-top: 24px;
-            margin-bottom: 12px;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+            background-color: #fff;
+            border: 1px solid #eee;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+            line-height: 1.6;
             font-size: 16px;
         }
 
-        .previa-documento p {
-            margin-bottom: 16px;
-            text-align: justify;
+        .previa-documento h1, .previa-documento h2, .previa-documento h3 {
+            text-align: center;
+            color: var(--pm-azul-escuro);
         }
-
+        
+        .previa-documento p {
+            text-align: justify;
+            margin-bottom: 1.5em;
+        }
+        
         .previa-documento .assinatura {
             margin-top: 80px;
             text-align: center;
         }
-
+        
         .previa-documento .linha-assinatura {
-            border-top: 1px solid var(--pm-azul-escuro);
-            width: 300px;
-            margin: 40px auto 8px;
+            border-top: 1px solid #000;
+            width: 60%;
+            margin: 0 auto 5px;
         }
 
-        /* Alerta */
-        .alerta {
-            padding: 16px;
-            border-radius: 6px;
-            margin-bottom: 24px;
-            border-left: 4px solid;
-            background: var(--pm-cinza-claro);
-        }
-
-        .alerta-info {
-            border-left-color: var(--pm-destaque);
-            background: #eff6ff;
-        }
-
-        .alerta-sucesso {
-            border-left-color: var(--pm-verde);
-            background: #d1fae5;
-        }
-
-        /* Toast */
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--pm-azul-escuro);
-            color: white;
-            padding: 12px 20px;
-            border-radius: var(--pm-raio);
-            box-shadow: var(--pm-sombra);
+        /* Histórico */
+        .historico-item {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--pm-borda);
+            font-size: 14px;
+        }
+        
+        .historico-item:last-child {
+            border-bottom: none;
+        }
+
+        .historico-item .acoes button {
+            background: none;
+            border: none;
+            color: var(--pm-azul-claro);
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        .historico-item .acoes button:hover {
+            color: var(--pm-azul);
+        }
+
+        /* Toast de Notificação */
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: var(--pm-azul-escuro);
+            color: #fff;
+            text-align: center;
+            border-radius: var(--pm-raio);
+            padding: 16px;
+            position: fixed;
             z-index: 1000;
-            transform: translateX(100%);
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
             opacity: 0;
-            transition: all 0.3s;
+            transition: visibility 0s, opacity 0.5s linear;
         }
 
         .toast.mostrar {
-            transform: translateX(0);
+            visibility: visible;
             opacity: 1;
         }
-
+        
+        .toast i {
+            margin-right: 10px;
+        }
+        
         .toast-sucesso {
-            background: var(--pm-verde);
+            background-color: var(--pm-verde);
+        }
+        
+        .modelo-card:hover {
+            border-color: var(--pm-azul-claro) !important;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
         }
 
-        .toast-erro {
-            background: var(--pm-vermelho);
-        }
-
-        /* Responsivo */
-        @media (max-width: 1024px) {
-            .layout-principal {
-                grid-template-columns: 1fr;
-            }
-            
-            .painel-lateral {
-                display: none;
-            }
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-            
-            .cabecalho {
-                flex-direction: column;
-                gap: 16px;
-                text-align: center;
-            }
-            
-            .usuario {
-                align-self: stretch;
-                justify-content: center;
-            }
-            
-            .area-conteudo {
-                padding: 20px;
-            }
-            
-            .grupo-botoes {
-                flex-direction: column;
-            }
-            
-            .grupo-botoes .botao {
-                width: 100%;
-            }
-        }
-
-        @media print {
-            .painel-lateral, .abas, .cabecalho-previa, .botao {
-                display: none !important;
-            }
-            
-            .previa-documento {
-                border: none;
-                padding: 0;
-                max-height: none;
-            }
-        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Cabeçalho -->
-        <header class="cabecalho">
-            <div class="logo-container">
-                <div class="logo">PM</div>
-                <div class="titulos">
-                    <h1>PMAM - Sistema de Documentos</h1>
-                    <p class="subtitulo">Geração automática de procedimentos administrativos</p>
-                </div>
+
+    <div class="sidebar">
+        <div style="text-align: center; padding-bottom: 20px; border-bottom: 1px solid #334155;">
+            <i class="fas fa-shield-alt" style="font-size: 40px; color: var(--pm-destaque);"></i>
+            <h1 style="font-size: 18px; margin: 10px 0 0;">Sistema PMAM</h1>
+            <p style="font-size: 12px; color: #94a3b8;">Gerador de Documentos</p>
+        </div>
+
+        <div class="navegacao">
+            <h3>Navegação</h3>
+            <div class="item-navegacao ativo aba" data-aba="formulario">
+                <i class="fas fa-keyboard"></i> Formulário de Dados
             </div>
-            <div class="usuario">
-                <div class="avatar">OP</div>
-                <div class="detalhes-usuario">
-                    <h3>Maj QOPM Olavo Pereira</h3>
-                    <p>Encarregado de Procedimentos</p>
-                </div>
+            <div class="item-navegacao aba" data-aba="previa">
+                <i class="fas fa-file-alt"></i> Pré-visualização
             </div>
-        </header>
+            <div class="item-navegacao aba" data-aba="modelos">
+                <i class="fas fa-copy"></i> Modelos
+            </div>
+            <div class="item-navegacao aba" data-aba="historico">
+                <i class="fas fa-history"></i> Histórico & Rascunhos
+            </div>
+        </div>
 
-        <!-- Layout Principal -->
-        <div class="layout-principal">
-            <!-- Painel Lateral -->
-            <aside class="painel-lateral">
-                <div class="secao-painel">
-                    <h3 class="titulo-secao"><i class="fas fa-folder"></i> Procedimentos</h3>
-                    <ul class="lista-navegacao">
-                        <li>
-                            <a class="item-navegacao ativo" data-aba="formulario">
-                                <i class="fas fa-file-invoice"></i>
-                                Formulário
-                                <span class="badge">3</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="item-navegacao" data-aba="previa">
-                                <i class="fas fa-eye"></i>
-                                Pré-visualização
-                            </a>
-                        </li>
-                        <li>
-                            <a class="item-navegacao" data-aba="modelos">
-                                <i class="fas fa-copy"></i>
-                                Modelos
-                            </a>
-                        </li>
-                        <li>
-                            <a class="item-navegacao" data-aba="historico">
-                                <i class="fas fa-history"></i>
-                                Histórico
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="secao-painel">
-                    <h3 class="titulo-secao"><i class="fas fa-bolt"></i> Ações Rápidas</h3>
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <button class="botao botao-primario" id="btn-gerar-tudo">
-                            <i class="fas fa-file-export"></i> Gerar Todos
-                        </button>
-                        <button class="botao botao-secundario" id="btn-limpar-form">
-                            <i class="fas fa-eraser"></i> Limpar
-                        </button>
-                        <button class="botao botao-sucesso" id="btn-salvar">
-                            <i class="fas fa-save"></i> Salvar
-                        </button>
-                    </div>
-                </div>
-
-                <div class="secao-painel">
-                    <h3 class="titulo-secao"><i class="fas fa-info-circle"></i> Informações</h3>
-                    <div style="font-size: 12px; color: var(--pm-cinza); line-height: 1.5;">
-                        <p><strong>Versão:</strong> 2.1.0</p>
-                        <p><strong>Última atualização:</strong> 10/12/2024</p>
-                        <p><strong>Documentos gerados:</strong> 47</p>
-                    </div>
-                </div>
-            </aside>
-
-            <!-- Área de Conteúdo -->
-            <main class="area-conteudo">
-                <!-- Abas -->
-                <div class="abas">
-                    <button class="aba ativo" data-aba="formulario">Formulário</button>
-                    <button class="aba" data-aba="previa">Pré-visualização</button>
-                    <button class="aba" data-aba="modelos">Modelos</button>
-                    <button class="aba" data-aba="historico">Histórico</button>
-                </div>
-
-                <!-- Alerta -->
-                <div class="alerta alerta-info">
-                    <i class="fas fa-info-circle"></i> Preencha todos os campos obrigatórios (*) e clique em "Gerar Documentos" para criar os documentos oficiais.
-                </div>
-
-                <!-- Aba: Formulário -->
-                <div class="cartao-conteudo conteudo-aba ativo" id="aba-formulario">
-                    <h2 style="color: var(--pm-azul); margin-bottom: 24px;">Formulário de Procedimento</h2>
-                    
-                    <div class="grupo-form">
-                        <label class="obrigatorio">Tipo de Procedimento</label>
-                        <select class="controle-form" id="tipo-procedimento">
-                            <option value="SINV">Sindicância Investigativa</option>
-                            <option value="IPM">Inquérito Policial Militar</option>
-                            <option value="SD">Sindicância Disciplinar</option>
-                        </select>
-                    </div>
-
-                    <div class="linha-form">
-                        <div class="grupo-form">
-                            <label class="obrigatorio">Número da Portaria</label>
-                            <input type="text" class="controle-form" id="numero-portaria" 
-                                   placeholder="Ex: 004.07/SJD/SIND.INVEST/CPA CENTRO-SUL">
-                        </div>
-                        <div class="grupo-form">
-                            <label class="obrigatorio">Data da Portaria</label>
-                            <input type="date" class="controle-form" id="data-portaria">
-                        </div>
-                    </div>
-
-                    <div class="linha-form">
-                        <div class="grupo-form">
-                            <label class="obrigatorio">Unidade/OM</label>
-                            <input type="text" class="controle-form" id="unidade" 
-                                   placeholder="Ex: CPA CENTRO-SUL">
-                        </div>
-                        <div class="grupo-form">
-                            <label class="obrigatorio">Cidade</label>
-                            <input type="text" class="controle-form" id="cidade" value="Manaus">
-                        </div>
-                    </div>
-
-                    <h3 style="color: var(--pm-azul); margin: 32px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--pm-borda);">
-                        <i class="fas fa-user-tie"></i> Encarregado/Sindicante
-                    </h3>
-
-                    <div class="linha-form">
-                        <div class="grupo-form">
-                            <label class="obrigatorio">Posto/Graduação</label>
-                            <select class="controle-form" id="posto-encarregado">
-                                <option value="MAJ QOPM">MAJ QOPM</option>
-                                <option value="CAP QOPM">CAP QOPM</option>
-                                <option value="1º TEN QOPM">1º TEN QOPM</option>
-                                <option value="2º TEN QOPM">2º TEN QOPM</option>
-                                <option value="CEL QOPM">CEL QOPM</option>
-                            </select>
-                        </div>
-                        <div class="grupo-form">
-                            <label class="obrigatorio">Nome Completo</label>
-                            <input type="text" class="controle-form" id="nome-encarregado" 
-                                   placeholder="Ex: Olavo Pereira da Silva Filho">
-                        </div>
-                        <div class="grupo-form">
-                            <label class="obrigatorio">Número de Identificação</label>
-                            <input type="text" class="controle-form" id="id-encarregado" 
-                                   placeholder="Ex: 15974">
-                        </div>
-                    </div>
-
-                    <h3 style="color: var(--pm-azul); margin: 32px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--pm-borda);">
-                        <i class="fas fa-user-shield"></i> Sindicado/Indiciado
-                    </h3>
-
-                    <div class="linha-form">
-                        <div class="grupo-form">
-                            <label>Posto/Graduação</label>
-                            <select class="controle-form" id="posto-sindicado">
-                                <option value="">Selecionar</option>
-                                <option value="CAP QOPM">CAP QOPM</option>
-                                <option value="1º TEN QOPM">1º TEN QOPM</option>
-                                <option value="ST QPPM">ST QPPM</option>
-                                <option value="CB QPPM">CB QPPM</option>
-                            </select>
-                        </div>
-                        <div class="grupo-form">
-                            <label>Nome Completo</label>
-                            <input type="text" class="controle-form" id="nome-sindicado" 
-                                   placeholder="Ex: Rômulo Botelho dos Santos">
-                        </div>
-                        <div class="grupo-form">
-                            <label>Número de Identificação</label>
-                            <input type="text" class="controle-form" id="id-sindicado" 
-                                   placeholder="Ex: 20765">
-                        </div>
-                    </div>
-
-                    <h3 style="color: var(--pm-azul); margin: 32px 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--pm-borda);">
-                        <i class="fas fa-file-alt"></i> Descrição dos Fatos
-                    </h3>
-
-                    <div class="grupo-form">
-                        <label class="obrigatorio">Relato dos Fatos</label>
-                        <textarea class="controle-form" id="resumo-fatos" rows="6" 
-                                  placeholder="Descreva detalhadamente os fatos que motivaram a instauração do procedimento..."></textarea>
-                    </div>
-
-                    <div class="linha-form">
-                        <div class="grupo-form">
-                            <label>Data do Fato</label>
-                            <input type="date" class="controle-form" id="data-fato">
-                        </div>
-                        <div class="grupo-form">
-                            <label>Local do Fato</label>
-                            <input type="text" class="controle-form" id="local-fato" 
-                                   placeholder="Ex: Boate Root, Rua Barão de Indaiá">
-                        </div>
-                        <div class="grupo-form">
-                            <label>Horário</label>
-                            <input type="text" class="controle-form" id="hora-fato" 
-                                   placeholder="Ex: 04:30h">
-                        </div>
-                    </div>
-
-                    <div class="grupo-botoes">
-                        <button class="botao botao-primario" id="btn-gerar-docs">
-                            <i class="fas fa-file-export"></i> Gerar Documentos
-                        </button>
-                        <button class="botao botao-secundario" id="btn-validar">
-                            <i class="fas fa-check-circle"></i> Validar Dados
-                        </button>
-                        <button class="botao botao-sucesso" id="btn-carregar-modelo">
-                            <i class="fas fa-upload"></i> Carregar Modelo
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Aba: Pré-visualização -->
-                <div class="cartao-conteudo conteudo-aba" id="aba-previa">
-                    <div class="cabecalho-previa">
-                        <h2>Pré-visualização do Documento</h2>
-                        <div class="acoes-previa">
-                            <select class="controle-form" id="selecionar-documento" style="width: 200px;">
-                                <option value="termo-abertura">Termo de Abertura</option>
-                                <option value="termo-declaracao">Termo de Declaração</option>
-                                <option value="oficio">Ofício</option>
-                                <option value="carta-precatoria">Carta Precatória</option>
-                                <option value="relatorio">Relatório Final</option>
-                                <option value="parecer">Parecer</option>
-                            </select>
-                            <button class="botao botao-primario" id="btn-exportar">
-                                <i class="fas fa-download"></i> Exportar
-                            </button>
-                            <button class="botao botao-secundario" id="btn-imprimir">
-                                <i class="fas fa-print"></i> Imprimir
-                            </button>
-                        </div>
-                    </div>
-                    <div class="previa-documento" id="previa-documento">
-                        <p style="text-align: center; color: var(--pm-cinza); padding: 40px;">
-                            <i class="fas fa-file-alt" style="font-size: 48px; margin-bottom: 20px; display: block; opacity: 0.3;"></i>
-                            Selecione um documento para visualização
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Aba: Modelos -->
-                <div class="cartao-conteudo conteudo-aba" id="aba-modelos">
-                    <h2 style="color: var(--pm-azul); margin-bottom: 24px;">Modelos de Documentos</h2>
-                    
-                    <div class="alerta alerta-info">
-                        <i class="fas fa-lightbulb"></i> Clique em um modelo para carregar automaticamente todos os dados no formulário.
-                    </div>
-                    
-                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 24px;">
-                        <div class="modelo-card" style="border: 2px solid var(--pm-borda); border-radius: var(--pm-raio); padding: 20px; cursor: pointer; transition: all 0.3s;" 
-                             data-modelo="sindicancia-botelho" onclick="carregarModelo('sindicancia-botelho')">
-                            <h3 style="color: var(--pm-azul); margin-bottom: 12px;">
-                                <i class="fas fa-file-contract"></i> Sindicância Cap. Botelho
-                            </h3>
-                            <p style="font-size: 14px; color: var(--pm-cinza); margin-bottom: 16px;">
-                                Sindicância Investigativa para apurar conduta de policial militar envolvido em ocorrência com PRFs em boate.
-                            </p>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="background: var(--pm-verde); color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">
-                                    Completo
-                                </span>
-                                <span style="font-size: 12px; color: var(--pm-cinza);">
-                                    <i class="fas fa-calendar"></i> Set/2021
-                                </span>
-                            </div>
-                        </div>
-                        
-                        <div class="modelo-card" style="border: 2px solid var(--pm-borda); border-radius: var(--pm-raio); padding: 20px; cursor: pointer; transition: all 0.3s;" 
-                             data-modelo="sindicancia-daivison" onclick="carregarModelo('sindicancia-daivison')">
-                            <h3 style="color: var(--pm-azul); margin-bottom: 12px;">
-                                <i class="fas fa-file-contract"></i> Sindicância Cap. Daivison
-                            </h3>
-                            <p style="font-size: 14px; color: var(--pm-cinza); margin-bottom: 16px;">
-                                Sindicância Investigativa para apurar suposta agressão física durante abordagem policial.
-                            </p>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="background: var(--pm-verde); color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">
-                                    Completo
-                                </span>
-                                <span style="font-size: 12px; color: var(--pm-cinza);">
-                                    <i class="fas fa-calendar"></i> Jun/2023
-                                </span>
-                            </div>
-                        </div>
-                        
-                        <div class="modelo-card" style="border: 2px solid var(--pm-borda); border-radius: var(--pm-raio); padding: 20px; cursor: pointer; transition: all 0.3s;" 
-                             data-modelo="ipm-stanley" onclick="carregarModelo('ipm-stanley')">
-                            <h3 style="color: var(--pm-azul); margin-bottom: 12px;">
-                                <i class="fas fa-gavel"></i> IPM 1º Ten. Stanley
-                            </h3>
-                            <p style="font-size: 14px; color: var(--pm-cinza); margin-bottom: 16px;">
-                                Inquérito Policial Militar instaurado para apurar conduta de policial militar.
-                            </p>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span style="background: var(--pm-amarelo); color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">
-                                    Em andamento
-                                </span>
-                                <span style="font-size: 12px; color: var(--pm-cinza);">
-                                    <i class="fas fa-calendar"></i> Mar/2023
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Aba: Histórico -->
-                <div class="cartao-conteudo conteudo-aba" id="aba-historico">
-                    <h2 style="color: var(--pm-azul); margin-bottom: 24px;">Histórico de Documentos</h2>
-                    
-                    <div class="alerta alerta-sucesso">
-                        <i class="fas fa-database"></i> Sistema de armazenamento local ativo. Seus documentos são salvos automaticamente.
-                    </div>
-                    
-                    <div id="lista-historico" style="margin-top: 24px;">
-                        <p style="text-align: center; color: var(--pm-cinza); padding: 20px;">
-                            <i class="fas fa-history" style="font-size: 36px; margin-bottom: 16px; display: block; opacity: 0.3;"></i>
-                            Nenhum documento gerado ainda
-                        </p>
-                    </div>
-                </div>
-            </main>
+        <div class="navegacao">
+            <h3>Ações Rápidas</h3>
+            <div class="item-navegacao" id="btn-gerar-tudo">
+                <i class="fas fa-magic"></i> Gerar TODOS Documentos
+            </div>
+            <div class="item-navegacao" id="btn-salvar">
+                <i class="fas fa-save"></i> Salvar Rascunho
+            </div>
+            <div class="item-navegacao" id="btn-exportar">
+                <i class="fas fa-download"></i> Exportar Documento
+            </div>
+            <div class="item-navegacao" id="btn-limpar-form">
+                <i class="fas fa-eraser"></i> Limpar Formulário
+            </div>
+            <div class="item-navegacao" id="btn-imprimir">
+                <i class="fas fa-print"></i> Imprimir Prévia
+            </div>
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div class="toast" id="toast">
-        <i class="fas fa-check-circle"></i>
-        <span id="toast-mensagem">Operação realizada com sucesso!</span>
+    <div class="main-content">
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-gavel" style="color: var(--pm-destaque); margin-right: 5px;"></i> Sistema de Documentos
+            </div>
+            <div>
+                <span style="color: var(--pm-cinza); font-size: 14px;">Usuário: Sindicante Padrão</span>
+            </div>
+        </div>
+
+        <div class="cartao-conteudo conteudo-aba ativo" id="aba-formulario">
+            <h2 style="color: var(--pm-azul); margin-bottom: 24px;"><i class="fas fa-keyboard"></i> Preenchimento do Procedimento</h2>
+            
+            <div class="alerta alerta-info">
+                <i class="fas fa-lightbulb"></i> Preencha todos os campos do formulário para garantir que os documentos sejam gerados corretamente.
+            </div>
+
+            <form id="formulario-procedimento">
+                <h3 style="color: var(--pm-azul-escuro); margin-top: 30px; border-bottom: 1px solid var(--pm-borda); padding-bottom: 10px;">
+                    1. Dados do Procedimento
+                </h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                    <div class="campo-grupo">
+                        <label for="tipo-procedimento">Tipo de Procedimento</label>
+                        <select id="tipo-procedimento" name="tipo-procedimento" required>
+                            <option value="Sindicância">Sindicância Investigativa</option>
+                            <option value="IPM">Inquérito Policial Militar (IPM)</option>
+                            <option value="PAD">Processo Administrativo Disciplinar (PAD)</option>
+                        </select>
+                    </div>
+
+                    <div class="campo-grupo">
+                        <label for="numero-portaria">Nº da Portaria de Instauração</label>
+                        <input type="text" id="numero-portaria" name="numero-portaria" placeholder="Ex: 001/2024-PMAM/CPI" required>
+                    </div>
+                    
+                    <div class="campo-grupo">
+                        <label for="data-portaria">Data da Instauração</label>
+                        <input type="date" id="data-portaria" name="data-portaria" required>
+                    </div>
+                    
+                    <div class="campo-grupo">
+                        <label for="unidade">Unidade Policial (Sigla)</label>
+                        <input type="text" id="unidade" name="unidade" placeholder="Ex: 1º BPM" required>
+                    </div>
+
+                    <div class="campo-grupo">
+                        <label for="cidade">Cidade/Local</label>
+                        <input type="text" id="cidade" name="cidade" placeholder="Ex: Manaus/AM" required>
+                    </div>
+                </div>
+                
+                <div class="campo-grupo">
+                    <label for="resumo-fatos">Resumo dos Fatos (Objeto da apuração)</label>
+                    <textarea id="resumo-fatos" name="resumo-fatos" placeholder="Descreva brevemente o que está sendo apurado..." required></textarea>
+                </div>
+
+                <h3 style="color: var(--pm-azul-escuro); margin-top: 30px; border-bottom: 1px solid var(--pm-borda); padding-bottom: 10px;">
+                    2. Encarregado (Sindicante/Presidente)
+                </h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                    <div class="campo-grupo">
+                        <label for="posto-encarregado">Posto/Graduação</label>
+                        <input type="text" id="posto-encarregado" name="posto-encarregado" placeholder="Ex: Cap. PM" required>
+                    </div>
+
+                    <div class="campo-grupo">
+                        <label for="nome-encarregado">Nome Completo</label>
+                        <input type="text" id="nome-encarregado" name="nome-encarregado" placeholder="Ex: João da Silva" required>
+                    </div>
+                    
+                    <div class="campo-grupo">
+                        <label for="id-encarregado">RG/CI</label>
+                        <input type="text" id="id-encarregado" name="id-encarregado" placeholder="Ex: 123456-7" required>
+                    </div>
+                </div>
+
+                <h3 style="color: var(--pm-azul-escuro); margin-top: 30px; border-bottom: 1px solid var(--pm-borda); padding-bottom: 10px;">
+                    3. Sindicado/Acusado
+                </h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+                    <div class="campo-grupo">
+                        <label for="posto-sindicado">Posto/Graduação</label>
+                        <input type="text" id="posto-sindicado" name="posto-sindicado" placeholder="Ex: Sd. PM" required>
+                    </div>
+
+                    <div class="campo-grupo">
+                        <label for="nome-sindicado">Nome Completo</label>
+                        <input type="text" id="nome-sindicado" name="nome-sindicado" placeholder="Ex: Pedro Santos" required>
+                    </div>
+                    
+                    <div class="campo-grupo">
+                        <label for="id-sindicado">RG/CI</label>
+                        <input type="text" id="id-sindicado" name="id-sindicado" placeholder="Ex: 987654-3" required>
+                    </div>
+                </div>
+
+                <div style="margin-top: 40px; border-top: 1px solid var(--pm-borda); padding-top: 20px; display: flex;">
+                    <button type="button" class="btn btn-primario" id="btn-gerar-docs">
+                        <i class="fas fa-file-export"></i> Gerar Documentos Iniciais
+                    </button>
+                    <button type="button" class="btn btn-secundario" id="btn-validar">
+                        <i class="fas fa-check"></i> Validar Campos
+                    </button>
+                    <button type="button" class="btn btn-secundario" id="btn-carregar-modelo">
+                        <i class="fas fa-upload"></i> Carregar Modelo
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="cartao-conteudo conteudo-aba" id="aba-previa">
+            <h2 style="color: var(--pm-azul); margin-bottom: 24px;"><i class="fas fa-file-alt"></i> Pré-visualização e Exportação</h2>
+            
+            <div class="alerta alerta-info">
+                <i class="fas fa-info-circle"></i> A pré-visualização pode ser um rascunho. Clique em "Gerar Documentos" no formulário para criar a versão final.
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div class="campo-grupo" style="flex-grow: 1; margin: 0;">
+                    <label for="selecionar-documento" style="font-weight: normal;">Documento para Visualizar:</label>
+                    <select id="selecionar-documento" name="selecionar-documento" style="max-width: 350px;">
+                        <option value="termo-abertura">Termo de Abertura</option>
+                        <option value="termo-declaracao">Termo de Declaração</option>
+                        <option value="oficio">Ofício (Interlocutório)</option>
+                        <option value="carta-precatoria">Carta Precatória</option>
+                        <option value="relatorio">Relatório Final</option>
+                        <option value="parecer">Parecer Jurídico</option>
+                    </select>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-primario" onclick="sistema.exportarDocumento()">
+                        <i class="fas fa-download"></i> Exportar (PDF/DOCX)
+                    </button>
+                </div>
+            </div>
+
+            <div class="previa-container">
+                <div class="previa-documento" id="previa-documento">
+                    <p style="text-align: center; color: var(--pm-cinza); padding: 40px;">
+                        <i class="fas fa-file-alt" style="font-size: 48px; margin-bottom: 20px; display: block; opacity: 0.3;"></i>
+                        Selecione um documento para visualização ou clique em "Gerar Documentos" no formulário.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="cartao-conteudo conteudo-aba" id="aba-modelos">
+            <h2 style="color: var(--pm-azul); margin-bottom: 24px;"><i class="fas fa-copy"></i> Modelos de Documentos</h2>
+            
+            <div class="alerta alerta-info">
+                <i class="fas fa-lightbulb"></i> Clique em um modelo para carregar automaticamente todos os dados no formulário.
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 24px;">
+                <div class="modelo-card" style="border: 2px solid var(--pm-borda); border-radius: var(--pm-raio); padding: 20px; cursor: pointer; transition: all 0.3s;" 
+                     data-modelo="sindicancia-botelho" onclick="carregarModelo('sindicancia-botelho')">
+                    <h3 style="color: var(--pm-azul); margin-bottom: 12px;">
+                        <i class="fas fa-file-contract"></i> MODELO DE SINDICANCIA 1
+                    </h3>
+                    <p style="font-size: 14px; color: var(--pm-cinza); margin-bottom: 16px;">
+                        Sindicância Investigativa para apurar conduta de policial militar envolvido em ocorrência com PRFs em boate.
+                    </p>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="background: var(--pm-verde); color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">
+                            Completo
+                        </span>
+                        <span style="font-size: 12px; color: var(--pm-cinza);">
+                            <i class="fas fa-calendar"></i> Set/2021
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="modelo-card" style="border: 2px solid var(--pm-borda); border-radius: var(--pm-raio); padding: 20px; cursor: pointer; transition: all 0.3s;"
+                     data-modelo="sindicancia-daivison" onclick="carregarModelo('sindicancia-daivison')">
+                    <h3 style="color: var(--pm-azul); margin-bottom: 12px;">
+                        <i class="fas fa-file-contract"></i> MODELO DE SINDICANCIA 2
+                    </h3>
+                    <p style="font-size: 14px; color: var(--pm-cinza); margin-bottom: 16px;">
+                        Sindicância Investigativa para apurar suposta agressão física durante abordagem policial.
+                    </p>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="background: var(--pm-verde); color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">
+                            Completo
+                        </span>
+                        <span style="font-size: 12px; color: var(--pm-cinza);">
+                            <i class="fas fa-calendar"></i> Jun/2023
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="modelo-card" style="border: 2px solid var(--pm-borda); border-radius: var(--pm-raio); padding: 20px; cursor: pointer; transition: all 0.3s;"
+                     data-modelo="ipm-stanley" onclick="carregarModelo('ipm-stanley')">
+                    <h3 style="color: var(--pm-azul); margin-bottom: 12px;">
+                        <i class="fas fa-gavel"></i> MODELO DE SINDICANCIA 3
+                    </h3>
+                    <p style="font-size: 14px; color: var(--pm-cinza); margin-bottom: 16px;">
+                        Inquérito Policial Militar instaurado para apurar conduta de policial militar.
+                    </p>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="background: var(--pm-amarelo); color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">
+                            Em andamento
+                        </span>
+                        <span style="font-size: 12px; color: var(--pm-cinza);">
+                            <i class="fas fa-calendar"></i> Mar/2023
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cartao-conteudo conteudo-aba" id="aba-historico">
+            <h2 style="color: var(--pm-azul); margin-bottom: 24px;"><i class="fas fa-history"></i> Histórico e Rascunhos Salvos</h2>
+            
+            <div class="alerta alerta-info">
+                <i class="fas fa-save"></i> O sistema salva automaticamente rascunhos quando você altera campos e o auto-save está ativo.
+            </div>
+            
+            <div id="historico-lista">
+                <p style="text-align: center; color: var(--pm-cinza); padding: 20px; font-style: italic;">Nenhum rascunho encontrado.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">
+        <i class="fas"></i>
+        <span id="toast-mensagem"></span>
     </div>
 
     <script>
-        // Sistema PMAM - Geração de Documentos
         class SistemaPMAM {
             constructor() {
+                // Configuração dos modelos (Mantendo o nome para o JS interno, mas com os dados corretos)
                 this.modelos = {
-                    'sindicancia-botelho': {
-                        'tipo-procedimento': 'SINV',
-                        'numero-portaria': '004.07/SJD/SIND.INVEST/CPA CENTRO-SUL',
-                        'data-portaria': '2021-08-31',
-                        'unidade': 'CPA CENTRO-SUL',
-                        'cidade': 'Manaus',
-                        'posto-encarregado': 'MAJ QOPM',
-                        'nome-encarregado': 'OLAVO PEREIRA DA SILVA FILHO',
-                        'id-encarregado': '15974',
-                        'posto-sindicado': 'CAP QOPM',
-                        'nome-sindicado': 'RÔMULO BOTELHO DOS SANTOS',
-                        'id-sindicado': '20765',
-                        'resumo-fatos': 'Trata-se de Sindicância investigativa com finalidade de apurar conduta de policial militar envolvido em ocorrência com Policiais Rodoviários Federais em boate na cidade de Manaus-AM, ocorrida no dia 18 de setembro de 2020. Segundo o que foi apurado, o CAP QOPM ROMULO BOTELHO DOS SANTOS encontrava-se juntamente com um grupo de amigos se divertindo na boate quando dois Policiais Rodoviários Federais começaram uma confusão dentro da boate após estes supostamente tentarem assediar uma conhecida sua.',
-                        'data-fato': '2020-09-18',
-                        'local-fato': 'Boate Root, Rua Barão de Indaiá',
-                        'hora-fato': '04:30h'
+                    'sindicancia-botelho': { 
+                        'tipo-procedimento': 'Sindicância',
+                        'numero-portaria': '012/2021-CPI/CMDO',
+                        'data-portaria': '2021-09-15',
+                        'unidade': 'CPI',
+                        'cidade': 'Manaus/AM',
+                        'resumo-fatos': 'Apuração de conduta de policial militar (Sd. Botelho) envolvido em altercação com Policiais Rodoviários Federais em uma boate, no dia 05/09/2021.',
+                        'posto-encarregado': 'Cap. PM',
+                        'nome-encarregado': 'SINDICANTE EXEMPLO A',
+                        'id-encarregado': '789012-3',
+                        'posto-sindicado': 'Sd. PM',
+                        'nome-sindicado': 'BOTELHO F. J.',
+                        'id-sindicado': '112233-4'
+                    }, 
+                    'sindicancia-daivison': { 
+                        'tipo-procedimento': 'Sindicância',
+                        'numero-portaria': '005/2023-1ºBPM/CMDO',
+                        'data-portaria': '2023-06-10',
+                        'unidade': '1º BPM',
+                        'cidade': 'Manaus/AM',
+                        'resumo-fatos': 'Apuração de denúncia de suposta agressão física e abuso de autoridade durante abordagem policial a um civil na área da Ponta Negra, em 01/06/2023.',
+                        'posto-encarregado': '1º Ten. PM',
+                        'nome-encarregado': 'SINDICANTE EXEMPLO B',
+                        'id-encarregado': '102030-4',
+                        'posto-sindicado': '3º Sgt. PM',
+                        'nome-sindicado': 'DAIVISON P. R.',
+                        'id-sindicado': '224466-8'
                     },
-                    'sindicancia-daivison': {
-                        'tipo-procedimento': 'SINV',
-                        'numero-portaria': '011/SIND INVEST/SJD/CPM/2023',
-                        'data-portaria': '2023-06-12',
-                        'unidade': 'CPA OESTE',
-                        'cidade': 'Manaus',
-                        'posto-encarregado': 'MAJ QOPM',
-                        'nome-encarregado': 'OLAVO PEREIRA DA SILVA FILHO',
-                        'id-encarregado': '15974',
-                        'posto-sindicado': 'CAP QOPM',
-                        'nome-sindicado': 'DAIVISON ANDERSON CUTRIM SOEIRO',
-                        'id-sindicado': '20900',
-                        'resumo-fatos': 'Sindicância Investigativa instaurada para apurar suposta conduta irregular praticada por policiais militares sob comando do Cap QOPM Daivison Anderson Cutrim Soeiro, suposta agressão física, ocorrida no dia 10 de março de 2023, durante abordagem, por volta das 14 horas, após denúncia de tráfico de drogas, na rua Dr. Ademar, nº 61, bairro Zumbi dos Palmares.',
-                        'data-fato': '2023-03-10',
-                        'local-fato': 'Rua Dr. Ademar, nº 61, bairro Zumbi dos Palmares',
-                        'hora-fato': '14:00h'
-                    },
-                    'ipm-stanley': {
+                    'ipm-stanley': { 
                         'tipo-procedimento': 'IPM',
-                        'numero-portaria': '05.02/2023/IPM/SJD/CPA OESTE/PMAM',
-                        'data-portaria': '2023-02-23',
-                        'unidade': 'CPA OESTE',
-                        'cidade': 'Manaus',
-                        'posto-encarregado': 'MAJ QOPM',
-                        'nome-encarregado': 'OLAVO PEREIRA DA SILVA FILHO',
-                        'id-encarregado': '15974',
-                        'posto-sindicado': '1º TEN QOPM',
-                        'nome-sindicado': 'STANLEY OLIVEIRA DE ARAÚJO',
-                        'id-sindicado': '20943',
-                        'resumo-fatos': 'Inquérito Policial Militar instaurado para apurar conduta de policial militar envolvido em ocorrência registrada, conforme portaria em referência. O presente procedimento tem como objetivo apurar os fatos e circunstâncias relacionadas à atuação do indiciado.',
-                        'data-fato': '2023-02-15',
-                        'local-fato': 'A ser apurado',
-                        'hora-fato': 'A ser apurado'
+                        'numero-portaria': '001/2023-GSI/DIP',
+                        'data-portaria': '2023-03-25',
+                        'unidade': 'GSI/DIP',
+                        'cidade': 'Manaus/AM',
+                        'resumo-fatos': 'Instauração de Inquérito Policial Militar para apurar o extravio de uma arma de fogo de carga, ocorrido nas dependências do batalhão, em 15/03/2023.',
+                        'posto-encarregado': 'Maj. PM',
+                        'nome-encarregado': 'ENCARREGADO EXEMPLO C',
+                        'id-encarregado': '506070-8',
+                        'posto-sindicado': 'Cb. PM',
+                        'nome-sindicado': 'STANLEY Q. T.',
+                        'id-sindicado': '335577-9'
                     }
                 };
                 
-                this.documentosGerados = {};
-                this.config = {
-                    autoSave: true,
-                    dateFormat: 'dd/mm/yyyy'
-                };
-                
-                this.init();
+                // Documentos gerados (vazio no início)
+                this.documentosGerados = {}; 
+                // Configurações básicas
+                this.config = { 
+                    autoSave: true, 
+                    dateFormat: 'dd/mm/yyyy' // Apenas informativo
+                }; 
+                this.init(); 
             }
-            
-            init() {
-                this.configurarDatas();
-                this.configurarEventos();
-                this.carregarConfig();
+
+            init() { 
+                this.configurarDatas(); 
+                this.configurarEventos(); 
+                this.carregarConfig(); 
                 this.atualizarHistorico();
+                // Carrega a prévia inicial
+                this.previsualizarDocumento(document.getElementById('selecionar-documento').value);
             }
-            
+
             configurarDatas() {
-                const hoje = new Date().toISOString().split('T')[0];
-                document.getElementById('data-portaria').value = hoje;
-                document.getElementById('data-instauracao')?.value = hoje;
-                document.getElementById('data-fato').value = hoje;
-            }
-            
-            configurarEventos() {
-                // Navegação por abas
-                document.querySelectorAll('.aba').forEach(aba => {
-                    aba.addEventListener('click', (e) => {
-                        const abaId = e.target.getAttribute('data-aba');
-                        this.mudarAba(abaId);
-                    });
-                });
-                
-                // Navegação lateral
-                document.querySelectorAll('.item-navegacao').forEach(item => {
-                    item.addEventListener('click', (e) => {
-                        const abaId = e.currentTarget.getAttribute('data-aba');
-                        this.mudarAba(abaId);
-                    });
-                });
-                
-                // Botões principais
-                document.getElementById('btn-gerar-docs').addEventListener('click', () => this.gerarDocumentos());
-                document.getElementById('btn-validar').addEventListener('click', () => this.validarFormulario());
-                document.getElementById('btn-carregar-modelo').addEventListener('click', () => this.carregarModeloDialog());
-                document.getElementById('btn-gerar-tudo').addEventListener('click', () => this.gerarDocumentos());
-                document.getElementById('btn-limpar-form').addEventListener('click', () => this.limparFormulario());
-                document.getElementById('btn-salvar').addEventListener('click', () => this.salvarRascunho());
-                document.getElementById('btn-exportar').addEventListener('click', () => this.exportarDocumento());
-                document.getElementById('btn-imprimir').addEventListener('click', () => window.print());
-                
-                // Seleção de documento na prévia
-                document.getElementById('selecionar-documento').addEventListener('change', (e) => {
-                    this.previsualizarDocumento(e.target.value);
-                });
-                
-                // Auto-salvamento
-                if (this.config.autoSave) {
-                    document.querySelectorAll('#aba-formulario input, #aba-formulario select, #aba-formulario textarea').forEach(input => {
-                        input.addEventListener('change', () => this.autoSalvar());
-                    });
+                // Seta a data de hoje como padrão se o campo estiver vazio
+                const dataPortaria = document.getElementById('data-portaria');
+                if (dataPortaria && !dataPortaria.value) {
+                    const hoje = new Date().toISOString().split('T')[0];
+                    dataPortaria.value = hoje;
                 }
             }
             
-            mudarAba(abaId) {
-                // Atualizar abas
-                document.querySelectorAll('.aba').forEach(aba => {
-                    aba.classList.remove('ativo');
-                });
-                document.querySelector(`.aba[data-aba="${abaId}"]`)?.classList.add('ativo');
-                
-                // Atualizar navegação lateral
-                document.querySelectorAll('.item-navegacao').forEach(item => {
-                    item.classList.remove('ativo');
-                });
-                document.querySelector(`.item-navegacao[data-aba="${abaId}"]`)?.classList.add('ativo');
-                
-                // Mostrar conteúdo da aba
+            configurarEventos() { 
+                // Navegação por abas 
+                document.querySelectorAll('.aba').forEach(aba => { 
+                    aba.addEventListener('click', (e) => this.mudarAba(e.target.dataset.aba)); 
+                }); 
+                document.querySelectorAll('.item-navegacao').forEach(item => { 
+                    item.addEventListener('click', (e) => { 
+                        const abaId = e.currentTarget.dataset.aba; 
+                        this.mudarAba(abaId); 
+                    }); 
+                }); 
+
+                // Botões de Ação no Formulário
+                document.getElementById('btn-gerar-docs').addEventListener('click', () => this.gerarDocumentos()); 
+                document.getElementById('btn-validar').addEventListener('click', () => this.validarFormulario()); 
+                document.getElementById('btn-carregar-modelo').addEventListener('click', () => this.mostrarToast('Selecione um modelo na aba "Modelos" para carregar.', 'info')); 
+
+                // Ações rápidas no painel lateral
+                // CORRIGIDO: Agora btn-gerar-tudo chama gerarDocumentos()
+                document.getElementById('btn-gerar-tudo').addEventListener('click', () => this.gerarDocumentos()); 
+                document.getElementById('btn-limpar-form').addEventListener('click', () => this.limparFormulario()); 
+                document.getElementById('btn-salvar').addEventListener('click', () => this.salvarRascunho()); 
+                document.getElementById('btn-exportar').addEventListener('click', () => this.exportarDocumento()); 
+                document.getElementById('btn-imprimir').addEventListener('click', () => window.print()); 
+
+                // Seleção de documento na prévia (Atualiza prévia ao trocar o documento)
+                document.getElementById('selecionar-documento').addEventListener('change', (e) => { 
+                    this.previsualizarDocumento(e.target.value); 
+                }); 
+
+                // Auto-salvamento (Monitora as alterações)
+                if (this.config.autoSave) { 
+                    document.querySelectorAll('#aba-formulario input, #aba-formulario select, #aba-formulario textarea').forEach(input => { 
+                        input.addEventListener('change', () => this.autoSalvar()); 
+                    }); 
+                } 
+            }
+
+            mudarAba(abaId) { 
                 document.querySelectorAll('.conteudo-aba').forEach(conteudo => {
                     conteudo.classList.remove('ativo');
                 });
+                document.querySelectorAll('.item-navegacao').forEach(item => {
+                    item.classList.remove('ativo');
+                });
+
                 document.getElementById(`aba-${abaId}`).classList.add('ativo');
-                
-                // Ações específicas por aba
-                if (abaId === 'previa' && Object.keys(this.documentosGerados).length === 0) {
-                    this.previsualizarDocumento('termo-abertura');
+                document.querySelector(`[data-aba="${abaId}"]`).classList.add('ativo');
+
+                // Força a atualização da prévia ao entrar na aba 'previa'
+                if (abaId === 'previa') {
+                    const tipoDocAtual = document.getElementById('selecionar-documento').value;
+                    this.previsualizarDocumento(tipoDocAtual);
                 }
             }
-            
-            obterDadosFormulario() {
+
+            obterDadosFormulario() { 
                 const dados = {};
-                const campos = ['tipo-procedimento', 'numero-portaria', 'data-portaria', 'unidade', 'cidade',
-                              'posto-encarregado', 'nome-encarregado', 'id-encarregado',
-                              'posto-sindicado', 'nome-sindicado', 'id-sindicado',
-                              'resumo-fatos', 'data-fato', 'local-fato', 'hora-fato'];
-                
-                campos.forEach(campo => {
-                    const elemento = document.getElementById(campo);
-                    if (elemento) {
-                        dados[campo] = elemento.value;
-                    }
+                const form = document.getElementById('formulario-procedimento');
+                new FormData(form).forEach((value, key) => {
+                    dados[key] = value;
                 });
-                
                 return dados;
             }
-            
-            validarFormulario() {
-                const camposObrigatorios = [
-                    'tipo-procedimento',
-                    'numero-portaria',
-                    'data-portaria',
-                    'unidade',
-                    'cidade',
-                    'posto-encarregado',
-                    'nome-encarregado',
-                    'id-encarregado',
-                    'resumo-fatos'
-                ];
-                
-                let valido = true;
-                const camposFaltando = [];
-                
-                camposObrigatorios.forEach(campoId => {
-                    const campo = document.getElementById(campoId);
-                    if (!campo || !campo.value.trim()) {
-                        valido = false;
-                        camposFaltando.push(campoId.replace('-', ' '));
-                        if (campo) {
-                            campo.style.borderColor = 'var(--pm-vermelho)';
-                        }
-                    } else if (campo) {
-                        campo.style.borderColor = '';
+
+            validarFormulario() { 
+                const form = document.getElementById('formulario-procedimento');
+                if (form.checkValidity()) {
+                    this.mostrarToast('Formulário validado! Todos os campos obrigatórios estão preenchidos.', 'sucesso');
+                    return true;
+                } else {
+                    form.reportValidity();
+                    this.mostrarToast('ERRO: Preencha todos os campos obrigatórios.', 'erro');
+                    return false;
+                }
+            }
+
+            formatarData(dataStr, formato = 'extenso') { 
+                if (!dataStr) return '___________';
+                try {
+                    const [ano, mes, dia] = dataStr.split('-');
+                    const data = new Date(ano, mes - 1, dia);
+
+                    const diaFormatado = dia;
+                    const mesExtenso = data.toLocaleString('pt-BR', { month: 'long' });
+                    const anoFormatado = ano;
+
+                    if (formato === 'extenso') {
+                        return `${diaFormatado} de ${mesExtenso} de ${anoFormatado}`;
+                    } else if (formato === 'normal') {
+                        return `${diaFormatado}/${mes}/${anoFormatado}`;
                     }
-                });
-                
-                if (valido) {
-                    this.mostrarToast('Formulário validado com sucesso!', 'sucesso');
-                } else {
-                    this.mostrarToast(`Campos obrigatórios faltando: ${camposFaltando.join(', ')}`, 'erro');
-                }
-                
-                return valido;
-            }
-            
-            formatarData(dataStr, formato = 'extenso') {
-                if (!dataStr) return '______';
-                
-                const data = new Date(dataStr + 'T00:00:00');
-                const dia = data.getDate();
-                const mes = data.getMonth() + 1;
-                const ano = data.getFullYear();
-                
-                if (formato === 'extenso') {
-                    const meses = [
-                        'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
-                        'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'
-                    ];
-                    return `${dia} dias do mês de ${meses[mes-1]} do ano de ${ano}`;
-                } else {
-                    return `${String(dia).padStart(2, '0')}/${String(mes).padStart(2, '0')}/${ano}`;
+                    return dataStr;
+                } catch (e) {
+                    console.error("Erro ao formatar data:", e);
+                    return dataStr; 
                 }
             }
             
-            gerarTermoAbertura(dados) {
-                const tipo = dados['tipo-procedimento'] === 'IPM' ? 'INQUÉRITO POLICIAL MILITAR' : 
-                           dados['tipo-procedimento'] === 'SD' ? 'SINDICÂNCIA DISCIPLINAR' : 
-                           'SINDICÂNCIA INVESTIGATIVA';
-                
+            /* * FUNÇÕES GERADORAS DE DOCUMENTOS 
+             */
+            gerarTermoAbertura(dados) { 
+                const dataExtenso = this.formatarData(dados['data-portaria'], 'extenso');
                 return `
-                    <h1>TERMO DE ABERTURA</h1>
+                    <h1 style="text-align: center;">TERMO DE ABERTURA</h1>
+                    <h2 style="text-align: center; margin-bottom: 40px;">DO ${dados['tipo-procedimento'].toUpperCase()} N° ${dados['numero-portaria'] || '______'}</h2>
                     
-                    <p>Aos ${this.formatarData(dados['data-portaria'])}, nesta cidade de ${dados.cidade || 'Manaus'}, Estado do Amazonas, na ${dados.unidade || 'Unidade'}, dou início a presente ${tipo} do que para constar lavro o presente termo.</p>
+                    <p style="text-indent: 50px;">Aos ${dataExtenso}, na ${dados.unidade || '______'} - ${dados.cidade || '______'}, onde se encontra o ${dados['posto-encarregado'] || '______'} ${dados['nome-encarregado'] || '______'}, ${dados['id-encarregado'] ? `CI ${dados['id-encarregado']}` : ''}, ${dados['tipo-procedimento'] === 'IPM' ? 'Encarregado do IPM' : 'Sindicante'} designado pela Portaria ${dados['numero-portaria'] || '______'} datada de ${this.formatarData(dados['data-portaria'], 'normal')}.</p>
                     
-                    <p>Fundamento legal: Código de Processo Penal Militar (Decreto-Lei nº 1.002/1969), Lei Estadual nº 3.278/2008 (Estatuto da Polícia Militar do Amazonas) e demais normas internas aplicáveis.</p>
+                    <p style="text-indent: 50px;">Em cumprimento à supracitada Portaria, dou por ${dados['tipo-procedimento']} instalado(a) para apurar os fatos noticiados, que consistem em: ${dados['resumo-fatos'] || 'Breve resumo dos fatos em apuração.'}</p>
                     
-                    <p>Designa-se, para as providências iniciais, o(a) escrivão(ã) e demais membros, quando houver, conforme necessidade.</p>
-                    
+                    <p style="text-indent: 50px;">Para constar, lavrei o presente Termo, que vai por mim, Encarregado/Sindicante, devidamente assinado.</p>
+
                     <div class="assinatura">
                         <div class="linha-assinatura"></div>
-                        <strong>${dados['posto-encarregado']} ${dados['nome-encarregado']}</strong><br>
-                        ${dados['tipo-procedimento'] === 'IPM' ? 'Encarregado do Inquérito Policial Militar' : 'Sindicante'}
+                        <strong>${dados['posto-encarregado']} ${dados['nome-encarregado']}</strong><br> ${dados['tipo-procedimento'] === 'IPM' ? 'Encarregado do IPM' : 'Sindicante'}
                     </div>
                 `;
-            }
-            
-            gerarTermoDeclaracao(dados) {
+            } 
+
+            gerarTermoDeclaracao(dados) { 
                 return `
-                    <h1>TERMO DE DECLARAÇÃO</h1>
+                    <h1 style="text-align: center;">TERMO DE DECLARAÇÃO / OITIVA</h1>
+                    <h2 style="text-align: center; margin-bottom: 40px;">DO ${dados['tipo-procedimento'].toUpperCase()} N° ${dados['numero-portaria'] || '______'}</h2>
                     
-                    <p>Aos ${this.formatarData(dados['data-portaria'])}, nesta cidade de ${dados.cidade || 'Manaus'}, Estado do Amazonas, no Comando de Policiamento da Área Centro-Sul, compareceu para inquirição o declarante qualificado abaixo.</p>
+                    <p style="text-indent: 50px;">Aos ______ dias do mês de ______ de ______, na sede da ${dados.unidade || '______'} - ${dados.cidade || '______'}, onde se encontra o ${dados['posto-encarregado'] || '______'} ${dados['nome-encarregado'] || '______'}, ${dados['tipo-procedimento'] === 'IPM' ? 'Encarregado do IPM' : 'Sindicante'}, foi inquirido o Sr(a). ${dados['posto-sindicado'] || '______'} ${dados['nome-sindicado'] || '______'} (Sindicado/Acusado), ______ (Vítima/Testemunha), sobre os fatos constantes da Portaria ${dados['numero-portaria'] || '______'}.</p>
                     
-                    <h3>QUALIFICAÇÃO:</h3>
-                    <p>Nome: ${dados['nome-sindicado'] || '________________'}<br>
-                    Posto/Graduação: ${dados['posto-sindicado'] || '________________'}<br>
-                    Número de Identificação: ${dados['id-sindicado'] || '________________'}</p>
+                    <p style="text-indent: 50px;">Às perguntas que lhe foram feitas, respondeu: "QUE... [Inserir aqui o teor da declaração/oitiva]".</p>
                     
-                    <h3>DECLARAÇÃO:</h3>
-                    <p>${dados['resumo-fatos'] || 'Descrição dos fatos a serem declarados.'}</p>
-                    
+                    <p style="text-indent: 50px;">Nada mais foi dito. Para constar, lavrei o presente Termo, que vai por mim, Encarregado/Sindicante, e pelo(a) depoente, devidamente assinado.</p>
+
                     <div class="assinatura">
                         <div class="linha-assinatura"></div>
-                        <strong>${dados['posto-encarregado']} ${dados['nome-encarregado']}</strong><br>
-                        Encarregado da Sindicância
-                        
-                        <div class="linha-assinatura" style="margin-top: 40px;"></div>
-                        <strong>${dados['nome-sindicado'] || '________________'}</strong><br>
-                        Declarante
+                        <strong>${dados['posto-encarregado']} ${dados['nome-encarregado']}</strong><br> ${dados['tipo-procedimento'] === 'IPM' ? 'Encarregado do IPM' : 'Sindicante'}
+                    </div>
+                    <div class="assinatura" style="margin-top: 50px;">
+                        <div class="linha-assinatura"></div>
+                        <strong>${dados['posto-sindicado']} ${dados['nome-sindicado']}</strong><br> Sindicado/Depoente
                     </div>
                 `;
-            }
-            
-            gerarRelatorioFinal(dados) {
-                const tipo = dados['tipo-procedimento'] === 'IPM' ? 'Inquérito Policial Militar' : 
-                           dados['tipo-procedimento'] === 'SD' ? 'Sindicância Disciplinar' : 
-                           'Sindicância Investigativa';
-                
+            } 
+
+            gerarRelatorioFinal(dados) { 
+                const dataExtenso = this.formatarData(new Date().toISOString().split('T')[0], 'extenso');
                 return `
-                    <h1>RELATÓRIO FINAL</h1>
+                    <h1 style="text-align: center;">RELATÓRIO FINAL</h1>
+                    <h2 style="text-align: center; margin-bottom: 40px;">DO ${dados['tipo-procedimento'].toUpperCase()} N° ${dados['numero-portaria'] || '______'}</h2>
                     
-                    <h3>I - OBJETIVO</h3>
-                    <p>A presente ${tipo} foi instaurada por determinação da autoridade competente, por meio da Portaria nº ${dados['numero-portaria'] || '______'}, de ${this.formatarData(dados['data-portaria'], 'normal')}, com a finalidade de apurar os fatos descritos a seguir.</p>
+                    <h3>I - HISTÓRICO E OBJETO</h3>
+                    <p>O presente procedimento foi instaurado pela Portaria ${dados['numero-portaria'] || '______'}, com a finalidade de apurar os fatos noticiados, envolvendo o ${dados['posto-sindicado'] || '______'} ${dados['nome-sindicado'] || '______'}, referente a ${dados['resumo-fatos'] || 'resumo dos fatos.'}</p>
                     
                     <h3>II - DILIGÊNCIAS REALIZADAS</h3>
-                    <p>Durante a instrução do procedimento, foram realizadas as seguintes diligências:</p>
-                    <ul style="margin-left: 20px; margin-bottom: 16px;">
-                        <li>Oitiva dos envolvidos;</li>
-                        <li>Análise de documentos pertinentes;</li>
-                        <li>Solicitação de informações complementares;</li>
-                        <li>Realização de perícias quando necessárias.</li>
-                    </ul>
+                    <p>Foram realizadas as seguintes diligências: oitiva do Sindicado, juntada de documentos, expedição de ofícios, etc. [Listar as diligências realizadas].</p>
                     
-                    <h3>III - FATOS APURADOS</h3>
-                    <p>${dados['resumo-fatos'] || 'Descrição dos fatos apurados.'}</p>
+                    <h3>III - ANÁLISE E CONCLUSÃO</h3>
+                    <p>Após a análise de todas as provas e oitivas colhidas, o Encarregado/Sindicante conclui que os fatos ${dados['tipo-procedimento'] === 'IPM' ? 'CONFIGURAM' : 'NÃO CONFIGURAM'} transgressão disciplinar, e opina por [Sugestão de arquivamento, punição, etc.].</p>
                     
-                    <h3>IV - CONCLUSÃO</h3>
-                    <p>Salvo melhor juízo, este encarregado é do parecer que os fatos apurados [inserir conclusão: apresentam/não apresentam indícios de irregularidade].</p>
-                    
+                    <p style="text-align: right; margin-top: 50px;">${dados.cidade || '______'}, ${dataExtenso}.</p>
+
                     <div class="assinatura">
                         <div class="linha-assinatura"></div>
-                        <strong>${dados['posto-encarregado']} ${dados['nome-encarregado']}</strong><br>
-                        ${dados['tipo-procedimento'] === 'IPM' ? 'Encarregado do Inquérito Policial Militar' : 'Sindicante'}<br>
-                        CI: ${dados['id-encarregado'] || '______'}
+                        <strong>${dados['posto-encarregado']} ${dados['nome-encarregado']}</strong><br> ${dados['tipo-procedimento'] === 'IPM' ? 'Encarregado do IPM' : 'Sindicante'}
                     </div>
                 `;
             }
             
-            gerarDocumentos() {
-                if (!this.validarFormulario()) {
-                    return;
-                }
-                
-                const dados = this.obterDadosFormulario();
-                
-                this.documentosGerados = {
-                    'termo-abertura': this.gerarTermoAbertura(dados),
-                    'termo-declaracao': this.gerarTermoDeclaracao(dados),
-                    'relatorio': this.gerarRelatorioFinal(dados)
-                };
-                
-                this.previsualizarDocumento('termo-abertura');
-                this.mudarAba('previa');
-                this.mostrarToast('Documentos gerados com sucesso!', 'sucesso');
-                this.atualizarHistorico();
+            // NOVO/CORRIGIDO: Ofício
+            gerarOficio(dados) {
+                return `
+                    <h1 style="text-align: center;">OFÍCIO</h1>
+                    <p style="text-align: center;">${dados.unidade || '______'}, ${dados.cidade || '______'}</p>
+                    <p style="text-align: center; margin-bottom: 40px;">Nº _____/${dados['tipo-procedimento']}-${dados.unidade || '______'}</p>
+                    
+                    <p style="margin-top: 30px;"><strong>Ao(À) Senhor(a)</strong></p>
+                    <p><strong>[Destinatário e Endereço]</strong></p>
+                    <p><strong>Assunto:</strong> Solicitação de informações / Encaminhamento de Peças.</p>
+                    
+                    <p style="text-indent: 50px;">Em atenção ao ${dados['tipo-procedimento'] || 'Procedimento'} nº ${dados['numero-portaria'] || '______'}, informo que esta sindicância/inquérito visa apurar os fatos ${dados['resumo-fatos'] || 'Breve resumo dos fatos.'}.</p>
+                    
+                    <p style="text-indent: 50px;">Nestes termos, solicito a V. Exa. [Detalhar a solicitação, ex: o envio de cópias de documentos, oitiva, etc.].</p>
+                    
+                    <p>Respeitosamente,</p>
+                    <div class="assinatura">
+                        <div class="linha-assinatura"></div>
+                        <strong>${dados['posto-encarregado']} ${dados['nome-encarregado']}</strong><br> ${dados['tipo-procedimento'] === 'IPM' ? 'Encarregado do IPM' : 'Sindicante'}
+                    </div>
+                `;
+            }
+
+            // NOVO/CORRIGIDO: Carta Precatória
+            gerarCartaPrecatoria(dados) {
+                return `
+                    <h1 style="text-align: center;">CARTA PRECATÓRIA</h1>
+                    <h2 style="text-align: center; margin-bottom: 40px;">Referência: ${dados['tipo-procedimento'].toUpperCase()} N° ${dados['numero-portaria'] || '______'}</h2>
+                    
+                    <p><strong>Ao(À) Comandante:</strong></p>
+                    <p>_____________________________________ (Unidade Policial)</p>
+                    
+                    <p style="text-indent: 50px;">Solicito a V. Exa. que determine a oitiva do(a) militar abaixo qualificado(a) ou da testemunha civil [Nome e qualificação da pessoa], sobre os fatos que constituem objeto do procedimento em referência (vide resumo dos fatos).</p>
+                    
+                    <p><strong>Dados do Sindicado/Depoente:</strong></p>
+                    <ul>
+                        <li>Posto/Graduação: ${dados['posto-sindicado'] || '______'}</li>
+                        <li>Nome: ${dados['nome-sindicado'] || '______'}</li>
+                        <li>RG/CI: ${dados['id-sindicado'] || '______'}</li>
+                    </ul>
+                    
+                    <p>Oitiva a ser realizada: ${dados['tipo-procedimento'] === 'IPM' ? 'Interrogatório/Indiciação' : 'Declaração'}.</p>
+                    
+                    <div class="assinatura">
+                        <div class="linha-assinatura"></div>
+                        <strong>${dados['posto-encarregado']} ${dados['nome-encarregado']}</strong><br> ${dados['tipo-procedimento'] === 'IPM' ? 'Encarregado do IPM' : 'Sindicante'}
+                    </div>
+                `;
+            }
+
+            // NOVO/CORRIGIDO: Parecer
+            gerarParecer(dados) {
+                const dataExtenso = this.formatarData(new Date().toISOString().split('T')[0], 'extenso');
+                return `
+                    <h1 style="text-align: center;">PARECER</h1>
+                    <h2 style="text-align: center; margin-bottom: 40px;">Referente ao ${dados['tipo-procedimento'].toUpperCase()} N° ${dados['numero-portaria'] || '______'}</h2>
+                    
+                    <h3>I - HISTÓRICO</h3>
+                    <p style="text-indent: 50px;">Trata-se do ${dados['tipo-procedimento'] || 'procedimento'} instaurado por Portaria de ${this.formatarData(dados['data-portaria'], 'normal')}, com a finalidade de apurar os fatos noticiados, que culminaram no Relatório Final de fls. ___, que opina por [opinião do encarregado/sindicante].</p>
+                    
+                    <h3>II - ANÁLISE JURÍDICA</h3>
+                    <p style="text-indent: 50px;">[Espaço para análise jurídica].</p>
+                    
+                    <h3>III - CONCLUSÃO</h3>
+                    <p style="text-indent: 50px;">Pelo exposto, e em concordância (ou discordância) com o Relatório Final, este setor é do parecer que os fatos ${dados['tipo-procedimento'] === 'IPM' ? 'devem ser encaminhados ao Juízo Militar.' : 'devem ser objeto de sanção disciplinar / arquivados.'}</p>
+                    
+                    <p style="text-align: right; margin-top: 50px;">${dados.cidade || '______'}, ${dataExtenso}.</p>
+
+                    <div class="assinatura">
+                        <div class="linha-assinatura"></div>
+                        <strong>[Posto/Graduação] [Nome Completo]</strong><br> Consultor(a) Jurídico(a) / Autoridade Superior
+                    </div>
+                `;
             }
             
-            previsualizarDocumento(tipoDocumento) {
-                const preview = document.getElementById('previa-documento');
-                if (this.documentosGerados[tipoDocumento]) {
-                    preview.innerHTML = this.documentosGerados[tipoDocumento];
+            // FUNÇÃO CORRIGIDA: Gerar Documentos (Gera TODOS os 6)
+            gerarDocumentos() { 
+                if (!this.validarFormulario()) { 
+                    return; 
+                } 
+                const dados = this.obterDadosFormulario(); 
+                
+                // Geração de TODOS os 6 documentos
+                this.documentosGerados = { 
+                    'termo-abertura': this.gerarTermoAbertura(dados), 
+                    'termo-declaracao': this.gerarTermoDeclaracao(dados), 
+                    'oficio': this.gerarOficio(dados), 
+                    'carta-precatoria': this.gerarCartaPrecatoria(dados), 
+                    'relatorio': this.gerarRelatorioFinal(dados), 
+                    'parecer': this.gerarParecer(dados), 
+                }; 
+
+                this.mostrarToast('Documentos gerados com sucesso! Verifique a Pré-visualização.', 'sucesso'); 
+                this.mudarAba('previa'); 
+                
+                // Força a seleção e visualização do Termo de Abertura após a geração
+                document.getElementById('selecionar-documento').value = 'termo-abertura';
+                this.previsualizarDocumento('termo-abertura');
+            }
+
+            // FUNÇÃO CORRIGIDA: Pré-visualização (Gera rascunho se não houver final)
+            previsualizarDocumento(tipoDoc) {
+                const previaDoc = document.getElementById('previa-documento');
+                if (!previaDoc) return;
+
+                let conteudo = this.documentosGerados[tipoDoc];
+
+                // Se o documento não foi gerado, gera um rascunho on-the-fly
+                if (!conteudo || Object.keys(this.documentosGerados).length === 0) {
+                    const dadosRascunho = this.obterDadosFormulario();
+                    
+                    switch (tipoDoc) {
+                        case 'termo-abertura':
+                            conteudo = this.gerarTermoAbertura(dadosRascunho);
+                            break;
+                        case 'termo-declaracao':
+                            conteudo = this.gerarTermoDeclaracao(dadosRascunho);
+                            break;
+                        case 'oficio':
+                            conteudo = this.gerarOficio(dadosRascunho);
+                            break;
+                        case 'carta-precatoria':
+                            conteudo = this.gerarCartaPrecatoria(dadosRascunho);
+                            break;
+                        case 'relatorio':
+                            conteudo = this.gerarRelatorioFinal(dadosRascunho);
+                            break;
+                        case 'parecer':
+                            conteudo = this.gerarParecer(dadosRascunho);
+                            break;
+                        default:
+                            conteudo = null;
+                            break;
+                    }
+                }
+
+                if (conteudo) {
+                    previaDoc.innerHTML = `<div class="documento-imprimivel">${conteudo}</div>`;
                 } else {
-                    preview.innerHTML = `
+                     previaDoc.innerHTML = `
                         <p style="text-align: center; color: var(--pm-cinza); padding: 40px;">
-                            <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 20px; display: block; opacity: 0.3;"></i>
-                            Documento não disponível. Gere os documentos primeiro.
+                            <i class="fas fa-file-alt" style="font-size: 48px; margin-bottom: 20px; display: block; opacity: 0.3;"></i>
+                            Selecione um documento para visualização ou clique em "Gerar Documentos".
                         </p>
                     `;
                 }
             }
-            
+
+            // Funções restantes (adaptadas)
             exportarDocumento() {
+                // Simplificação para exportação: alertar e sugerir impressão
                 const tipoDoc = document.getElementById('selecionar-documento').value;
                 if (!this.documentosGerados[tipoDoc]) {
-                    this.mostrarToast('Nenhum documento selecionado para exportar', 'erro');
+                    this.mostrarToast('Gere o documento final antes de exportar.', 'erro');
                     return;
                 }
                 
-                const conteudo = this.documentosGerados[tipoDoc];
-                const blob = new Blob([`
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <meta charset="UTF-8">
-                        <title>${tipoDoc.replace('-', ' ').toUpperCase()} - PMAM</title>
-                        <style>
-                            body { font-family: 'Times New Roman', Times, serif; margin: 40px; line-height: 1.6; }
-                            h1 { text-align: center; margin-bottom: 40px; }
-                            .linha-assinatura { border-top: 1px solid #000; width: 300px; margin: 60px auto 10px; }
-                        </style>
-                    </head>
-                    <body>
-                        ${conteudo}
-                    </body>
-                    </html>
-                `], { type: 'text/html' });
-                
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${tipoDoc}_${new Date().toISOString().split('T')[0]}.doc`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                
-                this.mostrarToast('Documento exportado com sucesso!', 'sucesso');
+                this.mostrarToast(`Simulação de exportação do documento ${tipoDoc}. Sugestão: use o botão 'Imprimir Prévia' e salve como PDF.`, 'info');
+                // Em um ambiente real, aqui estaria a lógica de conversão para PDF/DOCX
+                // window.print() para salvar como PDF é uma solução comum em navegadores.
             }
             
-            carregarModelo(modeloId) {
-                const modelo = this.modelos[modeloId];
-                if (!modelo) return;
-                
-                // Preencher formulário
-                Object.keys(modelo).forEach(campo => {
-                    const elemento = document.getElementById(campo);
-                    if (elemento) {
-                        elemento.value = modelo[campo];
-                    }
-                });
-                
-                this.mostrarToast(`Modelo "${modeloId}" carregado com sucesso!`, 'sucesso');
-                this.mudarAba('formulario');
-            }
-            
-            carregarModeloDialog() {
-                const modelo = prompt('Digite o nome do modelo (sindicancia-botelho, sindicancia-daivison, ipm-stanley):');
-                if (modelo && this.modelos[modelo]) {
-                    this.carregarModelo(modelo);
-                } else if (modelo) {
-                    this.mostrarToast('Modelo não encontrado', 'erro');
+            carregarModelo(modeloId) { 
+                const dados = this.modelos[modeloId];
+                if (!dados) {
+                    this.mostrarToast('Modelo não encontrado.', 'erro');
+                    return;
                 }
+                
+                // Limpa documentos gerados ao carregar novo modelo
+                this.documentosGerados = {}; 
+
+                // Preenche o formulário
+                for (const key in dados) {
+                    const input = document.getElementById(key);
+                    if (input) {
+                        input.value = dados[key];
+                    }
+                }
+                
+                this.mostrarToast(`Modelo '${modeloId.toUpperCase()}' carregado com sucesso.`, 'sucesso');
+                this.mudarAba('formulario');
+                this.autoSalvar(); // Salva o novo modelo como rascunho
             }
             
             limparFormulario() {
-                if (confirm('Tem certeza que deseja limpar todos os campos do formulário?')) {
-                    document.querySelectorAll('#aba-formulario input, #aba-formulario select, #aba-formulario textarea').forEach(input => {
-                        if (input.id !== 'cidade') {
-                            input.value = '';
-                        }
-                    });
-                    this.configurarDatas();
-                    this.mostrarToast('Formulário limpo com sucesso', 'sucesso');
-                }
+                document.getElementById('formulario-procedimento').reset();
+                this.documentosGerados = {}; // Limpa os documentos gerados
+                this.configurarDatas(); // Seta a data de hoje novamente
+                this.previsualizarDocumento(document.getElementById('selecionar-documento').value); // Atualiza a prévia
+                this.mostrarToast('Formulário limpo e documentos redefinidos.', 'sucesso');
             }
-            
-            salvarRascunho() {
+
+            salvarRascunho() { 
                 const dados = this.obterDadosFormulario();
-                const timestamp = new Date().toISOString();
-                const chave = `pmam_rascunho_${timestamp}`;
+                const chave = `rascunho-${Date.now()}`;
                 
-                localStorage.setItem(chave, JSON.stringify(dados));
-                this.mostrarToast('Rascunho salvo com sucesso', 'sucesso');
+                // Armazena dados do formulário e dos documentos gerados, se houver
+                localStorage.setItem(chave, JSON.stringify({ 
+                    dadosForm: dados, 
+                    data: new Date().toLocaleString(),
+                    documentos: this.documentosGerados 
+                }));
+                
+                this.atualizarHistorico();
+                this.mostrarToast('Rascunho salvo manualmente.', 'sucesso');
+                return chave;
+            }
+
+            autoSalvar() {
+                const dados = this.obterDadosFormulario();
+                // Usa uma chave fixa para o auto-save, que é sobrescrita
+                localStorage.setItem('rascunho-autosave', JSON.stringify({ 
+                    dadosForm: dados, 
+                    data: new Date().toLocaleString(),
+                    documentos: this.documentosGerados
+                }));
                 this.atualizarHistorico();
             }
-            
-            autoSalvar() {
-                if (this.config.autoSave) {
-                    const dados = this.obterDadosFormulario();
-                    localStorage.setItem('pmam_autosave', JSON.stringify(dados));
-                }
-            }
-            
-            carregarConfig() {
-                const saved = localStorage.getItem('pmam_config');
-                if (saved) {
-                    this.config = { ...this.config, ...JSON.parse(saved) };
-                }
-                
-                const autosave = localStorage.getItem('pmam_autosave');
-                if (autosave && confirm('Deseja restaurar o último rascunho salvo?')) {
-                    const dados = JSON.parse(autosave);
-                    Object.keys(dados).forEach(campo => {
-                        const elemento = document.getElementById(campo);
-                        if (elemento && dados[campo]) {
-                            elemento.value = dados[campo];
-                        }
-                    });
-                }
-            }
-            
-            atualizarHistorico() {
-                const historicoDiv = document.getElementById('lista-historico');
-                const rascunhos = [];
-                
-                for (let i = 0; i < localStorage.length; i++) {
-                    const chave = localStorage.key(i);
-                    if (chave.startsWith('pmam_rascunho_')) {
-                        rascunhos.push({
-                            chave,
-                            data: new Date(chave.replace('pmam_rascunho_', ''))
-                        });
-                    }
-                }
-                
-                if (rascunhos.length === 0) {
-                    historicoDiv.innerHTML = `
-                        <p style="text-align: center; color: var(--pm-cinza); padding: 20px;">
-                            <i class="fas fa-history" style="font-size: 36px; margin-bottom: 16px; display: block; opacity: 0.3;"></i>
-                            Nenhum documento gerado ainda
-                        </p>
-                    `;
+
+            carregarRascunho(chave) { 
+                const item = localStorage.getItem(chave);
+                if (!item) {
+                    this.mostrarToast('Rascunho não encontrado.', 'erro');
                     return;
                 }
                 
-                // Ordenar por data (mais recente primeiro)
-                rascunhos.sort((a, b) => b.data - a.data);
+                const rascunho = JSON.parse(item);
                 
-                let html = '<div style="display: flex; flex-direction: column; gap: 12px;">';
-                rascunhos.slice(0, 5).forEach(rascunho => {
-                    const dataFormatada = rascunho.data.toLocaleDateString('pt-BR');
-                    html += `
-                        <div style="display: flex; justify-content: space-between; align-items: center; 
-                                    padding: 12px; background: var(--pm-cinza-claro); border-radius: 6px;">
-                            <div>
-                                <strong>Rascunho de Documento</strong><br>
-                                <small style="color: var(--pm-cinza);">${dataFormatada}</small>
-                            </div>
-                            <button onclick="sistema.carregarRascunho('${rascunho.chave}')" 
-                                    style="background: var(--pm-azul); color: white; border: none; 
-                                           padding: 6px 12px; border-radius: 4px; cursor: pointer;">
-                                <i class="fas fa-upload"></i> Carregar
-                            </button>
-                        </div>
-                    `;
-                });
-                html += '</div>';
+                // 1. Carrega os dados do formulário
+                for (const key in rascunho.dadosForm) {
+                    const input = document.getElementById(key);
+                    if (input) {
+                        input.value = rascunho.dadosForm[key];
+                    }
+                }
                 
-                historicoDiv.innerHTML = html;
+                // 2. Carrega os documentos gerados
+                this.documentosGerados = rascunho.documentos || {};
+
+                this.mostrarToast('Rascunho carregado com sucesso.', 'sucesso');
+                this.mudarAba('formulario');
+                
+                // Atualiza a prévia após carregar
+                this.previsualizarDocumento(document.getElementById('selecionar-documento').value);
             }
-            
-            carregarRascunho(chave) {
-                const dados = JSON.parse(localStorage.getItem(chave));
-                if (dados) {
-                    Object.keys(dados).forEach(campo => {
-                        const elemento = document.getElementById(campo);
-                        if (elemento && dados[campo]) {
-                            elemento.value = dados[campo];
-                        }
-                    });
-                    this.mostrarToast('Rascunho carregado com sucesso', 'sucesso');
-                    this.mudarAba('formulario');
+
+            removerRascunho(chave) { 
+                if (confirm('Tem certeza que deseja excluir este rascunho?')) {
+                    localStorage.removeItem(chave);
+                    this.atualizarHistorico();
+                    this.mostrarToast('Rascunho excluído.', 'sucesso');
                 }
             }
-            
+
+            atualizarHistorico() { 
+                const historicoLista = document.getElementById('historico-lista');
+                historicoLista.innerHTML = '';
+                let encontrado = false;
+
+                for (let i = 0; i < localStorage.length; i++) {
+                    const chave = localStorage.key(i);
+                    if (chave.startsWith('rascunho-')) {
+                        try {
+                            const item = JSON.parse(localStorage.getItem(chave));
+                            const isAutoSave = chave === 'rascunho-autosave';
+                            const titulo = isAutoSave ? 
+                                `<i class="fas fa-history"></i> Rascunho Automático` : 
+                                `<i class="fas fa-save"></i> Rascunho Manual`;
+                            
+                            const itemHTML = `
+                                <div class="historico-item" style="${isAutoSave ? 'background-color: #f0f8ff; padding: 10px; border-radius: 4px;' : ''}">
+                                    <div>
+                                        <strong>${titulo}</strong> 
+                                        <span style="color: var(--pm-cinza); margin-left: 10px;">
+                                            (${item.dadosForm['numero-portaria'] || 'Sem Portaria'}) - Salvo em ${item.data}
+                                        </span>
+                                    </div>
+                                    <div class="acoes">
+                                        <button onclick="sistema.carregarRascunho('${chave}')"><i class="fas fa-upload"></i> Carregar</button>
+                                        ${!isAutoSave ? `<button onclick="sistema.removerRascunho('${chave}')" style="color: var(--pm-vermelho);"><i class="fas fa-trash-alt"></i> Excluir</button>` : ''}
+                                    </div>
+                                </div>
+                            `;
+                            historicoLista.innerHTML += itemHTML;
+                            encontrado = true;
+                        } catch (e) {
+                            console.error("Erro ao processar item do localStorage:", e);
+                            localStorage.removeItem(chave); // Remove itens corrompidos
+                        }
+                    }
+                }
+
+                if (!encontrado) {
+                    historicoLista.innerHTML = '<p style="text-align: center; color: var(--pm-cinza); padding: 20px; font-style: italic;">Nenhum rascunho encontrado.</p>';
+                }
+            }
+
             mostrarToast(mensagem, tipo = 'sucesso') {
                 const toast = document.getElementById('toast');
                 const icone = toast.querySelector('i');
@@ -1425,7 +1150,11 @@
                     toast.classList.add('toast-sucesso');
                     icone.className = 'fas fa-check-circle';
                 } else if (tipo === 'erro') {
+                    toast.classList.add('toast-erro'); // Adiciona classe erro, se definida no CSS
                     icone.className = 'fas fa-exclamation-circle';
+                } else if (tipo === 'info') {
+                    toast.classList.add('toast-info'); // Adiciona classe info, se definida no CSS
+                    icone.className = 'fas fa-info-circle';
                 }
                 
                 toast.classList.add('mostrar');
@@ -1440,13 +1169,14 @@
         let sistema;
         document.addEventListener('DOMContentLoaded', () => {
             sistema = new SistemaPMAM();
-            
-            // Função global para carregar modelos
+            // Torna o objeto sistema e a função carregarModelo acessíveis globalmente
+            window.sistema = sistema;
             window.carregarModelo = (modeloId) => sistema.carregarModelo(modeloId);
         });
 
-        // Função global para o sistema
-        window.sistema = sistema;
+        // Função global para evitar erro de referência antes do DOMContentLoaded
+        window.carregarModelo = window.carregarModelo || (() => {});
+        window.sistema = window.sistema || {};
     </script>
 </body>
 </html>
