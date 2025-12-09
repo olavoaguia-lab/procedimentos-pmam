@@ -3,359 +3,37 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PMAM - Sistema de Procedimentos Oficiais (Avançado)</title>
+    <title>PMAM - Sistema de Procedimentos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <script>
       tailwind.config = {
         theme: {
           extend: {
             colors: {
-              // Mapeamento das variáveis CSS para o Tailwind
-              'pmam-blue': '#1e3a8a', // pm-azul-marinho [cite: 2, 4]
-              'pmam-lightBlue': '#3b82f6', // pm-azul-claro [cite: 2, 5]
-              'pmam-accent': '#0ea5e9', // pm-destaque (Cor de ênfase mais moderna) [cite: 5]
-              'pmam-success': '#10b981', // pm-verde [cite: 6, 7]
-              'pmam-error': '#ef4444', // pm-vermelho [cite: 7, 8]
-              'pmam-secondary': '#64748b', // pm-cinza [cite: 8]
-              'pmam-bg': '#f8fafc', // pm-fundo [cite: 2, 9]
-              'pmam-card': '#ffffff', // pm-cartao [cite: 9, 10]
-            },
-            boxShadow: {
-              'pmam-xl': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)', // pm-sombra [cite: 10]
-            },
-            borderRadius: {
-              'pmam-lg': '8px', // pm-raio [cite: 11]
+              pmam: {
+                blue: '#1e3a8a',
+                lightBlue: '#3b82f6',
+                accent: '#eab308', // Gold/Yellow often used in insignias
+                bg: '#f8fafc',
+              }
             }
           }
         }
       }
     </script>
-    
-    <script type="importmap">
-    {
-      "imports": {
-        "react/": "https://aistudiocdn.com/react@^19.2.1/",
-        "react": "https://aistudiocdn.com/react@^19.2.1",
-        "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
-        "jspdf": "https://aistudiocdn.com/jspdf@^3.0.4"
-      }
-    }
-    </script>
-    
-    <style>
-      /* Estilos para o menu lateral (sidebar) para cores estáticas e hover customizado */
-      .sidebar-item:hover, .sidebar-item.ativo {
-        background-color: #0ea5e9; /* pmam-accent */
-        color: #1e3a8a; /* pmam-blue */
-      }
-      /* Estilo para a pré-visualização - mantido do código original para formatação de texto de documento */
-      #preview-documento {
-        white-space: pre-wrap; /* Preserva espaços e quebras de linha */ [cite: 51]
-        font-family: monospace; [cite: 52]
-        font-size: 0.9rem; [cite: 52]
-        color: #333;
-        border: 1px solid #e2e8f0;
-        min-height: 200px;
-        background-color: #fff;
-      }
-      /* Estilo para a animação do Toast */
-      .toast {
-        transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; [cite: 44]
-      }
-    </style>
-  </head>
-  
-  <body class="bg-pmam-bg text-slate-800 antialiased min-h-screen flex">
-    
-    <div class="sidebar w-64 bg-pmam-blue text-pmam-card py-5 shadow-pmam-xl z-10 flex-shrink-0">
-      <h2 class="text-center mb-7 text-2xl border-b border-white/10 pb-4 font-semibold">
-        <i class="fas fa-gavel mr-2"></i> PMAM SJD
-      </h2>
-      <a href="#" class="sidebar-item block py-4 px-5 mx-2 my-1 rounded-pmam-lg text-pmam-card text-sm transition-all" onclick="sistema.carregarModelo('sindicancia')">
-        <i class="fas fa-file-alt"></i> Sindicância (Completa)
-      </a>
-      <a href="#" class="sidebar-item block py-4 px-5 mx-2 my-1 rounded-pmam-lg text-pmam-card text-sm transition-all" onclick="sistema.carregarModelo('portaria')">
-        <i class="fas fa-scroll"></i> Portaria
-      </a>
-      <a href="#" class="sidebar-item block py-4 px-5 mx-2 my-1 rounded-pmam-lg text-pmam-card text-sm transition-all" onclick="sistema.carregarModelo('encaminhamento')">
-        <i class="fas fa-share-square"></i> Ofício de Encaminhamento
-      </a>
-      <a href="#" class="sidebar-item block py-4 px-5 mx-2 my-1 rounded-pmam-lg text-pmam-card text-sm transition-all" onclick="sistema.carregarModelo('defesa')">
-        <i class="fas fa-book"></i> Termo de Defesa
-      </a>
-    </div>
-
-    <div class="main-content flex-grow p-10">
-      <div class="card bg-pmam-card p-8 rounded-pmam-lg shadow-pmam-xl">
-        <h1 id="titulo-documento" class="text-pmam-blue mb-5 text-3xl border-b-2 border-pmam-accent pb-3 font-semibold">
-          <i class="fas fa-file-invoice mr-2"></i> Gerador de Documentos PMAM
-        </h1>
-        <p class="mb-5 text-gray-600">Preencha os campos abaixo para gerar o documento oficial.</p>
-        
-        <form id="form-documento">
-          
-          <div id="campos-dinamicos">
-            <div class="text-center py-10 text-pmam-secondary">Carregando formulário...</div>
-          </div>
-
-          <div class="form-group mt-6">
-            <label class="block mb-2 font-semibold text-pmam-secondary">Pré-visualização do Documento:</label>
-            <div id="preview-documento" class="p-5 mt-2 rounded-lg">
-              ... O documento será renderizado aqui ... [cite: 60]
-            </div>
-          </div>
-
-          <div class="botoes-acao flex gap-4 mt-8">
-            <button type="button" class="btn btn-primario bg-pmam-lightBlue text-pmam-card py-3 px-6 rounded-md cursor-pointer font-semibold transition-all hover:bg-pmam-accent hover:shadow-lg hover:shadow-pmam-accent/50 hover:-translate-y-0.5" onclick="sistema.gerarPDF()">
-              <i class="fas fa-file-pdf mr-2"></i> Gerar PDF
-            </button>
-            <button type="button" class="btn btn-secundario bg-pmam-secondary text-pmam-card py-3 px-6 rounded-md cursor-pointer font-semibold transition-all hover:bg-gray-700 hover:shadow-lg hover:shadow-pmam-secondary/50 hover:-translate-y-0.5" onclick="sistema.copiarTexto()">
-              <i class="fas fa-copy mr-2"></i> Copiar Texto
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <div class="toast-container fixed top-5 right-5 z-50" id="toast-container">
-    </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script>
-      // A lógica da classe SistemaPMAM permanece idêntica ao novo código procedimentos.txt, 
-      // mas ajusta a criação de campos (3. CARREGA O MODELO NA INTERFACE)
-      
-      const { jsPDF } = window.jspdf; [cite: 62]
-
-      class SistemaPMAM {
-        constructor() {
-          this.modelos = this.definirModelos(); [cite: 63, 64]
-          this.camposContainer = document.getElementById('campos-dinamicos');
-          this.previewArea = document.getElementById('preview-documento');
-          this.form = document.getElementById('form-documento');
-          this.tituloDocumento = document.getElementById('titulo-documento');
-          
-          // Listener para atualizar a pré-visualização em tempo real [cite: 65]
-          this.form.addEventListener('input', () => this.atualizarPreview());
-          
-          // Carrega o modelo inicial [cite: 66, 67]
-          this.modeloAtualId = 'sindicancia';
-          this.carregarModelo(this.modeloAtualId);
-        }
-
-        // 1. DEFINE OS MODELOS DE DOCUMENTOS [cite: 68-86]
-        definirModelos() {
-          return {
-            sindicancia: {
-              titulo: "Sindicância (Termo de Abertura)",
-              campos: [
-                { id: 'numero_portaria', label: 'Nº da Portaria', tipo: 'text', placeholder: 'Ex: 05.02/2023/IPM/SJD/CPA OESTE/PMAM', valorPadrao: 'XX.XX/AAAA/SIND/PMAM' },
-                { id: 'inquirido_nome', label: 'Nome/CI do Inquirido', tipo: 'text', placeholder: 'Ex: CAP QOPM Stanley Oliveira De Araújo (CI 20943)', valorPadrao: 'Nome do Militar (CI XXXX)' },
-                { id: 'encarregado_nome', label: 'Nome do Encarregado', tipo: 'text', placeholder: 'Ex: MAJ QOPM Olavo Pereira Da Silva Filho', valorPadrao: 'MAJ QOPM FULANO DA SILVA (CI XXXX)' },
-                { id: 'objeto_apuracao', label: 'Objeto da Apuração (Resumo)', tipo: 'textarea', placeholder: 'Ex: Apurar a suposta irregularidade...', valorPadrao: 'APURAR AS SUPOSTA IRREGULARIDADE PRATICADA PELO INQUIRIDO...' },
-              ],
-              template: (dados) => `
-                AUTOS DE SINDICÂNCIA
-                
-                INQUIRIDO: ${dados.inquirido_nome || ''}
-                OBJETO: ${dados.objeto_apuracao || ''}
-                
-                TERMO DE ABERTURA
-                
-                Aos [Dia] dias do mês de [Mês] de [Ano], nesta Cidade de Manaus, Estado do Amazonas, na sala da SJD do Batalhão Oeste, autuo a Portaria nº ${dados.numero_portaria || '__________'}, de [Data], e demais documentos que a este junto, do que para constar lavro o presente termo.
-                Quartel em Manaus-AM, [Dia] de [Mês] de [Ano].
-                
-                ${dados.encarregado_nome || '__________________________________'}
-                Encarregado da Sindicância
-              `
-            },
-            portaria: {
-              titulo: "Portaria de Instauração",
-              campos: [
-                { id: 'cmt_nome', label: 'Nome do Comandante', tipo: 'text', valorPadrao: 'TC QOPM MARIVALDO DE SOUZA FRANÇA FILHO' },
-                { id: 'cmt_cargo', label: 'Cargo do Comandante', tipo: 'text', valorPadrao: 'COMANDANTE DO BATALHÃO OESTE' },
-                { id: 'documento_origem', label: 'Documento de Origem', tipo: 'text', valorPadrao: 'Queixa Crime anexa' },
-              ],
-              template: (dados) => `
-                PORTARIA Nº XX.XX/AAAA/SJD/PMAM
-                
-                O ${dados.cmt_cargo || ''}, no uso de suas atribuições legais, e em cumprimento ao previsto na legislação em vigor,
-                
-                CONSIDERANDO o teor do ${dados.documento_origem || ''};
-                
-                RESOLVE:
-                
-                INSTAURAR Sindicância para apurar os fatos mencionados.
-                Manaus-AM, [Dia] de [Mês] de [Ano].
-                
-                ${dados.cmt_nome || '__________________________________'}
-                ${dados.cmt_cargo || ''}
-              `
-            },
-            encaminhamento: { titulo: "Ofício de Encaminhamento", campos: [], template: (dados) => "Modelo de Ofício de Encaminhamento em construção..." },
-            defesa: { titulo: "Termo de Defesa", campos: [], template: (dados) => "Modelo de Termo de Defesa em construção..." },
-          };
-        }
-
-        // 2. CARREGA O MODELO NA INTERFACE (Ajuste para classes Tailwind)
-        carregarModelo(modeloId) {
-          const modelo = this.modelos[modeloId]; [cite: 87]
-          if (!modelo) {
-            this.mostrarToast('Modelo não encontrado.', 'erro'); [cite: 87, 88]
-            return;
-          }
-
-          this.modeloAtualId = modeloId;
-          this.tituloDocumento.innerHTML = `<i class="fas fa-file-invoice mr-2"></i> Gerador de ${modelo.titulo}`; [cite: 89]
-          this.camposContainer.innerHTML = ''; // Limpa campos antigos [cite: 90]
-
-          // Cria os campos dinamicamente
-          modelo.campos.forEach(campo => {
-            const div = document.createElement('div');
-            div.className = 'mb-5'; // form-group com classe Tailwind
-
-            const inputElement = campo.tipo === 'textarea' ? 'textarea' : 'input';
-            const inputClasses = 'w-full p-3 border border-gray-300 rounded-lg box-border text-base transition-all focus:border-pmam-accent focus:outline-none focus:ring-2 focus:ring-pmam-accent/30';
-
-            div.innerHTML = `
-              <label for="${campo.id}" class="block mb-2 font-semibold text-pmam-secondary">${campo.label}:</label>
-              <${inputElement} 
-                id="${campo.id}" 
-                name="${campo.id}" 
-                ${campo.tipo === 'textarea' ? 'rows="3"' : `type="${campo.tipo}"`} 
-                placeholder="${campo.placeholder || ''}"
-                class="${inputClasses}"
-              >${campo.tipo === 'textarea' ? campo.valorPadrao || '' : ''}</${inputElement}>
-            `;
-
-            // Define valor para inputs [cite: 94, 95]
-            if (campo.tipo !== 'textarea') {
-              div.querySelector('input').value = campo.valorPadrao || '';
-            }
-            this.camposContainer.appendChild(div); [cite: 96]
-          });
-
-          // Remove o estado ativo dos itens do menu e aplica ao novo [cite: 96, 97]
-          document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('ativo'));
-          document.querySelector(`[onclick="sistema.carregarModelo('${modeloId}')"]`).classList.add('ativo');
-
-          this.atualizarPreview(); // Atualiza com os valores padrões
-        }
-
-        // 3. OBTÉM OS DADOS DO FORMULÁRIO [cite: 98, 99]
-        obterDados() {
-          const dados = {};
-          const formElements = this.form.querySelectorAll('input, textarea, select');
-          formElements.forEach(element => {
-            if (element.name) {
-              dados[element.name] = element.value;
-            }
-          });
-          return dados;
-        }
-
-        // 4. ATUALIZA A PRÉ-VISUALIZAÇÃO (em tempo real) [cite: 100, 101]
-        atualizarPreview() {
-          const modelo = this.modelos[this.modeloAtualId];
-          if (modelo && modelo.template) {
-            const dados = this.obterDados();
-            this.previewArea.textContent = modelo.template(dados).trim();
-          }
-        }
-
-        // 5. GERA O PDF USANDO JSDPF [cite: 102-110]
-        gerarPDF() {
-          const dados = this.obterDados();
-          const modelo = this.modelos[this.modeloAtualId];
-          
-          if (!modelo) {
-            this.mostrarToast('Erro: Modelo de documento não definido.', 'erro');
-            return;
-          }
-
-          const nomeArquivo = `${modelo.titulo.replace(/\s/g, '_')}_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`;
-          const conteudo = modelo.template(dados);
-
-          try {
-            const doc = new jsPDF({
-              unit: 'mm',
-              format: 'a4'
-            });
-            const margem = 20; // Margem de 20mm
-            const larguraConteudo = doc.internal.pageSize.getWidth() - 2 * margem;
-            doc.setFont('helvetica');
-            doc.setFontSize(12);
-
-            // Adiciona o conteúdo com quebras de linha automáticas [cite: 108]
-            const linhas = doc.splitTextToSize(conteudo, larguraConteudo);
-            doc.text(linhas, margem, margem + 10); // +10mm para descer um pouco
-
-            doc.save(nomeArquivo);
-            this.mostrarToast(`PDF de "${modelo.titulo}" gerado com sucesso!`, 'sucesso');
-          } catch (e) {
-            console.error("Erro ao gerar PDF:", e); [cite: 110]
-            this.mostrarToast('Erro ao gerar PDF. Verifique o console.', 'erro');
-          }
-        }
-        
-        // 6. COPIA O TEXTO [cite: 111-113]
-        copiarTexto() {
-          const texto = this.previewArea.textContent;
-          navigator.clipboard.writeText(texto)
-            .then(() => {
-              this.mostrarToast('Conteúdo do documento copiado para a área de transferência!', 'sucesso');
-            })
-            .catch(err => {
-              console.error('Erro ao copiar texto: ', err);
-              this.mostrarToast('Erro ao copiar texto.', 'erro');
-            });
-        }
-
-        // 7. TOASTS (Notificações) [cite: 114-122]
-        mostrarToast(mensagem, tipo = 'info') {
-          const container = document.getElementById('toast-container');
-          const toast = document.createElement('div');
-          
-          let iconeClass = '';
-          if (tipo === 'sucesso') {
-            iconeClass = 'fas fa-check-circle';
-            toast.className = `toast bg-pmam-success text-pmam-card min-w-64 p-4 rounded-pmam-lg shadow-pmam-xl mb-3 opacity-0 transform translate-x-full flex items-center`;
-          } else if (tipo === 'erro') {
-            iconeClass = 'fas fa-exclamation-circle';
-            toast.className = `toast bg-pmam-error text-pmam-card min-w-64 p-4 rounded-pmam-lg shadow-pmam-xl mb-3 opacity-0 transform translate-x-full flex items-center`;
-          } else if (tipo === 'info') {
-            iconeClass = 'fas fa-info-circle';
-            toast.className = `toast bg-pmam-blue text-pmam-card min-w-64 p-4 rounded-pmam-lg shadow-pmam-xl mb-3 opacity-0 transform translate-x-full flex items-center`;
-          }
-          
-          toast.innerHTML = `<i class="${iconeClass} mr-3 text-lg"></i> <span>${mensagem}</span>`;
-          container.appendChild(toast);
-          
-          // Mostrar e Remover
-          setTimeout(() => {
-            toast.classList.add('mostrar'); // Classe de animação para mostrar
-            toast.classList.remove('opacity-0', 'translate-x-full'); 
-          }, 10); // Pequeno delay para garantir a animação
-
-          setTimeout(() => {
-            toast.classList.remove('mostrar');
-            toast.classList.add('opacity-0', 'translate-x-full'); // Inicia a transição de volta
-            // Remove o elemento após a transição
-            setTimeout(() => {
-              container.removeChild(toast); [cite: 121]
-            }, 300); 
-          }, 3000);
-        }
-      }
-
-      // Inicializar o sistema ao carregar a página [cite: 123, 124]
-      let sistema;
-      document.addEventListener('DOMContentLoaded', () => {
-        sistema = new SistemaPMAM();
-        window.sistema = sistema; // Torna acessível no escopo global
-      });
-    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "jspdf": "https://aistudiocdn.com/jspdf@^3.0.4"
+  }
+}
+</script>
+</head>
+  <body class="bg-slate-100 text-slate-800 antialiased">
+    <div id="root"></div>
   </body>
 </html>
