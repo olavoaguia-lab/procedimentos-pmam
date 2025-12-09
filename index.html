@@ -3,161 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PMAM - Sistema de Documentos Oficiais</title>
+    <title>PMAM - Sistema de Procedimentos Oficiais</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
+        /* Estilos CSS (Melhorados para Estética Moderna) */
         :root {
-            --pm-azul: #1e3a8a;
+            --pm-azul-marinho: #1e3a8a; /* Base primária */
             --pm-azul-claro: #3b82f6;
-            --pm-azul-escuro: #1e293b;
-            --pm-destaque: #0ea5e9;
-            --pm-verde: #10b981;
-            --pm-amarelo: #f59e0b;
-            --pm-vermelho: #ef4444;
+            --pm-destaque: #0ea5e9; /* Cor de destaque */
+            --pm-verde: #10b981; /* Sucesso */
+            --pm-vermelho: #ef4444; /* Erro */
             --pm-cinza: #64748b;
-            --pm-cinza-claro: #f1f5f9;
-            --pm-branco: #ffffff;
-            --pm-borda: #e2e8f0;
-            --pm-sombra: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --pm-fundo: #f8fafc; /* Fundo mais claro */
+            --pm-cartao: #ffffff; /* Fundo do cartão */
+            --pm-sombra: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             --pm-raio: 8px;
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--pm-fundo);
+            color: #1f2937;
             margin: 0;
             padding: 0;
-            background-color: var(--pm-cinza-claro);
-            color: var(--pm-azul-escuro);
             display: flex;
             min-height: 100vh;
         }
 
-        /* Estrutura Principal */
+        /* ------------------ Sidebar (Menu Lateral) ------------------ */
         .sidebar {
-            width: 280px;
-            background-color: var(--pm-azul-escuro);
-            color: var(--pm-branco);
-            padding: 20px;
+            width: 250px;
+            background-color: var(--pm-azul-marinho);
+            color: var(--pm-cartao);
+            padding: 20px 0;
             box-shadow: var(--pm-sombra);
-            position: fixed;
-            height: 100%;
-            overflow-y: auto;
+            z-index: 10;
+            flex-shrink: 0;
         }
 
-        .main-content {
-            margin-left: 280px;
-            flex-grow: 1;
-            padding: 20px 30px;
-        }
-
-        /* Cabeçalho */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--pm-borda);
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--pm-azul);
-        }
-
-        /* Navegação Lateral */
-        .navegacao h3 {
-            color: var(--pm-destaque);
-            font-size: 14px;
-            margin-top: 30px;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-        }
-
-        .item-navegacao {
-            display: flex;
-            align-items: center;
-            padding: 12px 15px;
-            margin-bottom: 5px;
-            border-radius: var(--pm-raio);
-            cursor: pointer;
-            transition: background-color 0.2s, color 0.2s;
-            font-size: 15px;
-        }
-
-        .item-navegacao.ativo,
-        .item-navegacao:hover {
-            background-color: var(--pm-azul);
-            color: var(--pm-branco);
-        }
-
-        .item-navegacao i {
-            margin-right: 12px;
-            width: 20px;
+        .sidebar h2 {
             text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+            font-weight: 600;
         }
 
-        /* Cartões de Conteúdo */
-        .cartao-conteudo {
-            background-color: var(--pm-branco);
+        .sidebar-item {
+            display: block;
+            padding: 15px 20px;
+            margin: 5px 10px;
+            border-radius: var(--pm-raio);
+            text-decoration: none;
+            color: var(--pm-cartao);
+            transition: background-color 0.2s, color 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .sidebar-item:hover, .sidebar-item.ativo {
+            background-color: var(--pm-destaque);
+            color: var(--pm-azul-marinho);
+        }
+
+        .sidebar-item i {
+            margin-right: 10px;
+        }
+
+        /* ------------------ Conteúdo Principal ------------------ */
+        .main-content {
+            flex-grow: 1;
+            padding: 40px;
+        }
+
+        .card {
+            background-color: var(--pm-cartao);
             padding: 30px;
             border-radius: var(--pm-raio);
             box-shadow: var(--pm-sombra);
-            margin-bottom: 30px;
         }
 
-        .conteudo-aba {
-            display: none;
+        .card h1 {
+            color: var(--pm-azul-marinho);
+            margin-bottom: 20px;
+            font-size: 2rem;
+            border-bottom: 2px solid var(--pm-destaque);
+            padding-bottom: 10px;
         }
 
-        .conteudo-aba.ativo {
-            display: block;
-        }
-
-        /* Formulário */
-        .campo-grupo {
+        /* ------------------ Formulário ------------------ */
+        .form-group {
             margin-bottom: 20px;
         }
 
-        .campo-grupo label {
+        .form-group label {
             display: block;
+            margin-bottom: 5px;
             font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--pm-azul-escuro);
+            color: var(--pm-cinza);
         }
 
-        .campo-grupo input[type="text"],
-        .campo-grupo input[type="date"],
-        .campo-grupo select,
-        .campo-grupo textarea {
+        .form-group input[type="text"],
+        .form-group textarea,
+        .form-group select {
             width: 100%;
             padding: 10px;
-            border: 1px solid var(--pm-borda);
-            border-radius: 4px;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
             box-sizing: border-box;
-            font-size: 15px;
-            background-color: #fcfcfc;
+            font-size: 1rem;
+            transition: border-color 0.2s;
         }
 
-        .campo-grupo textarea {
-            resize: vertical;
-            min-height: 100px;
+        .form-group input[type="text"]:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--pm-destaque);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
         }
 
-        /* Botões */
+        /* ------------------ Botões ------------------ */
+        .botoes-acao {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
         .btn {
-            padding: 12px 20px;
+            padding: 12px 25px;
             border: none;
-            border-radius: var(--pm-raio);
+            border-radius: 5px;
             cursor: pointer;
+            font-size: 1rem;
             font-weight: 600;
-            transition: background-color 0.2s, opacity 0.2s;
-            display: inline-flex;
+            transition: transform 0.1s, box-shadow 0.2s;
+            display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 10px;
         }
 
         .btn i {
@@ -166,156 +149,72 @@
 
         .btn-primario {
             background-color: var(--pm-azul-claro);
-            color: var(--pm-branco);
+            color: var(--pm-cartao);
         }
 
         .btn-primario:hover {
-            background-color: var(--pm-azul);
+            background-color: var(--pm-destaque);
+            box-shadow: 0 5px 10px rgba(14, 165, 233, 0.4);
+            transform: translateY(-2px);
         }
 
         .btn-secundario {
-            background-color: var(--pm-cinza-claro);
-            color: var(--pm-cinza);
-            border: 1px solid var(--pm-borda);
+            background-color: var(--pm-cinza);
+            color: var(--pm-cartao);
         }
 
         .btn-secundario:hover {
-            background-color: var(--pm-borda);
+            background-color: #4b5563;
+            box-shadow: 0 5px 10px rgba(100, 116, 139, 0.4);
+            transform: translateY(-2px);
         }
 
-        /* Alertas/Mensagens */
-        .alerta {
-            padding: 15px;
-            border-radius: var(--pm-raio);
-            margin-bottom: 20px;
-            font-size: 15px;
-            display: flex;
-            align-items: center;
-        }
-
-        .alerta i {
-            margin-right: 10px;
-        }
-
-        .alerta-erro {
-            background-color: #fee2e2;
-            color: var(--pm-vermelho);
-            border: 1px solid #fca5a5;
-        }
-
-        .alerta-sucesso {
-            background-color: #d1fae5;
-            color: var(--pm-verde);
-            border: 1px solid #6ee7b7;
-        }
-        
-        .alerta-info {
-            background-color: #eff6ff;
-            color: var(--pm-destaque);
-            border: 1px solid #bfdbfe;
-        }
-
-        /* Área de Pré-visualização */
-        .previa-container {
-            border: 1px solid var(--pm-borda);
-            padding: 20px;
-            min-height: 500px;
-            overflow-y: auto;
-            background-color: #fff;
-        }
-
-        .previa-documento {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 40px;
-            background-color: #fff;
-            border: 1px solid #eee;
-            box-shadow: 0 0 10px rgba(0,0,0,0.05);
-            line-height: 1.6;
-            font-size: 16px;
-        }
-
-        .previa-documento h1, .previa-documento h2, .previa-documento h3 {
-            text-align: center;
-            color: var(--pm-azul-escuro);
-        }
-        
-        .previa-documento p {
-            text-align: justify;
-            margin-bottom: 1.5em;
-        }
-        
-        .previa-documento .assinatura {
-            margin-top: 80px;
-            text-align: center;
-        }
-        
-        .previa-documento .linha-assinatura {
-            border-top: 1px solid #000;
-            width: 60%;
-            margin: 0 auto 5px;
-        }
-
-        /* Histórico */
-        .historico-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--pm-borda);
-            font-size: 14px;
-        }
-        
-        .historico-item:last-child {
-            border-bottom: none;
-        }
-
-        .historico-item .acoes button {
-            background: none;
-            border: none;
-            color: var(--pm-azul-claro);
-            cursor: pointer;
-            margin-left: 10px;
-        }
-        
-        .historico-item .acoes button:hover {
-            color: var(--pm-azul);
-        }
-
-        /* Toast de Notificação */
-        .toast {
-            visibility: hidden;
-            min-width: 250px;
-            background-color: var(--pm-azul-escuro);
-            color: #fff;
-            text-align: center;
-            border-radius: var(--pm-raio);
-            padding: 16px;
+        /* ------------------ Toast (Notificações) ------------------ */
+        .toast-container {
             position: fixed;
+            top: 20px;
+            right: 20px;
             z-index: 1000;
-            left: 50%;
-            bottom: 30px;
-            transform: translateX(-50%);
+        }
+        
+        .toast {
+            min-width: 250px;
+            padding: 15px 20px;
+            border-radius: var(--pm-raio);
+            box-shadow: var(--pm-sombra);
+            margin-bottom: 10px;
             opacity: 0;
-            transition: visibility 0s, opacity 0.5s linear;
+            transform: translateX(100%);
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            display: flex;
+            align-items: center;
         }
 
         .toast.mostrar {
-            visibility: visible;
             opacity: 1;
+            transform: translateX(0);
         }
-        
+
         .toast i {
             margin-right: 10px;
+            font-size: 1.2rem;
         }
+
+        .toast-sucesso { background-color: var(--pm-verde); color: var(--pm-cartao); }
+        .toast-erro { background-color: var(--pm-vermelho); color: var(--pm-cartao); }
+        .toast-info { background-color: var(--pm-azul-marinho); color: var(--pm-cartao); }
         
-        .toast-sucesso {
-            background-color: var(--pm-verde);
-        }
-        
-        .modelo-card:hover {
-            border-color: var(--pm-azul-claro) !important;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+        /* ------------------ Preview PDF (Área de Modelo) ------------------ */
+        #preview-documento {
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            min-height: 200px;
+            background-color: #fff;
+            margin-top: 20px;
+            white-space: pre-wrap; /* Preserva espaços e quebras de linha */
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: #333;
         }
 
     </style>
@@ -323,860 +222,289 @@
 <body>
 
     <div class="sidebar">
-        <div style="text-align: center; padding-bottom: 20px; border-bottom: 1px solid #334155;">
-            <i class="fas fa-shield-alt" style="font-size: 40px; color: var(--pm-destaque);"></i>
-            <h1 style="font-size: 18px; margin: 10px 0 0;">Sistema PMAM</h1>
-            <p style="font-size: 12px; color: #94a3b8;">Gerador de Documentos</p>
-        </div>
-
-        <div class="navegacao">
-            <h3>Navegação</h3>
-            <div class="item-navegacao ativo aba" data-aba="formulario">
-                <i class="fas fa-keyboard"></i> Formulário de Dados
-            </div>
-            <div class="item-navegacao aba" data-aba="previa">
-                <i class="fas fa-file-alt"></i> Pré-visualização
-            </div>
-            <div class="item-navegacao aba" data-aba="modelos">
-                <i class="fas fa-copy"></i> Modelos
-            </div>
-            <div class="item-navegacao aba" data-aba="historico">
-                <i class="fas fa-history"></i> Histórico & Rascunhos
-            </div>
-        </div>
-
-        <div class="navegacao">
-            <h3>Ações Rápidas</h3>
-            <div class="item-navegacao" id="btn-gerar-tudo">
-                <i class="fas fa-magic"></i> Gerar TODOS Documentos
-            </div>
-            <div class="item-navegacao" id="btn-salvar">
-                <i class="fas fa-save"></i> Salvar Rascunho
-            </div>
-            <div class="item-navegacao" id="btn-exportar">
-                <i class="fas fa-download"></i> Exportar Documento
-            </div>
-            <div class="item-navegacao" id="btn-limpar-form">
-                <i class="fas fa-eraser"></i> Limpar Formulário
-            </div>
-            <div class="item-navegacao" id="btn-imprimir">
-                <i class="fas fa-print"></i> Imprimir Prévia
-            </div>
-        </div>
+        <h2><i class="fas fa-gavel"></i> PMAM SJD</h2>
+        <a href="#" class="sidebar-item ativo" onclick="sistema.carregarModelo('sindicancia')"><i class="fas fa-file-alt"></i> Sindicância (Completa)</a>
+        <a href="#" class="sidebar-item" onclick="sistema.carregarModelo('portaria')"><i class="fas fa-scroll"></i> Portaria</a>
+        <a href="#" class="sidebar-item" onclick="sistema.carregarModelo('encaminhamento')"><i class="fas fa-share-square"></i> Ofício de Encaminhamento</a>
+        <a href="#" class="sidebar-item" onclick="sistema.carregarModelo('defesa')"><i class="fas fa-book"></i> Termo de Defesa</a>
     </div>
 
     <div class="main-content">
-        <div class="header">
-            <div class="logo">
-                <i class="fas fa-gavel" style="color: var(--pm-destaque); margin-right: 5px;"></i> Sistema de Documentos
-            </div>
-            <div>
-                <span style="color: var(--pm-cinza); font-size: 14px;">Usuário: Sindicante Padrão</span>
-            </div>
-        </div>
-
-        <div class="cartao-conteudo conteudo-aba ativo" id="aba-formulario">
-            <h2 style="color: var(--pm-azul); margin-bottom: 24px;"><i class="fas fa-keyboard"></i> Preenchimento do Procedimento</h2>
+        <div class="card">
+            <h1 id="titulo-documento"><i class="fas fa-file-invoice"></i> Gerador de Sindicância PMAM</h1>
+            <p>Preencha os campos abaixo para gerar o documento oficial.</p>
             
-            <div class="alerta alerta-info">
-                <i class="fas fa-lightbulb"></i> Preencha todos os campos do formulário para garantir que os documentos sejam gerados corretamente.
-            </div>
-
-            <form id="formulario-procedimento">
-                <h3 style="color: var(--pm-azul-escuro); margin-top: 30px; border-bottom: 1px solid var(--pm-borda); padding-bottom: 10px;">
-                    1. Dados do Procedimento
-                </h3>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-                    <div class="campo-grupo">
-                        <label for="tipo-procedimento">Tipo de Procedimento</label>
-                        <select id="tipo-procedimento" name="tipo-procedimento" required>
-                            <option value="Sindicância">Sindicância Investigativa</option>
-                            <option value="IPM">Inquérito Policial Militar (IPM)</option>
-                            <option value="PAD">Processo Administrativo Disciplinar (PAD)</option>
+            <form id="form-documento">
+                <div id="campos-dinamicos">
+                    <div class="form-group">
+                        <label for="tipo_procedimento">Tipo de Procedimento:</label>
+                        <select id="tipo_procedimento" name="tipo_procedimento">
+                            <option value="Sindicância">Sindicância</option>
+                            <option value="IPM">Inquérito Policial Militar</option>
+                            <option value="PA">Processo Administrativo</option>
                         </select>
                     </div>
-
-                    <div class="campo-grupo">
-                        <label for="numero-portaria">Nº da Portaria de Instauração</label>
-                        <input type="text" id="numero-portaria" name="numero-portaria" placeholder="Ex: 001/2024-PMAM/CPI" required>
+                    <div class="form-group">
+                        <label for="numero_portaria">Nº da Portaria:</label>
+                        <input type="text" id="numero_portaria" name="numero_portaria" placeholder="Ex: 05.02/2023/IPM/SJD/CPA OESTE/PMAM">
                     </div>
-                    
-                    <div class="campo-grupo">
-                        <label for="data-portaria">Data da Instauração</label>
-                        <input type="date" id="data-portaria" name="data-portaria" required>
+                    <div class="form-group">
+                        <label for="inquirido_nome">Nome/CI do Inquirido:</label>
+                        <input type="text" id="inquirido_nome" name="inquirido_nome" placeholder="Ex: CAP QOPM Stanley Oliveira De Araújo (CI 20943)">
                     </div>
-                    
-                    <div class="campo-grupo">
-                        <label for="unidade">Unidade Policial (Sigla)</label>
-                        <input type="text" id="unidade" name="unidade" placeholder="Ex: 1º BPM" required>
-                    </div>
-
-                    <div class="campo-grupo">
-                        <label for="cidade">Cidade/Local</label>
-                        <input type="text" id="cidade" name="cidade" placeholder="Ex: Manaus/AM" required>
-                    </div>
-                </div>
-                
-                <div class="campo-grupo">
-                    <label for="resumo-fatos">Resumo dos Fatos (Objeto da apuração)</label>
-                    <textarea id="resumo-fatos" name="resumo-fatos" placeholder="Descreva brevemente o que está sendo apurado..." required></textarea>
-                </div>
-
-                <h3 style="color: var(--pm-azul-escuro); margin-top: 30px; border-bottom: 1px solid var(--pm-borda); padding-bottom: 10px;">
-                    2. Encarregado (Sindicante/Presidente)
-                </h3>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-                    <div class="campo-grupo">
-                        <label for="posto-encarregado">Posto/Graduação</label>
-                        <input type="text" id="posto-encarregado" name="posto-encarregado" placeholder="Ex: Cap. PM" required>
-                    </div>
-
-                    <div class="campo-grupo">
-                        <label for="nome-encarregado">Nome Completo</label>
-                        <input type="text" id="nome-encarregado" name="nome-encarregado" placeholder="Ex: João da Silva" required>
-                    </div>
-                    
-                    <div class="campo-grupo">
-                        <label for="id-encarregado">RG/CI</label>
-                        <input type="text" id="id-encarregado" name="id-encarregado" placeholder="Ex: 123456-7" required>
+                    <div class="form-group">
+                        <label for="objeto_apuracao">Objeto da Apuração (Resumo):</label>
+                        <textarea id="objeto_apuracao" name="objeto_apuracao" rows="3" placeholder="Ex: Apurar a suposta irregularidade praticada pelo Inquirido conforme Queixa Crime anexa..."></textarea>
                     </div>
                 </div>
 
-                <h3 style="color: var(--pm-azul-escuro); margin-top: 30px; border-bottom: 1px solid var(--pm-borda); padding-bottom: 10px;">
-                    3. Sindicado/Acusado
-                </h3>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-                    <div class="campo-grupo">
-                        <label for="posto-sindicado">Posto/Graduação</label>
-                        <input type="text" id="posto-sindicado" name="posto-sindicado" placeholder="Ex: Sd. PM" required>
-                    </div>
-
-                    <div class="campo-grupo">
-                        <label for="nome-sindicado">Nome Completo</label>
-                        <input type="text" id="nome-sindicado" name="nome-sindicado" placeholder="Ex: Pedro Santos" required>
-                    </div>
-                    
-                    <div class="campo-grupo">
-                        <label for="id-sindicado">RG/CI</label>
-                        <input type="text" id="id-sindicado" name="id-sindicado" placeholder="Ex: 987654-3" required>
+                <div class="form-group">
+                    <label>Pré-visualização do Documento:</label>
+                    <div id="preview-documento">
+                        ... O documento será renderizado aqui ...
                     </div>
                 </div>
 
-                <div style="margin-top: 40px; border-top: 1px solid var(--pm-borda); padding-top: 20px; display: flex;">
-                    <button type="button" class="btn btn-primario" id="btn-gerar-docs">
-                        <i class="fas fa-file-export"></i> Gerar Documentos Iniciais
-                    </button>
-                    <button type="button" class="btn btn-secundario" id="btn-validar">
-                        <i class="fas fa-check"></i> Validar Campos
-                    </button>
-                    <button type="button" class="btn btn-secundario" id="btn-carregar-modelo">
-                        <i class="fas fa-upload"></i> Carregar Modelo
-                    </button>
+                <div class="botoes-acao">
+                    <button type="button" class="btn btn-primario" onclick="sistema.gerarPDF()"><i class="fas fa-file-pdf"></i> Gerar PDF</button>
+                    <button type="button" class="btn btn-secundario" onclick="sistema.copiarTexto()"><i class="fas fa-copy"></i> Copiar Texto</button>
                 </div>
             </form>
         </div>
-
-        <div class="cartao-conteudo conteudo-aba" id="aba-previa">
-            <h2 style="color: var(--pm-azul); margin-bottom: 24px;"><i class="fas fa-file-alt"></i> Pré-visualização e Exportação</h2>
-            
-            <div class="alerta alerta-info">
-                <i class="fas fa-info-circle"></i> A pré-visualização pode ser um rascunho. Clique em "Gerar Documentos" no formulário para criar a versão final.
-            </div>
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <div class="campo-grupo" style="flex-grow: 1; margin: 0;">
-                    <label for="selecionar-documento" style="font-weight: normal;">Documento para Visualizar:</label>
-                    <select id="selecionar-documento" name="selecionar-documento" style="max-width: 350px;">
-                        <option value="termo-abertura">Termo de Abertura</option>
-                        <option value="termo-declaracao">Termo de Declaração</option>
-                        <option value="oficio">Ofício (Interlocutório)</option>
-                        <option value="carta-precatoria">Carta Precatória</option>
-                        <option value="relatorio">Relatório Final</option>
-                        <option value="parecer">Parecer Jurídico</option>
-                    </select>
-                </div>
-                <div>
-                    <button type="button" class="btn btn-primario" onclick="sistema.exportarDocumento()">
-                        <i class="fas fa-download"></i> Exportar (PDF/DOCX)
-                    </button>
-                </div>
-            </div>
-
-            <div class="previa-container">
-                <div class="previa-documento" id="previa-documento">
-                    <p style="text-align: center; color: var(--pm-cinza); padding: 40px;">
-                        <i class="fas fa-file-alt" style="font-size: 48px; margin-bottom: 20px; display: block; opacity: 0.3;"></i>
-                        Selecione um documento para visualização ou clique em "Gerar Documentos" no formulário.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <div class="cartao-conteudo conteudo-aba" id="aba-modelos">
-            <h2 style="color: var(--pm-azul); margin-bottom: 24px;"><i class="fas fa-copy"></i> Modelos de Documentos</h2>
-            
-            <div class="alerta alerta-info">
-                <i class="fas fa-lightbulb"></i> Clique em um modelo para carregar automaticamente todos os dados no formulário.
-            </div>
-            
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 24px;">
-                <div class="modelo-card" style="border: 2px solid var(--pm-borda); border-radius: var(--pm-raio); padding: 20px; cursor: pointer; transition: all 0.3s;" 
-                     data-modelo="sindicancia-botelho" onclick="carregarModelo('sindicancia-botelho')">
-                    <h3 style="color: var(--pm-azul); margin-bottom: 12px;">
-                        <i class="fas fa-file-contract"></i> MODELO DE SINDICANCIA 1
-                    </h3>
-                    <p style="font-size: 14px; color: var(--pm-cinza); margin-bottom: 16px;">
-                        Sindicância Investigativa para apurar conduta de policial militar envolvido em ocorrência com PRFs em boate.
-                    </p>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="background: var(--pm-verde); color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">
-                            Completo
-                        </span>
-                        <span style="font-size: 12px; color: var(--pm-cinza);">
-                            <i class="fas fa-calendar"></i> Set/2021
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="modelo-card" style="border: 2px solid var(--pm-borda); border-radius: var(--pm-raio); padding: 20px; cursor: pointer; transition: all 0.3s;"
-                     data-modelo="sindicancia-daivison" onclick="carregarModelo('sindicancia-daivison')">
-                    <h3 style="color: var(--pm-azul); margin-bottom: 12px;">
-                        <i class="fas fa-file-contract"></i> MODELO DE SINDICANCIA 2
-                    </h3>
-                    <p style="font-size: 14px; color: var(--pm-cinza); margin-bottom: 16px;">
-                        Sindicância Investigativa para apurar suposta agressão física durante abordagem policial.
-                    </p>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="background: var(--pm-verde); color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">
-                            Completo
-                        </span>
-                        <span style="font-size: 12px; color: var(--pm-cinza);">
-                            <i class="fas fa-calendar"></i> Jun/2023
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="modelo-card" style="border: 2px solid var(--pm-borda); border-radius: var(--pm-raio); padding: 20px; cursor: pointer; transition: all 0.3s;"
-                     data-modelo="ipm-stanley" onclick="carregarModelo('ipm-stanley')">
-                    <h3 style="color: var(--pm-azul); margin-bottom: 12px;">
-                        <i class="fas fa-gavel"></i> MODELO DE SINDICANCIA 3
-                    </h3>
-                    <p style="font-size: 14px; color: var(--pm-cinza); margin-bottom: 16px;">
-                        Inquérito Policial Militar instaurado para apurar conduta de policial militar.
-                    </p>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span style="background: var(--pm-amarelo); color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px;">
-                            Em andamento
-                        </span>
-                        <span style="font-size: 12px; color: var(--pm-cinza);">
-                            <i class="fas fa-calendar"></i> Mar/2023
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="cartao-conteudo conteudo-aba" id="aba-historico">
-            <h2 style="color: var(--pm-azul); margin-bottom: 24px;"><i class="fas fa-history"></i> Histórico e Rascunhos Salvos</h2>
-            
-            <div class="alerta alerta-info">
-                <i class="fas fa-save"></i> O sistema salva automaticamente rascunhos quando você altera campos e o auto-save está ativo.
-            </div>
-            
-            <div id="historico-lista">
-                <p style="text-align: center; color: var(--pm-cinza); padding: 20px; font-style: italic;">Nenhum rascunho encontrado.</p>
-            </div>
-        </div>
     </div>
 
-    <div id="toast" class="toast">
-        <i class="fas"></i>
-        <span id="toast-mensagem"></span>
-    </div>
+    <div class="toast-container" id="toast-container">
+        </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
+        // JS - Lógica, Funcionalidade e Modelos (Mais detalhes abaixo)
+        const { jsPDF } = window.jspdf;
+
         class SistemaPMAM {
             constructor() {
-                // Configuração dos modelos (Mantendo o nome para o JS interno, mas com os dados corretos)
-                this.modelos = {
-                    'sindicancia-botelho': { 
-                        'tipo-procedimento': 'Sindicância',
-                        'numero-portaria': '012/2021-CPI/CMDO',
-                        'data-portaria': '2021-09-15',
-                        'unidade': 'CPI',
-                        'cidade': 'Manaus/AM',
-                        'resumo-fatos': 'Apuração de conduta de policial militar (Sd. Botelho) envolvido em altercação com Policiais Rodoviários Federais em uma boate, no dia 05/09/2021.',
-                        'posto-encarregado': 'Cap. PM',
-                        'nome-encarregado': 'SINDICANTE EXEMPLO A',
-                        'id-encarregado': '789012-3',
-                        'posto-sindicado': 'Sd. PM',
-                        'nome-sindicado': 'BOTELHO F. J.',
-                        'id-sindicado': '112233-4'
-                    }, 
-                    'sindicancia-daivison': { 
-                        'tipo-procedimento': 'Sindicância',
-                        'numero-portaria': '005/2023-1ºBPM/CMDO',
-                        'data-portaria': '2023-06-10',
-                        'unidade': '1º BPM',
-                        'cidade': 'Manaus/AM',
-                        'resumo-fatos': 'Apuração de denúncia de suposta agressão física e abuso de autoridade durante abordagem policial a um civil na área da Ponta Negra, em 01/06/2023.',
-                        'posto-encarregado': '1º Ten. PM',
-                        'nome-encarregado': 'SINDICANTE EXEMPLO B',
-                        'id-encarregado': '102030-4',
-                        'posto-sindicado': '3º Sgt. PM',
-                        'nome-sindicado': 'DAIVISON P. R.',
-                        'id-sindicado': '224466-8'
-                    },
-                    'ipm-stanley': { 
-                        'tipo-procedimento': 'IPM',
-                        'numero-portaria': '001/2023-GSI/DIP',
-                        'data-portaria': '2023-03-25',
-                        'unidade': 'GSI/DIP',
-                        'cidade': 'Manaus/AM',
-                        'resumo-fatos': 'Instauração de Inquérito Policial Militar para apurar o extravio de uma arma de fogo de carga, ocorrido nas dependências do batalhão, em 15/03/2023.',
-                        'posto-encarregado': 'Maj. PM',
-                        'nome-encarregado': 'ENCARREGADO EXEMPLO C',
-                        'id-encarregado': '506070-8',
-                        'posto-sindicado': 'Cb. PM',
-                        'nome-sindicado': 'STANLEY Q. T.',
-                        'id-sindicado': '335577-9'
-                    }
-                };
+                this.modelos = this.definirModelos();
+                this.camposContainer = document.getElementById('campos-dinamicos');
+                this.previewArea = document.getElementById('preview-documento');
+                this.form = document.getElementById('form-documento');
+                this.tituloDocumento = document.getElementById('titulo-documento');
+
+                // Listener para atualizar a pré-visualização em tempo real
+                this.form.addEventListener('input', () => this.atualizarPreview());
                 
-                // Documentos gerados (vazio no início)
-                this.documentosGerados = {}; 
-                // Configurações básicas
-                this.config = { 
-                    autoSave: true, 
-                    dateFormat: 'dd/mm/yyyy' // Apenas informativo
-                }; 
-                this.init(); 
+                // Carrega o modelo inicial
+                this.modeloAtualId = 'sindicancia';
+                this.carregarModelo(this.modeloAtualId);
             }
 
-            init() { 
-                this.configurarDatas(); 
-                this.configurarEventos(); 
-                this.carregarConfig(); 
-                this.atualizarHistorico();
-                // Carrega a prévia inicial
-                this.previsualizarDocumento(document.getElementById('selecionar-documento').value);
+            // 1. DEFINE OS MODELOS DE DOCUMENTOS (Simples para a demonstração)
+            definirModelos() {
+                return {
+                    sindicancia: {
+                        titulo: "Sindicância (Termo de Abertura)",
+                        campos: [
+                            { id: 'numero_portaria', label: 'Nº da Portaria', tipo: 'text', placeholder: 'Ex: 05.02/2023/IPM/SJD/CPA OESTE/PMAM', valorPadrao: 'XX.XX/AAAA/SIND/PMAM' },
+                            { id: 'inquirido_nome', label: 'Nome/CI do Inquirido', tipo: 'text', placeholder: 'Ex: CAP QOPM Stanley Oliveira De Araújo (CI 20943)', valorPadrao: 'Nome do Militar (CI XXXX)' },
+                            { id: 'encarregado_nome', label: 'Nome do Encarregado', tipo: 'text', placeholder: 'Ex: MAJ QOPM Olavo Pereira Da Silva Filho', valorPadrao: 'MAJ QOPM FULANO DA SILVA (CI XXXX)' },
+                            { id: 'objeto_apuracao', label: 'Objeto da Apuração (Resumo)', tipo: 'textarea', placeholder: 'Ex: Apurar a suposta irregularidade...', valorPadrao: 'APURAR AS SUPOSTA IRREGULARIDADE PRATICADA PELO INQUIRIDO...' },
+                        ],
+                        template: (dados) => `
+                            AUTOS DE SINDICÂNCIA
+                            
+                            INQUIRIDO: ${dados.inquirido_nome || ''}
+                            OBJETO: ${dados.objeto_apuracao || ''}
+                            
+                            TERMO DE ABERTURA
+                            
+                            Aos [Dia] dias do mês de [Mês] de [Ano], nesta Cidade de Manaus, Estado do Amazonas, na sala da SJD do Batalhão Oeste, autuo a Portaria nº ${dados.numero_portaria || '__________'}, de [Data], e demais documentos que a este junto, do que para constar lavro o presente termo.
+                            
+                            Quartel em Manaus-AM, [Dia] de [Mês] de [Ano].
+                            
+                            ${dados.encarregado_nome || '__________________________________'}
+                            Encarregado da Sindicância
+                        `
+                    },
+                    portaria: {
+                        titulo: "Portaria de Instauração",
+                        campos: [
+                            { id: 'cmt_nome', label: 'Nome do Comandante', tipo: 'text', valorPadrao: 'TC QOPM MARIVALDO DE SOUZA FRANÇA FILHO' },
+                            { id: 'cmt_cargo', label: 'Cargo do Comandante', tipo: 'text', valorPadrao: 'COMANDANTE DO BATALHÃO OESTE' },
+                            { id: 'documento_origem', label: 'Documento de Origem', tipo: 'text', valorPadrao: 'Queixa Crime anexa' },
+                        ],
+                        template: (dados) => `
+                            PORTARIA Nº XX.XX/AAAA/SJD/PMAM
+                            
+                            O ${dados.cmt_cargo || ''}, no uso de suas atribuições legais, e em cumprimento ao previsto na legislação em vigor,
+                            
+                            CONSIDERANDO o teor do ${dados.documento_origem || ''};
+                            
+                            RESOLVE:
+                            
+                            INSTAURAR Sindicância para apurar os fatos mencionados.
+                            
+                            Manaus-AM, [Dia] de [Mês] de [Ano].
+                            
+                            ${dados.cmt_nome || '__________________________________'}
+                            ${dados.cmt_cargo || ''}
+                        `
+                    },
+                    // ... Outros modelos (encaminhamento, defesa) seriam definidos aqui.
+                };
             }
 
-            configurarDatas() {
-                // Seta a data de hoje como padrão se o campo estiver vazio
-                const dataPortaria = document.getElementById('data-portaria');
-                if (dataPortaria && !dataPortaria.value) {
-                    const hoje = new Date().toISOString().split('T')[0];
-                    dataPortaria.value = hoje;
+            // 2. CARREGA O MODELO NA INTERFACE
+            carregarModelo(modeloId) {
+                const modelo = this.modelos[modeloId];
+                if (!modelo) {
+                    this.mostrarToast('Modelo não encontrado.', 'erro');
+                    return;
                 }
-            }
-            
-            configurarEventos() { 
-                // Navegação por abas 
-                document.querySelectorAll('.aba').forEach(aba => { 
-                    aba.addEventListener('click', (e) => this.mudarAba(e.target.dataset.aba)); 
-                }); 
-                document.querySelectorAll('.item-navegacao').forEach(item => { 
-                    item.addEventListener('click', (e) => { 
-                        const abaId = e.currentTarget.dataset.aba; 
-                        this.mudarAba(abaId); 
-                    }); 
-                }); 
 
-                // Botões de Ação no Formulário
-                document.getElementById('btn-gerar-docs').addEventListener('click', () => this.gerarDocumentos()); 
-                document.getElementById('btn-validar').addEventListener('click', () => this.validarFormulario()); 
-                document.getElementById('btn-carregar-modelo').addEventListener('click', () => this.mostrarToast('Selecione um modelo na aba "Modelos" para carregar.', 'info')); 
+                this.modeloAtualId = modeloId;
+                this.tituloDocumento.innerHTML = `<i class="fas fa-file-invoice"></i> Gerador de ${modelo.titulo}`;
+                this.camposContainer.innerHTML = ''; // Limpa campos antigos
 
-                // Ações rápidas no painel lateral
-                // CORRIGIDO: Agora btn-gerar-tudo chama gerarDocumentos()
-                document.getElementById('btn-gerar-tudo').addEventListener('click', () => this.gerarDocumentos()); 
-                document.getElementById('btn-limpar-form').addEventListener('click', () => this.limparFormulario()); 
-                document.getElementById('btn-salvar').addEventListener('click', () => this.salvarRascunho()); 
-                document.getElementById('btn-exportar').addEventListener('click', () => this.exportarDocumento()); 
-                document.getElementById('btn-imprimir').addEventListener('click', () => window.print()); 
-
-                // Seleção de documento na prévia (Atualiza prévia ao trocar o documento)
-                document.getElementById('selecionar-documento').addEventListener('change', (e) => { 
-                    this.previsualizarDocumento(e.target.value); 
-                }); 
-
-                // Auto-salvamento (Monitora as alterações)
-                if (this.config.autoSave) { 
-                    document.querySelectorAll('#aba-formulario input, #aba-formulario select, #aba-formulario textarea').forEach(input => { 
-                        input.addEventListener('change', () => this.autoSalvar()); 
-                    }); 
-                } 
-            }
-
-            mudarAba(abaId) { 
-                document.querySelectorAll('.conteudo-aba').forEach(conteudo => {
-                    conteudo.classList.remove('ativo');
-                });
-                document.querySelectorAll('.item-navegacao').forEach(item => {
-                    item.classList.remove('ativo');
+                // Cria os campos dinamicamente
+                modelo.campos.forEach(campo => {
+                    const div = document.createElement('div');
+                    div.className = 'form-group';
+                    div.innerHTML = `
+                        <label for="${campo.id}">${campo.label}:</label>
+                        <${campo.tipo === 'textarea' ? 'textarea' : 'input'} 
+                            id="${campo.id}" 
+                            name="${campo.id}" 
+                            ${campo.tipo === 'textarea' ? `rows="3"` : `type="${campo.tipo}"`} 
+                            placeholder="${campo.placeholder || ''}"
+                        >${campo.tipo === 'textarea' ? campo.valorPadrao || '' : ''}</${campo.tipo === 'textarea' ? 'textarea' : 'input'}>
+                    `;
+                    // Define valor para inputs
+                    if (campo.tipo !== 'textarea') {
+                        div.querySelector('input').value = campo.valorPadrao || '';
+                    }
+                    this.camposContainer.appendChild(div);
                 });
 
-                document.getElementById(`aba-${abaId}`).classList.add('ativo');
-                document.querySelector(`[data-aba="${abaId}"]`).classList.add('ativo');
+                // Remove o estado ativo dos itens do menu e aplica ao novo
+                document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('ativo'));
+                document.querySelector(`[onclick="sistema.carregarModelo('${modeloId}')"]`).classList.add('ativo');
 
-                // Força a atualização da prévia ao entrar na aba 'previa'
-                if (abaId === 'previa') {
-                    const tipoDocAtual = document.getElementById('selecionar-documento').value;
-                    this.previsualizarDocumento(tipoDocAtual);
-                }
+                this.atualizarPreview(); // Atualiza com os valores padrões
             }
 
-            obterDadosFormulario() { 
+            // 3. OBTÉM OS DADOS DO FORMULÁRIO
+            obterDados() {
                 const dados = {};
-                const form = document.getElementById('formulario-procedimento');
-                new FormData(form).forEach((value, key) => {
-                    dados[key] = value;
+                const formElements = this.form.querySelectorAll('input, textarea, select');
+                formElements.forEach(element => {
+                    if (element.name) {
+                        dados[element.name] = element.value;
+                    }
                 });
                 return dados;
             }
 
-            validarFormulario() { 
-                const form = document.getElementById('formulario-procedimento');
-                if (form.checkValidity()) {
-                    this.mostrarToast('Formulário validado! Todos os campos obrigatórios estão preenchidos.', 'sucesso');
-                    return true;
-                } else {
-                    form.reportValidity();
-                    this.mostrarToast('ERRO: Preencha todos os campos obrigatórios.', 'erro');
-                    return false;
+            // 4. ATUALIZA A PRÉ-VISUALIZAÇÃO (em tempo real)
+            atualizarPreview() {
+                const modelo = this.modelos[this.modeloAtualId];
+                if (modelo && modelo.template) {
+                    const dados = this.obterDados();
+                    this.previewArea.textContent = modelo.template(dados).trim(); // Usa textContent para segurança
                 }
             }
 
-            formatarData(dataStr, formato = 'extenso') { 
-                if (!dataStr) return '___________';
+            // 5. GERA O PDF USANDO JSDPF
+            gerarPDF() {
+                const dados = this.obterDados();
+                const modelo = this.modelos[this.modeloAtualId];
+                
+                if (!modelo) {
+                    this.mostrarToast('Erro: Modelo de documento não definido.', 'erro');
+                    return;
+                }
+
+                const nomeArquivo = `${modelo.titulo.replace(/\s/g, '_')}_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`;
+                const conteudo = modelo.template(dados);
+
                 try {
-                    const [ano, mes, dia] = dataStr.split('-');
-                    const data = new Date(ano, mes - 1, dia);
+                    const doc = new jsPDF({
+                        unit: 'mm',
+                        format: 'a4'
+                    });
 
-                    const diaFormatado = dia;
-                    const mesExtenso = data.toLocaleString('pt-BR', { month: 'long' });
-                    const anoFormatado = ano;
+                    // Configuração de Fonte (importante para caracteres especiais em PT-BR)
+                    // Nota: jspdf usa fontes padrão, pode ser necessário incluir mais fontes para full-PT-BR
+                    const margem = 20; // Margem de 20mm
+                    const larguraConteudo = doc.internal.pageSize.getWidth() - 2 * margem;
+                    
+                    doc.setFont('helvetica');
+                    doc.setFontSize(12);
 
-                    if (formato === 'extenso') {
-                        return `${diaFormatado} de ${mesExtenso} de ${anoFormatado}`;
-                    } else if (formato === 'normal') {
-                        return `${diaFormatado}/${mes}/${anoFormatado}`;
-                    }
-                    return dataStr;
+                    // Adiciona o conteúdo com quebras de linha automáticas
+                    const linhas = doc.splitTextToSize(conteudo, larguraConteudo);
+                    doc.text(linhas, margem, margem + 10); // +10mm para descer um pouco
+
+                    doc.save(nomeArquivo);
+                    this.mostrarToast(`PDF de "${modelo.titulo}" gerado com sucesso!`, 'sucesso');
+
                 } catch (e) {
-                    console.error("Erro ao formatar data:", e);
-                    return dataStr; 
+                    console.error("Erro ao gerar PDF:", e);
+                    this.mostrarToast('Erro ao gerar PDF. Verifique o console.', 'erro');
                 }
             }
             
-            /* * FUNÇÕES GERADORAS DE DOCUMENTOS 
-             */
-            gerarTermoAbertura(dados) { 
-                const dataExtenso = this.formatarData(dados['data-portaria'], 'extenso');
-                return `
-                    <h1 style="text-align: center;">TERMO DE ABERTURA</h1>
-                    <h2 style="text-align: center; margin-bottom: 40px;">DO ${dados['tipo-procedimento'].toUpperCase()} N° ${dados['numero-portaria'] || '______'}</h2>
-                    
-                    <p style="text-indent: 50px;">Aos ${dataExtenso}, na ${dados.unidade || '______'} - ${dados.cidade || '______'}, onde se encontra o ${dados['posto-encarregado'] || '______'} ${dados['nome-encarregado'] || '______'}, ${dados['id-encarregado'] ? `CI ${dados['id-encarregado']}` : ''}, ${dados['tipo-procedimento'] === 'IPM' ? 'Encarregado do IPM' : 'Sindicante'} designado pela Portaria ${dados['numero-portaria'] || '______'} datada de ${this.formatarData(dados['data-portaria'], 'normal')}.</p>
-                    
-                    <p style="text-indent: 50px;">Em cumprimento à supracitada Portaria, dou por ${dados['tipo-procedimento']} instalado(a) para apurar os fatos noticiados, que consistem em: ${dados['resumo-fatos'] || 'Breve resumo dos fatos em apuração.'}</p>
-                    
-                    <p style="text-indent: 50px;">Para constar, lavrei o presente Termo, que vai por mim, Encarregado/Sindicante, devidamente assinado.</p>
-
-                    <div class="assinatura">
-                        <div class="linha-assinatura"></div>
-                        <strong>${dados['posto-encarregado']} ${dados['nome-encarregado']}</strong><br> ${dados['tipo-procedimento'] === 'IPM' ? 'Encarregado do IPM' : 'Sindicante'}
-                    </div>
-                `;
-            } 
-
-            gerarTermoDeclaracao(dados) { 
-                return `
-                    <h1 style="text-align: center;">TERMO DE DECLARAÇÃO / OITIVA</h1>
-                    <h2 style="text-align: center; margin-bottom: 40px;">DO ${dados['tipo-procedimento'].toUpperCase()} N° ${dados['numero-portaria'] || '______'}</h2>
-                    
-                    <p style="text-indent: 50px;">Aos ______ dias do mês de ______ de ______, na sede da ${dados.unidade || '______'} - ${dados.cidade || '______'}, onde se encontra o ${dados['posto-encarregado'] || '______'} ${dados['nome-encarregado'] || '______'}, ${dados['tipo-procedimento'] === 'IPM' ? 'Encarregado do IPM' : 'Sindicante'}, foi inquirido o Sr(a). ${dados['posto-sindicado'] || '______'} ${dados['nome-sindicado'] || '______'} (Sindicado/Acusado), ______ (Vítima/Testemunha), sobre os fatos constantes da Portaria ${dados['numero-portaria'] || '______'}.</p>
-                    
-                    <p style="text-indent: 50px;">Às perguntas que lhe foram feitas, respondeu: "QUE... [Inserir aqui o teor da declaração/oitiva]".</p>
-                    
-                    <p style="text-indent: 50px;">Nada mais foi dito. Para constar, lavrei o presente Termo, que vai por mim, Encarregado/Sindicante, e pelo(a) depoente, devidamente assinado.</p>
-
-                    <div class="assinatura">
-                        <div class="linha-assinatura"></div>
-                        <strong>${dados['posto-encarregado']} ${dados['nome-encarregado']}</strong><br> ${dados['tipo-procedimento'] === 'IPM' ? 'Encarregado do IPM' : 'Sindicante'}
-                    </div>
-                    <div class="assinatura" style="margin-top: 50px;">
-                        <div class="linha-assinatura"></div>
-                        <strong>${dados['posto-sindicado']} ${dados['nome-sindicado']}</strong><br> Sindicado/Depoente
-                    </div>
-                `;
-            } 
-
-            gerarRelatorioFinal(dados) { 
-                const dataExtenso = this.formatarData(new Date().toISOString().split('T')[0], 'extenso');
-                return `
-                    <h1 style="text-align: center;">RELATÓRIO FINAL</h1>
-                    <h2 style="text-align: center; margin-bottom: 40px;">DO ${dados['tipo-procedimento'].toUpperCase()} N° ${dados['numero-portaria'] || '______'}</h2>
-                    
-                    <h3>I - HISTÓRICO E OBJETO</h3>
-                    <p>O presente procedimento foi instaurado pela Portaria ${dados['numero-portaria'] || '______'}, com a finalidade de apurar os fatos noticiados, envolvendo o ${dados['posto-sindicado'] || '______'} ${dados['nome-sindicado'] || '______'}, referente a ${dados['resumo-fatos'] || 'resumo dos fatos.'}</p>
-                    
-                    <h3>II - DILIGÊNCIAS REALIZADAS</h3>
-                    <p>Foram realizadas as seguintes diligências: oitiva do Sindicado, juntada de documentos, expedição de ofícios, etc. [Listar as diligências realizadas].</p>
-                    
-                    <h3>III - ANÁLISE E CONCLUSÃO</h3>
-                    <p>Após a análise de todas as provas e oitivas colhidas, o Encarregado/Sindicante conclui que os fatos ${dados['tipo-procedimento'] === 'IPM' ? 'CONFIGURAM' : 'NÃO CONFIGURAM'} transgressão disciplinar, e opina por [Sugestão de arquivamento, punição, etc.].</p>
-                    
-                    <p style="text-align: right; margin-top: 50px;">${dados.cidade || '______'}, ${dataExtenso}.</p>
-
-                    <div class="assinatura">
-                        <div class="linha-assinatura"></div>
-                        <strong>${dados['posto-encarregado']} ${dados['nome-encarregado']}</strong><br> ${dados['tipo-procedimento'] === 'IPM' ? 'Encarregado do IPM' : 'Sindicante'}
-                    </div>
-                `;
-            }
-            
-            // NOVO/CORRIGIDO: Ofício
-            gerarOficio(dados) {
-                return `
-                    <h1 style="text-align: center;">OFÍCIO</h1>
-                    <p style="text-align: center;">${dados.unidade || '______'}, ${dados.cidade || '______'}</p>
-                    <p style="text-align: center; margin-bottom: 40px;">Nº _____/${dados['tipo-procedimento']}-${dados.unidade || '______'}</p>
-                    
-                    <p style="margin-top: 30px;"><strong>Ao(À) Senhor(a)</strong></p>
-                    <p><strong>[Destinatário e Endereço]</strong></p>
-                    <p><strong>Assunto:</strong> Solicitação de informações / Encaminhamento de Peças.</p>
-                    
-                    <p style="text-indent: 50px;">Em atenção ao ${dados['tipo-procedimento'] || 'Procedimento'} nº ${dados['numero-portaria'] || '______'}, informo que esta sindicância/inquérito visa apurar os fatos ${dados['resumo-fatos'] || 'Breve resumo dos fatos.'}.</p>
-                    
-                    <p style="text-indent: 50px;">Nestes termos, solicito a V. Exa. [Detalhar a solicitação, ex: o envio de cópias de documentos, oitiva, etc.].</p>
-                    
-                    <p>Respeitosamente,</p>
-                    <div class="assinatura">
-                        <div class="linha-assinatura"></div>
-                        <strong>${dados['posto-encarregado']} ${dados['nome-encarregado']}</strong><br> ${dados['tipo-procedimento'] === 'IPM' ? 'Encarregado do IPM' : 'Sindicante'}
-                    </div>
-                `;
+            // 6. COPIA O TEXTO
+            copiarTexto() {
+                const texto = this.previewArea.textContent;
+                navigator.clipboard.writeText(texto)
+                    .then(() => {
+                        this.mostrarToast('Conteúdo do documento copiado para a área de transferência!', 'sucesso');
+                    })
+                    .catch(err => {
+                        console.error('Erro ao copiar texto: ', err);
+                        this.mostrarToast('Erro ao copiar texto.', 'erro');
+                    });
             }
 
-            // NOVO/CORRIGIDO: Carta Precatória
-            gerarCartaPrecatoria(dados) {
-                return `
-                    <h1 style="text-align: center;">CARTA PRECATÓRIA</h1>
-                    <h2 style="text-align: center; margin-bottom: 40px;">Referência: ${dados['tipo-procedimento'].toUpperCase()} N° ${dados['numero-portaria'] || '______'}</h2>
-                    
-                    <p><strong>Ao(À) Comandante:</strong></p>
-                    <p>_____________________________________ (Unidade Policial)</p>
-                    
-                    <p style="text-indent: 50px;">Solicito a V. Exa. que determine a oitiva do(a) militar abaixo qualificado(a) ou da testemunha civil [Nome e qualificação da pessoa], sobre os fatos que constituem objeto do procedimento em referência (vide resumo dos fatos).</p>
-                    
-                    <p><strong>Dados do Sindicado/Depoente:</strong></p>
-                    <ul>
-                        <li>Posto/Graduação: ${dados['posto-sindicado'] || '______'}</li>
-                        <li>Nome: ${dados['nome-sindicado'] || '______'}</li>
-                        <li>RG/CI: ${dados['id-sindicado'] || '______'}</li>
-                    </ul>
-                    
-                    <p>Oitiva a ser realizada: ${dados['tipo-procedimento'] === 'IPM' ? 'Interrogatório/Indiciação' : 'Declaração'}.</p>
-                    
-                    <div class="assinatura">
-                        <div class="linha-assinatura"></div>
-                        <strong>${dados['posto-encarregado']} ${dados['nome-encarregado']}</strong><br> ${dados['tipo-procedimento'] === 'IPM' ? 'Encarregado do IPM' : 'Sindicante'}
-                    </div>
-                `;
-            }
-
-            // NOVO/CORRIGIDO: Parecer
-            gerarParecer(dados) {
-                const dataExtenso = this.formatarData(new Date().toISOString().split('T')[0], 'extenso');
-                return `
-                    <h1 style="text-align: center;">PARECER</h1>
-                    <h2 style="text-align: center; margin-bottom: 40px;">Referente ao ${dados['tipo-procedimento'].toUpperCase()} N° ${dados['numero-portaria'] || '______'}</h2>
-                    
-                    <h3>I - HISTÓRICO</h3>
-                    <p style="text-indent: 50px;">Trata-se do ${dados['tipo-procedimento'] || 'procedimento'} instaurado por Portaria de ${this.formatarData(dados['data-portaria'], 'normal')}, com a finalidade de apurar os fatos noticiados, que culminaram no Relatório Final de fls. ___, que opina por [opinião do encarregado/sindicante].</p>
-                    
-                    <h3>II - ANÁLISE JURÍDICA</h3>
-                    <p style="text-indent: 50px;">[Espaço para análise jurídica].</p>
-                    
-                    <h3>III - CONCLUSÃO</h3>
-                    <p style="text-indent: 50px;">Pelo exposto, e em concordância (ou discordância) com o Relatório Final, este setor é do parecer que os fatos ${dados['tipo-procedimento'] === 'IPM' ? 'devem ser encaminhados ao Juízo Militar.' : 'devem ser objeto de sanção disciplinar / arquivados.'}</p>
-                    
-                    <p style="text-align: right; margin-top: 50px;">${dados.cidade || '______'}, ${dataExtenso}.</p>
-
-                    <div class="assinatura">
-                        <div class="linha-assinatura"></div>
-                        <strong>[Posto/Graduação] [Nome Completo]</strong><br> Consultor(a) Jurídico(a) / Autoridade Superior
-                    </div>
-                `;
-            }
-            
-            // FUNÇÃO CORRIGIDA: Gerar Documentos (Gera TODOS os 6)
-            gerarDocumentos() { 
-                if (!this.validarFormulario()) { 
-                    return; 
-                } 
-                const dados = this.obterDadosFormulario(); 
+            // 7. TOASTS (Melhorado do código original)
+            mostrarToast(mensagem, tipo = 'info') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${tipo}`;
                 
-                // Geração de TODOS os 6 documentos
-                this.documentosGerados = { 
-                    'termo-abertura': this.gerarTermoAbertura(dados), 
-                    'termo-declaracao': this.gerarTermoDeclaracao(dados), 
-                    'oficio': this.gerarOficio(dados), 
-                    'carta-precatoria': this.gerarCartaPrecatoria(dados), 
-                    'relatorio': this.gerarRelatorioFinal(dados), 
-                    'parecer': this.gerarParecer(dados), 
-                }; 
-
-                this.mostrarToast('Documentos gerados com sucesso! Verifique a Pré-visualização.', 'sucesso'); 
-                this.mudarAba('previa'); 
-                
-                // Força a seleção e visualização do Termo de Abertura após a geração
-                document.getElementById('selecionar-documento').value = 'termo-abertura';
-                this.previsualizarDocumento('termo-abertura');
-            }
-
-            // FUNÇÃO CORRIGIDA: Pré-visualização (Gera rascunho se não houver final)
-            previsualizarDocumento(tipoDoc) {
-                const previaDoc = document.getElementById('previa-documento');
-                if (!previaDoc) return;
-
-                let conteudo = this.documentosGerados[tipoDoc];
-
-                // Se o documento não foi gerado, gera um rascunho on-the-fly
-                if (!conteudo || Object.keys(this.documentosGerados).length === 0) {
-                    const dadosRascunho = this.obterDadosFormulario();
-                    
-                    switch (tipoDoc) {
-                        case 'termo-abertura':
-                            conteudo = this.gerarTermoAbertura(dadosRascunho);
-                            break;
-                        case 'termo-declaracao':
-                            conteudo = this.gerarTermoDeclaracao(dadosRascunho);
-                            break;
-                        case 'oficio':
-                            conteudo = this.gerarOficio(dadosRascunho);
-                            break;
-                        case 'carta-precatoria':
-                            conteudo = this.gerarCartaPrecatoria(dadosRascunho);
-                            break;
-                        case 'relatorio':
-                            conteudo = this.gerarRelatorioFinal(dadosRascunho);
-                            break;
-                        case 'parecer':
-                            conteudo = this.gerarParecer(dadosRascunho);
-                            break;
-                        default:
-                            conteudo = null;
-                            break;
-                    }
-                }
-
-                if (conteudo) {
-                    previaDoc.innerHTML = `<div class="documento-imprimivel">${conteudo}</div>`;
-                } else {
-                     previaDoc.innerHTML = `
-                        <p style="text-align: center; color: var(--pm-cinza); padding: 40px;">
-                            <i class="fas fa-file-alt" style="font-size: 48px; margin-bottom: 20px; display: block; opacity: 0.3;"></i>
-                            Selecione um documento para visualização ou clique em "Gerar Documentos".
-                        </p>
-                    `;
-                }
-            }
-
-            // Funções restantes (adaptadas)
-            exportarDocumento() {
-                // Simplificação para exportação: alertar e sugerir impressão
-                const tipoDoc = document.getElementById('selecionar-documento').value;
-                if (!this.documentosGerados[tipoDoc]) {
-                    this.mostrarToast('Gere o documento final antes de exportar.', 'erro');
-                    return;
-                }
-                
-                this.mostrarToast(`Simulação de exportação do documento ${tipoDoc}. Sugestão: use o botão 'Imprimir Prévia' e salve como PDF.`, 'info');
-                // Em um ambiente real, aqui estaria a lógica de conversão para PDF/DOCX
-                // window.print() para salvar como PDF é uma solução comum em navegadores.
-            }
-            
-            carregarModelo(modeloId) { 
-                const dados = this.modelos[modeloId];
-                if (!dados) {
-                    this.mostrarToast('Modelo não encontrado.', 'erro');
-                    return;
-                }
-                
-                // Limpa documentos gerados ao carregar novo modelo
-                this.documentosGerados = {}; 
-
-                // Preenche o formulário
-                for (const key in dados) {
-                    const input = document.getElementById(key);
-                    if (input) {
-                        input.value = dados[key];
-                    }
-                }
-                
-                this.mostrarToast(`Modelo '${modeloId.toUpperCase()}' carregado com sucesso.`, 'sucesso');
-                this.mudarAba('formulario');
-                this.autoSalvar(); // Salva o novo modelo como rascunho
-            }
-            
-            limparFormulario() {
-                document.getElementById('formulario-procedimento').reset();
-                this.documentosGerados = {}; // Limpa os documentos gerados
-                this.configurarDatas(); // Seta a data de hoje novamente
-                this.previsualizarDocumento(document.getElementById('selecionar-documento').value); // Atualiza a prévia
-                this.mostrarToast('Formulário limpo e documentos redefinidos.', 'sucesso');
-            }
-
-            salvarRascunho() { 
-                const dados = this.obterDadosFormulario();
-                const chave = `rascunho-${Date.now()}`;
-                
-                // Armazena dados do formulário e dos documentos gerados, se houver
-                localStorage.setItem(chave, JSON.stringify({ 
-                    dadosForm: dados, 
-                    data: new Date().toLocaleString(),
-                    documentos: this.documentosGerados 
-                }));
-                
-                this.atualizarHistorico();
-                this.mostrarToast('Rascunho salvo manualmente.', 'sucesso');
-                return chave;
-            }
-
-            autoSalvar() {
-                const dados = this.obterDadosFormulario();
-                // Usa uma chave fixa para o auto-save, que é sobrescrita
-                localStorage.setItem('rascunho-autosave', JSON.stringify({ 
-                    dadosForm: dados, 
-                    data: new Date().toLocaleString(),
-                    documentos: this.documentosGerados
-                }));
-                this.atualizarHistorico();
-            }
-
-            carregarRascunho(chave) { 
-                const item = localStorage.getItem(chave);
-                if (!item) {
-                    this.mostrarToast('Rascunho não encontrado.', 'erro');
-                    return;
-                }
-                
-                const rascunho = JSON.parse(item);
-                
-                // 1. Carrega os dados do formulário
-                for (const key in rascunho.dadosForm) {
-                    const input = document.getElementById(key);
-                    if (input) {
-                        input.value = rascunho.dadosForm[key];
-                    }
-                }
-                
-                // 2. Carrega os documentos gerados
-                this.documentosGerados = rascunho.documentos || {};
-
-                this.mostrarToast('Rascunho carregado com sucesso.', 'sucesso');
-                this.mudarAba('formulario');
-                
-                // Atualiza a prévia após carregar
-                this.previsualizarDocumento(document.getElementById('selecionar-documento').value);
-            }
-
-            removerRascunho(chave) { 
-                if (confirm('Tem certeza que deseja excluir este rascunho?')) {
-                    localStorage.removeItem(chave);
-                    this.atualizarHistorico();
-                    this.mostrarToast('Rascunho excluído.', 'sucesso');
-                }
-            }
-
-            atualizarHistorico() { 
-                const historicoLista = document.getElementById('historico-lista');
-                historicoLista.innerHTML = '';
-                let encontrado = false;
-
-                for (let i = 0; i < localStorage.length; i++) {
-                    const chave = localStorage.key(i);
-                    if (chave.startsWith('rascunho-')) {
-                        try {
-                            const item = JSON.parse(localStorage.getItem(chave));
-                            const isAutoSave = chave === 'rascunho-autosave';
-                            const titulo = isAutoSave ? 
-                                `<i class="fas fa-history"></i> Rascunho Automático` : 
-                                `<i class="fas fa-save"></i> Rascunho Manual`;
-                            
-                            const itemHTML = `
-                                <div class="historico-item" style="${isAutoSave ? 'background-color: #f0f8ff; padding: 10px; border-radius: 4px;' : ''}">
-                                    <div>
-                                        <strong>${titulo}</strong> 
-                                        <span style="color: var(--pm-cinza); margin-left: 10px;">
-                                            (${item.dadosForm['numero-portaria'] || 'Sem Portaria'}) - Salvo em ${item.data}
-                                        </span>
-                                    </div>
-                                    <div class="acoes">
-                                        <button onclick="sistema.carregarRascunho('${chave}')"><i class="fas fa-upload"></i> Carregar</button>
-                                        ${!isAutoSave ? `<button onclick="sistema.removerRascunho('${chave}')" style="color: var(--pm-vermelho);"><i class="fas fa-trash-alt"></i> Excluir</button>` : ''}
-                                    </div>
-                                </div>
-                            `;
-                            historicoLista.innerHTML += itemHTML;
-                            encontrado = true;
-                        } catch (e) {
-                            console.error("Erro ao processar item do localStorage:", e);
-                            localStorage.removeItem(chave); // Remove itens corrompidos
-                        }
-                    }
-                }
-
-                if (!encontrado) {
-                    historicoLista.innerHTML = '<p style="text-align: center; color: var(--pm-cinza); padding: 20px; font-style: italic;">Nenhum rascunho encontrado.</p>';
-                }
-            }
-
-            mostrarToast(mensagem, tipo = 'sucesso') {
-                const toast = document.getElementById('toast');
-                const icone = toast.querySelector('i');
-                const texto = document.getElementById('toast-mensagem');
-                
-                texto.textContent = mensagem;
-                toast.className = 'toast';
-                
+                let iconeClass = '';
                 if (tipo === 'sucesso') {
-                    toast.classList.add('toast-sucesso');
-                    icone.className = 'fas fa-check-circle';
+                    iconeClass = 'fas fa-check-circle';
                 } else if (tipo === 'erro') {
-                    toast.classList.add('toast-erro'); // Adiciona classe erro, se definida no CSS
-                    icone.className = 'fas fa-exclamation-circle';
+                    iconeClass = 'fas fa-exclamation-circle';
                 } else if (tipo === 'info') {
-                    toast.classList.add('toast-info'); // Adiciona classe info, se definida no CSS
-                    icone.className = 'fas fa-info-circle';
+                    iconeClass = 'fas fa-info-circle';
                 }
                 
-                toast.classList.add('mostrar');
+                toast.innerHTML = `<i class="${iconeClass}"></i> <span>${mensagem}</span>`;
                 
+                container.appendChild(toast);
+                
+                // Mostrar e Remover
+                setTimeout(() => {
+                    toast.classList.add('mostrar');
+                }, 10); // Pequeno delay para garantir a animação
+
                 setTimeout(() => {
                     toast.classList.remove('mostrar');
+                    // Remove o elemento após a transição
+                    setTimeout(() => {
+                        container.removeChild(toast);
+                    }, 300); 
                 }, 3000);
             }
         }
 
-        // Inicializar sistema quando a página carregar
+        // Inicializar o sistema ao carregar a página
         let sistema;
         document.addEventListener('DOMContentLoaded', () => {
             sistema = new SistemaPMAM();
-            // Torna o objeto sistema e a função carregarModelo acessíveis globalmente
-            window.sistema = sistema;
-            window.carregarModelo = (modeloId) => sistema.carregarModelo(modeloId);
+            window.sistema = sistema; // Torna acessível no escopo global
         });
-
-        // Função global para evitar erro de referência antes do DOMContentLoaded
-        window.carregarModelo = window.carregarModelo || (() => {});
-        window.sistema = window.sistema || {};
     </script>
 </body>
 </html>
