@@ -95,24 +95,15 @@
       <h2 class="text-center mb-7 text-2xl border-b border-white/10 pb-4 font-semibold">
         <i class="fas fa-balance-scale-right mr-2"></i> PMAM SJD
       </h2>
-      <a href="#" class="sidebar-item block py-4 px-5 mx-2 my-1 rounded-pmam-lg text-pmam-card text-sm transition-all" onclick="sistema.carregarModelo('sindicancia')">
-        <i class="fas fa-file-alt mr-2"></i> Termo de Abertura SIND
-      </a>
-      <a href="#" class="sidebar-item block py-4 px-5 mx-2 my-1 rounded-pmam-lg text-pmam-card text-sm transition-all" onclick="sistema.carregarModelo('termoDeclaracao')">
-        <i class="fas fa-microphone-alt mr-2"></i> Termo de Declaração/Oitiva
-      </a>
-      <a href="#" class="sidebar-item block py-4 px-5 mx-2 my-1 rounded-pmam-lg text-pmam-card text-sm transition-all" onclick="sistema.carregarModelo('designacaoEscrivao')">
-        <i class="fas fa-user-tie mr-2"></i> Designação de Escrivão
-      </a>
-      <a href="#" class="sidebar-item block py-4 px-5 mx-2 my-1 rounded-pmam-lg text-pmam-card text-sm transition-all" onclick="sistema.carregarModelo('prorrogacao')">
-        <i class="fas fa-clock mr-2"></i> Prorrogação de Prazo
-      </a>
-      <a href="#" class="sidebar-item block py-4 px-5 mx-2 my-1 rounded-pmam-lg text-pmam-card text-sm transition-all" onclick="sistema.carregarModelo('encaminhamento')">
-        <i class="fas fa-share-square mr-2"></i> Ofício de Encaminhamento
-      </a>
-      <a href="#" class="sidebar-item block py-4 px-5 mx-2 my-1 rounded-pmam-lg text-pmam-card text-sm transition-all" onclick="sistema.carregarModelo('defensorDativo')">
-        <i class="fas fa-graduation-cap mr-2"></i> Nomeação Defensor Dativo
-      </a>
+      
+      <div id="menu-procedimentos" class="px-5 text-center text-sm">
+          <p class="text-white/70 mb-2">Selecione um Procedimento:</p>
+      </div>
+
+      <div id="menu-documentos" class="mt-5 border-t border-white/10 pt-4">
+        <p class="text-white/70 text-center text-sm px-5">Escolha o tipo de Procedimento no campo ao lado.</p>
+      </div>
+      
     </div>
 
     <div class="main-content flex-grow p-5 md:p-10">
@@ -120,12 +111,24 @@
         <h1 id="titulo-documento" class="text-pmam-blue mb-5 text-2xl md:text-3xl border-b-2 border-pmam-accent pb-3 font-semibold">
           <i class="fas fa-file-invoice mr-2"></i> Gerador de Documentos PMAM
         </h1>
-        <p class="mb-5 text-gray-600">Preencha os campos abaixo para gerar o documento oficial.</p>
+        <p class="mb-5 text-gray-600" id="descricao-documento">Primeiro, selecione o tipo de Procedimento (Sindicância, IPM, etc.) para carregar os documentos adequados.</p>
+        
+        <div id="selecao-procedimento" class="mb-6 pb-4 border-b border-gray-200">
+            <label for="procedimento-select" class="block mb-2 font-semibold text-pmam-blue text-lg"><i class="fas fa-folder-open mr-2"></i> Tipo de Procedimento:</label>
+            <select id="procedimento-select" class="w-full p-3 border border-gray-300 rounded-lg focus:border-pmam-accent focus:outline-none focus:ring-2 focus:ring-pmam-accent/30" onchange="sistema.carregarProcedimento(this.value)">
+                <option value="" disabled selected>-- Selecione o Tipo de Procedimento --</option>
+                <option value="SD">Sindicância Disciplinar (SD)</option>
+                <option value="SI">Sindicância Investigativa (SI)</option>
+                <option value="IPM">Inquérito Policial Militar (IPM)</option>
+                <option value="PAD">Processo Administrativo Disciplinar (PAD)</option>
+                <option value="PARE">Procedimento Administrativo de Revisão Ex-Officio (PARE)</option>
+            </select>
+        </div>
         
         <form id="form-documento">
           
           <div id="campos-dinamicos" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="text-center py-10 text-pmam-secondary">Carregando formulário...</div>
+            <div class="md:col-span-2 text-center py-10 text-pmam-secondary">Selecione um Procedimento acima para iniciar.</div>
           </div>
 
           <div class="mt-8 pt-4 border-t border-gray-200 grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -181,13 +184,18 @@
       // Classe principal do sistema
       class SistemaPMAM {
         constructor() {
-          this.modelos = this.definirModelos();
+          this.procedimentos = this.definirModelos();
           this.camposContainer = document.getElementById('campos-dinamicos');
           this.previewArea = document.getElementById('preview-documento');
           this.form = document.getElementById('form-documento');
           this.tituloDocumento = document.getElementById('titulo-documento');
+          this.descricaoDocumento = document.getElementById('descricao-documento');
+          this.menuDocumentos = document.getElementById('menu-documentos');
           this.sidebar = document.getElementById('sidebar');
           this.toggleButton = document.getElementById('sidebar-toggle');
+          
+          this.procedimentoAtualId = null;
+          this.modeloAtualId = null;
           
           // Configuração de Datas (preenche automaticamente)
           const hoje = new Date();
@@ -199,62 +207,133 @@
           this.form.addEventListener('input', () => this.atualizarPreview());
           this.toggleButton.addEventListener('click', () => this.toggleSidebar());
 
-          // Carrega o modelo inicial
-          this.modeloAtualId = 'sindicancia';
-          this.carregarModelo(this.modeloAtualId);
+          // O sistema inicia aguardando a seleção do procedimento
         }
 
-        // === 1. DEFINIÇÃO DOS MODELOS DE DOCUMENTOS (ROBUSTEZ JURÍDICA) ===
+        // === 1. DEFINIÇÃO DOS MODELOS POR TIPO DE PROCEDIMENTO ===
         definirModelos() {
           return {
-            sindicancia: {
-              titulo: "Sindicância (Termo de Abertura e Autuação)",
-              campos: [
-                { id: 'numero_portaria', label: 'Nº da Portaria (Instauração)', tipo: 'text', placeholder: 'Ex: 05.02/2024/SIND/SJD/CPA OESTE/PMAM', valorPadrao: 'XX.XX/AAAA/SIND/SJD/PMAM' },
-                { id: 'data_portaria', label: 'Data da Portaria', tipo: 'text', placeholder: 'Ex: 23 de Julho de 2024', valorPadrao: `${document.getElementById('data_dia').value} de ${document.getElementById('data_mes').value} de ${document.getElementById('data_ano').value}` },
-                { id: 'sindicado_nome', label: 'Nome, Posto/Grad e CI do Sindicado', tipo: 'text', placeholder: 'Ex: CAP QOPM Stanley O. De Araújo (CI 20943)', valorPadrao: 'NOME DO MILITAR (POSTO/GRAD CI XXXX)' },
-                { id: 'sindicante_nome', label: 'Nome, Posto/Grad e CI do Sindicante', tipo: 'text', placeholder: 'Ex: MAJ QOPM Olavo P. Da Silva Filho (CI 15000)', valorPadrao: 'NOME DO MILITAR (POSTO/GRAD CI XXXX)' },
-                { id: 'objeto_apuracao', label: 'Objeto da Apuração (Sucinto)', tipo: 'textarea', placeholder: 'Ex: Apurar a suposta irregularidade administrativa e disciplinar de abandono de posto...', valorPadrao: 'APURAR A SUPOSTA IRREGULARIDADE PRATICADA PELO MILITAR ACIMA QUALIFICADO...' },
-                { id: 'local_quartel', label: 'Local do Quartel/Unidade', tipo: 'text', placeholder: 'Ex: Quartel do CPA OESTE', valorPadrao: 'SJD DO COMANDO DE POLICIAMENTO' },
-              ],
-              template: (dados) => `
-                SINDICÂNCIA ADMINISTRATIVA DISCIPLINAR
-                
-                SINDICANTE: ${dados.sindicante_nome || '____________________'}
-                SINDICADO: ${dados.sindicado_nome || '____________________'}
-                OFENDIDO: POLÍCIA MILITAR DO ESTADO DO AMAZONAS
-                
-                
-                A U T U A Ç Ã O
-                
-                Aos ${dados.data_dia || '[Dia]'} dias do mês de ${dados.data_mes || '[Mês]'} do ano de ${dados.data_ano || '[Ano]'}, nesta cidade de Manaus, Estado do Amazonas, na sala da ${dados.local_quartel || '____________________'}, autuo a Portaria nº ${dados.numero_portaria || '__________'}, datada de ${dados.data_portaria || '__________'}, e demais documentos que a este junto, do que para constar, lavro o presente termo. Eu, ${dados.sindicante_nome || '____________________'}, Sindicante que o digitei e assino.
-                
-                __________________________________
-                ${dados.sindicante_nome || '____________________'}
-                Sindicante
-                
-                
-                TERMO DE ABERTURA
-                
-                Aos ${dados.data_dia || '[Dia]'} dias do mês de ${dados.data_mes || '[Mês]'} do ano de ${dados.data_ano || '[Ano]'}, nesta cidade de Manaus, Estado do Amazonas, na ${dados.local_quartel || '____________________'}, dei início à presente Sindicância Administrativa Disciplinar, tendo como objeto: ${dados.objeto_apuracao || '____________________'}. Do que para constar lavro o presente Termo que o escrevi e assino.
-                
-                __________________________________
-                ${dados.sindicante_nome || '____________________'}
-                Sindicante
-              `
+            // --- SINDICÂNCIA DISCIPLINAR (SD) ---
+            SD: {
+              nome: "SINDICÂNCIA DISCIPLINAR",
+              documentos: {
+                termoAbertura: {
+                    titulo: "Termo de Abertura e Autuação",
+                    campos: [
+                        { id: 'numero_portaria', label: 'Nº da Portaria (Instauração)', tipo: 'text', placeholder: 'Ex: 05.02/2024/SIND/SJD/CPA OESTE/PMAM', valorPadrao: 'XX.XX/AAAA/SD/SJD/PMAM' },
+                        { id: 'data_portaria', label: 'Data da Portaria', tipo: 'text', placeholder: 'Ex: 23 de Julho de 2024', valorPadrao: `${document.getElementById('data_dia').value} de ${document.getElementById('data_mes').value} de ${document.getElementById('data_ano').value}` },
+                        { id: 'sindicado_nome', label: 'Nome, Posto/Grad e CI do Sindicado', tipo: 'text', placeholder: 'Ex: CAP QOPM Stanley O. De Araújo (CI 20943)', valorPadrao: 'NOME DO MILITAR (POSTO/GRAD CI XXXX)' },
+                        { id: 'sindicante_nome', label: 'Nome, Posto/Grad e CI do Sindicante', tipo: 'text', placeholder: 'Ex: MAJ QOPM Olavo P. Da Silva Filho (CI 15000)', valorPadrao: 'NOME DO MILITAR (POSTO/GRAD CI XXXX)' },
+                        { id: 'objeto_apuracao', label: 'Objeto da Apuração (Sucinto)', tipo: 'textarea', placeholder: 'Ex: Apurar a suposta irregularidade administrativa e disciplinar de abandono de posto...', valorPadrao: 'APURAR A SUPOSTA TRANSGRESSÃO DISCIPLINAR PRATICADA PELO MILITAR ACIMA QUALIFICADO...' },
+                        { id: 'local_quartel', label: 'Local do Quartel/Unidade', tipo: 'text', placeholder: 'Ex: Quartel do CPA OESTE', valorPadrao: 'SJD DO COMANDO DE POLICIAMENTO' },
+                    ],
+                    template: (dados, proc) => `
+                        ${proc.nome.toUpperCase()}
+                        
+                        SINDICANTE: ${dados.sindicante_nome || '____________________'}
+                        SINDICADO: ${dados.sindicado_nome || '____________________'}
+                        OFENDIDO: POLÍCIA MILITAR DO ESTADO DO AMAZONAS
+                        
+                        
+                        A U T U A Ç Ã O
+                        
+                        Aos ${dados.data_dia || '[Dia]'} dias do mês de ${dados.data_mes || '[Mês]'} do ano de ${dados.data_ano || '[Ano]'}, nesta cidade de Manaus, Estado do Amazonas, na sala da ${dados.local_quartel || '____________________'}, autuo a Portaria nº ${dados.numero_portaria || '__________'}, datada de ${dados.data_portaria || '__________'}, e demais documentos que a este junto, do que para constar, lavro o presente termo. Eu, ${dados.sindicante_nome || '____________________'}, Sindicante que o digitei e assino.
+                        
+                        __________________________________
+                        ${dados.sindicante_nome || '____________________'}
+                        Sindicante
+                        
+                        
+                        TERMO DE ABERTURA
+                        
+                        Aos ${dados.data_dia || '[Dia]'} dias do mês de ${dados.data_mes || '[Mês]'} do ano de ${dados.data_ano || '[Ano]'}, nesta cidade de Manaus, Estado do Amazonas, na ${dados.local_quartel || '____________________'}, dei início à presente ${proc.nome.toUpperCase()}, tendo como objeto: ${dados.objeto_apuracao || '____________________'}. Do que para constar lavro o presente Termo que o escrevi e assino.
+                        
+                        __________________________________
+                        ${dados.sindicante_nome || '____________________'}
+                        Sindicante
+                    `
+                },
+                termoOitiva: this.modeloTermoOitiva(), 
+                designacaoEscrivao: this.modeloDesignacaoEscrivao('SD'),
+                prorrogacao: this.modeloProrrogacao('SD'),
+                encaminhamento: this.modeloEncaminhamento()
+              }
             },
             
-            // === NOVO CAMPO: TERMO DE DECLARAÇÃO/OITIVA ===
-            termoDeclaracao: {
-                titulo: "Termo de Declaração/Oitiva (Testemunha/Sindicado)",
+            // --- SINDICÂNCIA INVESTIGATIVA (SI) ---
+            SI: {
+                nome: "SINDICÂNCIA INVESTIGATIVA",
+                documentos: {
+                    termoAbertura: {
+                         titulo: "Termo de Abertura e Autuação",
+                         // Campos iguais ao SD, mas com valores padrão SI
+                         campos: [
+                            { id: 'numero_portaria', label: 'Nº da Portaria (Instauração)', tipo: 'text', placeholder: 'Ex: 05.02/2024/SIND/SJD/CPA OESTE/PMAM', valorPadrao: 'XX.XX/AAAA/SI/SJD/PMAM' },
+                            { id: 'data_portaria', label: 'Data da Portaria', tipo: 'text', placeholder: 'Ex: 23 de Julho de 2024', valorPadrao: `${document.getElementById('data_dia').value} de ${document.getElementById('data_mes').value} de ${document.getElementById('data_ano').value}` },
+                            { id: 'sindicado_nome', label: 'Nome, Posto/Grad e CI do Sindicado', tipo: 'text', placeholder: 'Ex: CAP QOPM Stanley O. De Araújo (CI 20943)', valorPadrao: 'NOME DO MILITAR (POSTO/GRAD CI XXXX) - SE HOUVER' },
+                            { id: 'sindicante_nome', label: 'Nome, Posto/Grad e CI do Sindicante', tipo: 'text', placeholder: 'Ex: MAJ QOPM Olavo P. Da Silva Filho (CI 15000)', valorPadrao: 'NOME DO MILITAR (POSTO/GRAD CI XXXX)' },
+                            { id: 'objeto_apuracao', label: 'Objeto da Apuração (Sucinto)', tipo: 'textarea', placeholder: 'Ex: Apurar a suposta prática de crime militar de Lesão Corporal...', valorPadrao: 'APURAR A SUPOSTA INFRAÇÃO PENAL/CRIMINAL PRATICADA POR MILITAR...' },
+                            { id: 'local_quartel', label: 'Local do Quartel/Unidade', tipo: 'text', placeholder: 'Ex: Quartel do CPA OESTE', valorPadrao: 'SJD DO COMANDO DE POLICIAMENTO' },
+                        ],
+                        template: (dados, proc) => this.procedimentos.SD.documentos.termoAbertura.template(dados, proc)
+                    },
+                    termoOitiva: this.modeloTermoOitiva(), 
+                    prorrogacao: this.modeloProrrogacao('SI'),
+                    encaminhamento: this.modeloEncaminhamento()
+                }
+            },
+
+            // --- INQUÉRITO POLICIAL MILITAR (IPM) ---
+            IPM: {
+                nome: "INQUÉRITO POLICIAL MILITAR",
+                documentos: {
+                    termoOitiva: this.modeloTermoOitiva(), 
+                    designacaoEscrivao: this.modeloDesignacaoEscrivao('IPM'),
+                    prorrogacao: this.modeloProrrogacao('IPM'),
+                    encaminhamento: this.modeloEncaminhamento()
+                }
+            },
+            
+            // --- PROCESSO ADM. DISCIPLINAR (PAD) ---
+            PAD: {
+                nome: "PROCESSO ADMINISTRATIVO DISCIPLINAR",
+                documentos: {
+                    termoOitiva: this.modeloTermoOitiva(), 
+                    prorrogacao: this.modeloProrrogacao('PAD'),
+                    encaminhamento: this.modeloEncaminhamento()
+                }
+            },
+            
+            // --- PROCEDIMENTO DE REVISÃO EX-OFFICIO (PARE) ---
+            PARE: {
+                nome: "PROCEDIMENTO DE REVISÃO EX-OFFICIO",
+                documentos: {
+                    termoOitiva: this.modeloTermoOitiva(), 
+                    encaminhamento: this.modeloEncaminhamento()
+                }
+            }
+          };
+        }
+        
+        // --- MODELO REUTILIZÁVEL: TERMO DE OITIVA (Refatorado) ---
+        modeloTermoOitiva() {
+            return {
+                titulo: "Termo de Oitiva",
                 campos: [
-                    // Dados do Encarregado (Sindicante/Presidente)
+                    { id: 'tipo_oitiva', label: 'Tipo da Oitiva (Declarante/Acusado)', tipo: 'select', 
+                      opcoes: [
+                          'DECLARAÇÃO DO OFENDIDO', 
+                          'DECLARAÇÃO DE TESTEMUNHA', 
+                          'INTERROGATÓRIO DO ACUSADO/SINDICADO'
+                      ], 
+                      valorPadrao: 'DECLARAÇÃO DE TESTEMUNHA' 
+                    },
+                    // Dados do Encarregado
                     { id: 'encarregado_nome', label: 'Nome e Posto/Grad do Encarregado', tipo: 'text', valorPadrao: 'MAJ QOPM FULANO DA SILVA (CI XXXX)' },
-                    { id: 'procedimento_tipo', label: 'Tipo do Procedimento', tipo: 'select', opcoes: ['Sindicância', 'IPM', 'PAD'], valorPadrao: 'Sindicância' },
-                    { id: 'procedimento_numero', label: 'Nº do Procedimento (Portaria/Instrução)', tipo: 'text', valorPadrao: 'XX.XX/AAAA/SIND/PMAM' },
+                    { id: 'procedimento_numero', label: 'Nº do Procedimento (Portaria/Instrução)', tipo: 'text', valorPadrao: 'XX.XX/AAAA/PROCEDIMENTO/PMAM' },
 
                     // Dados do Declarante
-                    { id: 'declarante_nome', label: 'Nome Completo do Declarante', tipo: 'text', placeholder: 'Nome e Qualificação (Posto/Grad CI se Militar, ou Profissão se Civil)', valorPadrao: 'NOME COMPLETO E QUALIFICAÇÃO' },
+                    { id: 'declarante_nome', label: 'Nome Completo', tipo: 'text', placeholder: 'Nome e Qualificação', valorPadrao: 'NOME COMPLETO E QUALIFICAÇÃO' },
                     { id: 'declarante_cpf', label: 'CPF', tipo: 'text', placeholder: 'Apenas números' },
                     { id: 'declarante_identidade', label: 'Identidade (RG)', tipo: 'text', placeholder: 'RG e Órgão Emissor' },
                     { id: 'declarante_filiacao', label: 'Filiação (Mãe e Pai)', tipo: 'text', placeholder: 'Nome da Mãe e do Pai' },
@@ -266,62 +345,72 @@
                     // Descrição do Fato/Depoimento
                     { id: 'depoimento_livre', label: 'DESCREVA: Narração dos Fatos/Perguntas e Respostas', tipo: 'textarea', placeholder: 'O Declarante disse que... (Perguntas e Respostas em tópicos)', valorPadrao: 'O DECLARANTE INICIA SUA OITIVA (DEPOIMENTO LIVRE):\n\nPERGUNTA: [P1]\nRESPOSTA: [R1]\n\nPERGUNTA: [P2]\nRESPOSTA: [R2]' },
                 ],
-                // Template focado em robustez e coleta de dados completos
-                template: (dados) => `
-                    TERMO DE DECLARAÇÃO / OITIVA
-                    
-                    AUTOS: ${dados.procedimento_tipo || '__________'} nº ${dados.procedimento_numero || '__________'}
-                    ENCARREGADO: ${dados.encarregado_nome || '____________________'}
-                    
-                    
-                    DECLARANTE/OITIVADO: ${dados.declarante_nome || '____________________'}
-                    CPF: ${dados.declarante_cpf || '__________'}
-                    IDENTIDADE: ${dados.declarante_identidade || '__________'}
-                    FILIAÇÃO: ${dados.declarante_filiacao || '__________'}
-                    ENDEREÇO: ${dados.declarante_endereco || '__________'}
-                    
-                    
-                    Aos ${dados.data_dia || '[Dia]'} dias do mês de ${dados.data_mes || '[Mês]'} do ano de ${dados.data_ano || '[Ano]'}, nesta Cidade de Manaus, Estado do Amazonas, na ${dados.local_oitiva || '____________________'}, perante o Encarregado, presente o Escrivão, foi inquirido o(a) declarante acima qualificado(a), que ao ser perguntado(a) sobre o objeto da apuração, declarou:
-                    
-                    
-                    ${dados.depoimento_livre || '____________________'}
-                    
-                    
-                    Lida e achada conforme, dou por encerrado o presente Termo, que segue assinado pelo Encarregado, pelo Escrivão e pelo Declarante/Oitivado.
-                    
-                    
-                    Manaus-AM, ${dados.data_dia || '[Dia]'} de ${dados.data_mes || '[Mês]'} de ${dados.data_ano || '[Ano]'}.
-                    
-                    __________________________________
-                    ${dados.declarante_nome || '____________________'}
-                    Declarante/Oitivado
-                    
-                    __________________________________
-                    [NOME DO ESCRIVÃO (Posto/Grad CI)]
-                    Escrivão
-                    
-                    __________________________________
-                    ${dados.encarregado_nome || '____________________'}
-                    Encarregado / Sindicante
-                `
-            },
-            designacaoEscrivao: {
+                // Template ajustado para o tipo de oitiva
+                template: (dados, proc) => {
+                    const tipoOitiva = dados.tipo_oitiva || 'DECLARAÇÃO DE TESTEMUNHA';
+                    const oitivaCapitalizada = tipoOitiva.toUpperCase().replace(/DO |DE /g, 'DE ');
+                    const termoAssinatura = tipoOitiva.includes('ACUSADO') ? 'Interrogado/Acusado' : 
+                                            tipoOitiva.includes('OFENDIDO') ? 'Declarante/Ofendido' : 'Declarante/Testemunha';
+
+                    return `
+                        TERMO DE OITIVA - ${oitivaCapitalizada}
+                        
+                        AUTOS: ${proc.nome.toUpperCase()} (${proc.id}) nº ${dados.procedimento_numero || '__________'}
+                        ENCARREGADO: ${dados.encarregado_nome || '____________________'}
+                        
+                        
+                        ${termoAssinatura.toUpperCase()}: ${dados.declarante_nome || '____________________'}
+                        CPF: ${dados.declarante_cpf || '__________'}
+                        IDENTIDADE: ${dados.declarante_identidade || '__________'}
+                        FILIAÇÃO: ${dados.declarante_filiacao || '__________'}
+                        ENDEREÇO: ${dados.declarante_endereco || '__________'}
+                        
+                        
+                        Aos ${dados.data_dia || '[Dia]'} dias do mês de ${dados.data_mes || '[Mês]'} do ano de ${dados.data_ano || '[Ano]'}, nesta Cidade de Manaus, Estado do Amazonas, na ${dados.local_oitiva || '____________________'}, perante o Encarregado, presente o Escrivão, foi inquirido o(a) ${termoAssinatura.toLowerCase()} acima qualificado(a), que ao ser perguntado(a) sobre o objeto da apuração, declarou:
+                        
+                        
+                        ${dados.depoimento_livre || '____________________'}
+                        
+                        
+                        Lida e achada conforme, dou por encerrado o presente Termo, que segue assinado pelo Encarregado, pelo Escrivão e pelo ${termoAssinatura}.
+                        
+                        
+                        Manaus-AM, ${dados.data_dia || '[Dia]'} de ${dados.data_mes || '[Mês]'} de ${dados.data_ano || '[Ano]'}.
+                        
+                        __________________________________
+                        ${dados.declarante_nome || '____________________'}
+                        ${termoAssinatura}
+                        
+                        __________________________________
+                        [NOME DO ESCRIVÃO (Posto/Grad CI)]
+                        Escrivão
+                        
+                        __________________________________
+                        ${dados.encarregado_nome || '____________________'}
+                        Encarregado / Sindicante
+                    `;
+                }
+            };
+        }
+
+        // --- MODELO REUTILIZÁVEL: DESIGNAÇÃO DE ESCRIVÃO ---
+        modeloDesignacaoEscrivao(procId) {
+            return {
                 titulo: "Termo de Designação de Escrivão",
                 campos: [
                     { id: 'sindicante_nome', label: 'Nome e Posto/Grad do Sindicante/Encarregado', tipo: 'text', valorPadrao: 'MAJ QOPM Olavo P. Da Silva Filho (CI 15000)' },
                     { id: 'escrivao_nome', label: 'Nome, Posto/Grad e CI do Militar Designado (Escrivão)', tipo: 'text', valorPadrao: 'SD PM FULANO DE TAL (CI YYYY)' },
-                    { id: 'procedimento_tipo', label: 'Tipo do Procedimento', tipo: 'select', opcoes: ['Sindicância', 'IPM', 'PAD'], valorPadrao: 'Sindicância' },
-                    { id: 'procedimento_numero', label: 'Nº do Procedimento (Portaria/Instrução)', tipo: 'text', valorPadrao: 'XX.XX/AAAA/SIND/PMAM' },
+                    { id: 'procedimento_numero', label: 'Nº do Procedimento (Portaria/Instrução)', tipo: 'text', valorPadrao: 'XX.XX/AAAA/PROCEDIMENTO/PMAM' },
                 ],
-                template: (dados) => `
+                template: (dados, proc) => `
                     TERMO DE DESIGNAÇÃO DE ESCRIVÃO
                     
-                    AUTOS: ${dados.procedimento_tipo || 'Sindicância'} nº ${dados.procedimento_numero || '__________'}
+                    AUTOS: ${proc.nome.toUpperCase()} (${proc.id}) nº ${dados.procedimento_numero || '__________'}
                     ENCARREGADO: ${dados.sindicante_nome || '____________________'}
                     
                     Aos ${dados.data_dia || '[Dia]'} dias do mês de ${dados.data_mes || '[Mês]'} do ano de ${dados.data_ano || '[Ano]'}, em face da necessidade de dar andamento regular aos trabalhos, eu, ${dados.sindicante_nome || '____________________'}, Encarregado, RESOLVO:
                     
-                    DESIGNAR o ${dados.escrivao_nome || '____________________'}, para exercer a função de **Escrivão** no presente ${dados.procedimento_tipo || 'Sindicância'} acima referenciado, devendo cumprir todas as determinações legais inerentes ao cargo, conforme a legislação processual militar.
+                    DESIGNAR o ${dados.escrivao_nome || '____________________'}, para exercer a função de **Escrivão** no presente ${proc.nome.toUpperCase()} acima referenciado, devendo cumprir todas as determinações legais inerentes ao cargo, conforme a legislação processual militar.
                     
                     Para constar, lavro o presente termo que vai assinado.
                     
@@ -331,31 +420,38 @@
                     ${dados.sindicante_nome || '____________________'}
                     Encarregado / Sindicante
                 `
-            },
-            prorrogacao: {
+            };
+        }
+        
+        // --- MODELO REUTILIZÁVEL: PRORROGAÇÃO DE PRAZO ---
+        modeloProrrogacao(procId) {
+            let artigoCPPM = (procId === 'IPM') ? "Art. 20, §1º do CPPM (Decreto-Lei nº 1.002/69)" : "Art. 135 da Portaria Normativa nº 001/2019/DJD/PMAM (ou similar)";
+            let prazoPadrao = (procId === 'IPM') ? 40 : 30;
+            let prazoSolicitadoPadrao = (procId === 'IPM') ? 20 : 20;
+
+            return {
                 titulo: "Ofício de Pedido de Prorrogação de Prazo",
                 campos: [
                     { id: 'destinatario_posto', label: 'Posto/Grad do Destinatário', tipo: 'text', valorPadrao: 'EXMO. SR. CEL. QOPM' },
                     { id: 'destinatario_cargo', label: 'Cargo do Destinatário (Autoridade Superior)', tipo: 'text', valorPadrao: 'COMANDANTE DO CPA OESTE' },
                     { id: 'sindicante_nome', label: 'Nome, Posto/Grad e CI do Encarregado/Sindicante', tipo: 'text', valorPadrao: 'MAJ QOPM FULANO DA SILVA (CI XXXX)' },
-                    { id: 'procedimento_tipo', label: 'Tipo do Procedimento', tipo: 'select', opcoes: ['Sindicância', 'IPM', 'PAD'], valorPadrao: 'Sindicância' },
-                    { id: 'procedimento_numero', label: 'Nº do Procedimento (Portaria/Instrução)', tipo: 'text', valorPadrao: 'XX.XX/AAAA/SIND/PMAM' },
-                    { id: 'prazo_atual', label: 'Prazo Anterior (em dias)', tipo: 'number', valorPadrao: 30 },
-                    { id: 'prazo_solicitado', label: 'Novo Prazo Solicitado (em dias)', tipo: 'number', valorPadrao: 20 },
+                    { id: 'procedimento_numero', label: 'Nº do Procedimento (Portaria/Instrução)', tipo: 'text', valorPadrao: 'XX.XX/AAAA/PROCEDIMENTO/PMAM' },
+                    { id: 'prazo_atual', label: 'Prazo Anterior (em dias)', tipo: 'number', valorPadrao: prazoPadrao },
+                    { id: 'prazo_solicitado', label: 'Novo Prazo Solicitado (em dias)', tipo: 'number', valorPadrao: prazoSolicitadoPadrao },
                     { id: 'justificativa', label: 'Justificativa Detalhada da Prorrogação', tipo: 'textarea', placeholder: 'Ex: Necessidade de oitiva de novas testemunhas e realização de perícia técnica que ainda não foi concluída...', valorPadrao: 'Em razão da complexidade da apuração, e da necessidade de realização de diligências imprescindíveis (oitiva de XXX e análise de documentos YYY), cujo prazo se esgota no dia [Data], e que demandam tempo para conclusão.' },
                 ],
-                template: (dados) => `
-                    OFÍCIO Nº XXX/${dados.data_ano || 'AAAA'}/${dados.procedimento_tipo || 'SIND'} - Quartel em Manaus/AM, ${dados.data_dia || '[Dia]'} de ${dados.data_mes || '[Mês]'} de ${dados.data_ano || '[Ano]'}.
+                template: (dados, proc) => `
+                    OFÍCIO Nº XXX/${dados.data_ano || 'AAAA'}/${proc.id} - Quartel em Manaus/AM, ${dados.data_dia || '[Dia]'} de ${dados.data_mes || '[Mês]'} de ${dados.data_ano || '[Ano]'}.
                     
                     Ao ${dados.destinatario_posto || '____________________'} ${dados.destinatario_cargo || '____________________'}
                     
-                    Assunto: Solicita Prorrogação de Prazo para Conclusão de ${dados.procedimento_tipo || 'Sindicância'}
+                    Assunto: Solicita Prorrogação de Prazo para Conclusão de ${proc.nome.toUpperCase()} (${proc.id})
                     
                     Senhor Comandante/Diretor,
                     
                     Em cumprimento à Portaria de Instauração nº ${dados.procedimento_numero || '__________'}, o Sindicante/Encarregado ${dados.sindicante_nome || '____________________'} vem, respeitosamente, solicitar a Prorrogação do Prazo Legal para conclusão do procedimento em epígrafe.
                     
-                    O prazo anterior de ${dados.prazo_atual || 'XX'} dias se esgota em [Data de Vencimento], sendo solicitado um prazo adicional de **${dados.prazo_solicitado || 'XX'} ( ${dados.prazo_solicitado || 'XX'} )** dias, com base no Art. 135 da Portaria Normativa nº 001/2019/DJD/PMAM (para Sindicância) ou Art. 20, §1º do CPPM (para IPM).
+                    O prazo anterior de ${dados.prazo_atual || 'XX'} dias se esgota em [Data de Vencimento], sendo solicitado um prazo adicional de **${dados.prazo_solicitado || 'XX'} ( ${dados.prazo_solicitado || 'XX'} )** dias, com base no **${artigoCPPM}**.
                     
                     A prorrogação é necessária e imprescindível, conforme justificativa abaixo:
                     
@@ -371,69 +467,42 @@
                     ${dados.sindicante_nome || '____________________'}
                     Encarregado / Sindicante
                 `
-            },
-            defensorDativo: {
-                titulo: "Nomeação de Defensor Dativo",
+            };
+        }
+
+        // --- MODELO REUTILIZÁVEL: OFÍCIO DE ENCAMINHAMENTO ---
+        modeloEncaminhamento() {
+            return { 
+                titulo: "Ofício de Encaminhamento de Autos", 
                 campos: [
-                    { id: 'autoridade_nome', label: 'Nome e Posto/Grad da Autoridade Expedidora', tipo: 'text', valorPadrao: 'CEL QOPM COMANDANTE GERAL' },
-                    { id: 'defensor_nome', label: 'Nome, Posto/Grad e CI do Militar Designado (Defensor Dativo)', tipo: 'text', placeholder: 'Preferencialmente Bacharel em Direito', valorPadrao: 'CAP QOPM FULANO JURISTA (CI XXXX)' },
-                    { id: 'procedimento_tipo', label: 'Tipo do Procedimento', tipo: 'select', opcoes: ['FATD', 'Sindicância', 'PAD', 'IPM'], valorPadrao: 'FATD' },
-                    { id: 'sindicado_nome', label: 'Nome, Posto/Grad e CI do Militar a ser defendido', tipo: 'text', valorPadrao: 'SD PM CICLANO DA SILVA (CI YYYY)' },
-                    { id: 'data_nao_apresentacao', label: 'Data da Certidão de Não Apresentação de Defesa', tipo: 'text', placeholder: 'Ex: 01 de Outubro de 2024', valorPadrao: 'DD de MÊS de AAAA' },
-                ],
-                template: (dados) => `
-                    NOTA PARA BOLETIM GERAL
+                    { id: 'destinatario_posto', label: 'Posto/Grad do Destinatário', tipo: 'text', valorPadrao: 'EXMO. SR. CEL. QOPM' },
+                    { id: 'destinatario_cargo', label: 'Cargo do Destinatário', tipo: 'text', valorPadrao: 'COMANDANTE GERAL DA PMAM' },
+                    { id: 'remetente_posto', label: 'Posto/Grad do Remetente', tipo: 'text', valorPadrao: 'MAJ QOPM' },
+                    { id: 'remetente_cargo', label: 'Cargo do Remetente', tipo: 'text', valorPadrao: 'SINDICANTE/ENCARREGADO' },
+                    { id: 'assunto', label: 'Assunto do Ofício', tipo: 'text', valorPadrao: 'ENCAMINHAMENTO DE AUTOS' },
+                    { id: 'referencia', label: 'Referência (Portaria ou N° do Procedimento)', tipo: 'text', valorPadrao: 'Portaria nº XX.XX/AAAA/PROCEDIMENTO/PMAM' },
+                    { id: 'conteudo', label: 'Conteúdo do Ofício', tipo: 'textarea', placeholder: 'Ex: Tenho a honra de encaminhar os autos do procedimento em epígrafe para a devida análise e solução...', valorPadrao: 'Tenho a honra de encaminhar a Vossa Excelência os autos do procedimento em epígrafe (com XX laudas), devidamente concluídos, para a devida análise e deliberação da Autoridade Competente.' },
+                ], 
+                template: (dados, proc) => `
+                    OFÍCIO Nº XXX/${dados.data_ano || 'AAAA'}/${proc.id} - Quartel em Manaus/AM, ${dados.data_dia || '[Dia]'} de ${dados.data_mes || '[Mês]'} de ${dados.data_ano || '[Ano]'}.
                     
-                    ASSUNTO: NOMEAÇÃO DE DEFENSOR DATIVO - ${dados.procedimento_tipo || 'FATD'}
+                    Ao ${dados.destinatario_posto || '____________________'} ${dados.destinatario_cargo || '____________________'}
                     
-                    CONSIDERANDO a determinação sobre a garantia da Ampla Defesa e Contraditório, e o teor da Certidão de Não Apresentação de Defesa Prévia pelo militar ${dados.sindicado_nome || '____________________'}, datada de ${dados.data_nao_apresentacao || '__________'}.
+                    Assunto: ${dados.assunto || '____________________'} - Ref.: ${dados.referencia || '____________________'}
                     
-                    O ${dados.autoridade_nome || '____________________'}, Autoridade Expedidora, no uso de suas atribuições,
+                    Senhor Comandante/Diretor,
                     
-                    RESOLVE:
+                    ${dados.conteudo || '____________________'}
                     
-                    I - NOMEAR o ${dados.defensor_nome || '____________________'} para atuar como **DEFENSOR DATIVO** nos autos do ${dados.procedimento_tipo || 'FATD'} envolvendo o militar ${dados.sindicado_nome || '____________________'}, para apresentar a Defesa no prazo legal.
-                    
-                    II - DETERMINAR que o Defensor Dativo tome ciência de sua nomeação e apresente a defesa no prazo estipulado em lei (Lei 3278/2008, se for o caso).
-                    
-                    Manaus-AM, ${dados.data_dia || '[Dia]'} de ${dados.data_mes || '[Mês]'} de ${dados.data_ano || '[Ano]'}.
+                    Atenciosamente,
                     
                     __________________________________
-                    ${dados.autoridade_nome || '____________________'}
-                    Autoridade Expedidora
-                `
-            },
-            encaminhamento: { 
-              titulo: "Ofício de Encaminhamento", 
-              campos: [
-                { id: 'destinatario_posto', label: 'Posto/Grad do Destinatário', tipo: 'text', valorPadrao: 'EXMO. SR. CEL. QOPM' },
-                { id: 'destinatario_cargo', label: 'Cargo do Destinatário', tipo: 'text', valorPadrao: 'COMANDANTE GERAL DA PMAM' },
-                { id: 'remetente_posto', label: 'Posto/Grad do Remetente', tipo: 'text', valorPadrao: 'MAJ QOPM' },
-                { id: 'remetente_cargo', label: 'Cargo do Remetente', tipo: 'text', valorPadrao: 'SINDICANTE/ENCARREGADO' },
-                { id: 'assunto', label: 'Assunto do Ofício', tipo: 'text', valorPadrao: 'ENCAMINHAMENTO DE AUTOS DE SINDICÂNCIA' },
-                { id: 'referencia', label: 'Referência (Portaria ou N° do Procedimento)', tipo: 'text', valorPadrao: 'Portaria nº XX.XX/AAAA/SIND/PMAM' },
-                { id: 'conteudo', label: 'Conteúdo do Ofício', tipo: 'textarea', placeholder: 'Ex: Tenho a honra de encaminhar os autos do procedimento em epígrafe para a devida análise e solução...', valorPadrao: 'Tenho a honra de encaminhar a Vossa Excelência os autos do procedimento em epígrafe (com XX laudas), devidamente concluídos, para a devida análise e deliberação da Autoridade Competente.' },
-              ], 
-              template: (dados) => `
-                OFÍCIO Nº XXX/${dados.data_ano || 'AAAA'}/[SIGLA] - Quartel em Manaus/AM, ${dados.data_dia || '[Dia]'} de ${dados.data_mes || '[Mês]'} de ${dados.data_ano || '[Ano]'}.
-                
-                Ao ${dados.destinatario_posto || '____________________'} ${dados.destinatario_cargo || '____________________'}
-                
-                Assunto: ${dados.assunto || '____________________'} - Ref.: ${dados.referencia || '____________________'}
-                
-                Senhor Comandante/Diretor,
-                
-                ${dados.conteudo || '____________________'}
-                
-                Atenciosamente,
-                
-                __________________________________
-                ${dados.remetente_posto || '____________________'}
-                ${dados.remetente_cargo || '____________________'}
-              ` 
-            },
-          };
+                    ${dados.remetente_posto || '____________________'}
+                    ${dados.remetente_cargo || '____________________'}
+                ` 
+            };
         }
+
 
         // === 2. LÓGICA DE INTERFACE E FORMULÁRIO ===
         
@@ -471,9 +540,48 @@
             return div;
         }
 
+        carregarProcedimento(procedimentoId) {
+            this.procedimentoAtualId = procedimentoId;
+            this.modeloAtualId = null; 
+            const proc = this.procedimentos[procedimentoId];
+            
+            if (proc) {
+                // Atualiza o menu lateral (Sidebar)
+                let menuHTML = '';
+                for (const [modeloId, modelo] of Object.entries(proc.documentos)) {
+                    menuHTML += `
+                        <a href="#" class="sidebar-item block py-4 px-5 mx-2 my-1 rounded-pmam-lg text-pmam-card text-sm transition-all" onclick="sistema.carregarModelo('${modeloId}')">
+                            <i class="${this.getIcone(modeloId)} mr-2"></i> ${modelo.titulo}
+                        </a>
+                    `;
+                }
+                this.menuDocumentos.innerHTML = menuHTML;
+                
+                // Limpa e atualiza o conteúdo principal
+                this.tituloDocumento.innerHTML = `<i class="fas fa-file-invoice mr-2"></i> Documentos: ${proc.nome}`;
+                this.descricaoDocumento.textContent = `Selecione um documento abaixo para gerar o modelo para o procedimento de ${proc.nome}.`;
+                this.camposContainer.innerHTML = '<div class="md:col-span-2 text-center py-10 text-pmam-secondary">Selecione um tipo de documento no menu lateral.</div>';
+                this.previewArea.textContent = '... O documento será renderizado aqui ...';
 
+                // Se houver sidebar aberta no mobile, fecha.
+                if (window.innerWidth < 768 && this.sidebar.classList.contains('open')) {
+                    this.toggleSidebar();
+                }
+
+            } else {
+                 this.menuDocumentos.innerHTML = '<p class="text-white/70 text-center text-sm px-5">Escolha o tipo de Procedimento no campo ao lado.</p>';
+            }
+        }
+        
         carregarModelo(modeloId) {
-          const modelo = this.modelos[modeloId];
+          if (!this.procedimentoAtualId) {
+              this.mostrarToast('Selecione primeiro o Tipo de Procedimento.', 'erro');
+              return;
+          }
+            
+          const proc = this.procedimentos[this.procedimentoAtualId];
+          const modelo = proc.documentos[modeloId];
+
           if (!modelo) {
             this.mostrarToast('Modelo não encontrado.', 'erro');
             return;
@@ -484,11 +592,12 @@
           }
 
           this.modeloAtualId = modeloId;
-          this.tituloDocumento.innerHTML = `<i class="fas fa-file-invoice mr-2"></i> Gerador de ${modelo.titulo}`;
+          this.tituloDocumento.innerHTML = `<i class="${this.getIcone(modeloId)} mr-2"></i> Gerador de ${modelo.titulo} (${proc.id})`;
+          this.descricaoDocumento.textContent = `Preencha os campos abaixo para gerar o ${modelo.titulo} referente à ${proc.nome}.`;
           this.camposContainer.innerHTML = '';
           
           // Tratamento especial para o Termo de Declaração para que a Oitiva seja em tela inteira.
-          const isFullWidth = (modeloId === 'termoDeclaracao');
+          const isFullWidth = (modeloId === 'termoOitiva');
           this.camposContainer.classList.toggle('md:grid-cols-2', !isFullWidth);
           this.camposContainer.classList.toggle('md:grid-cols-1', isFullWidth);
 
@@ -509,6 +618,17 @@
 
           this.atualizarPreview();
         }
+
+        getIcone(modeloId) {
+            switch(modeloId) {
+                case 'termoAbertura': return 'fas fa-file-alt';
+                case 'termoOitiva': return 'fas fa-microphone-alt';
+                case 'designacaoEscrivao': return 'fas fa-user-tie';
+                case 'prorrogacao': return 'fas fa-clock';
+                case 'encaminhamento': return 'fas fa-share-square';
+                default: return 'fas fa-file';
+            }
+        }
         
         obterDados() {
             const dados = {};
@@ -520,9 +640,17 @@
             });
             
             // Exceção para o conteúdo do depoimento (permite letras minúsculas e pontuação normal)
-            if (dados.depoimento_livre) {
-                 dados.depoimento_livre = this.form.querySelector('#depoimento_livre').value.trim();
+            const depoimentoElement = this.form.querySelector('#depoimento_livre');
+            if (depoimentoElement) {
+                 dados.depoimento_livre = depoimentoElement.value.trim();
             }
+            
+            // Exceção para o tipo de oitiva (para não ficar tudo em maiúsculo no template, mas sim na saída)
+            const tipoOitivaElement = this.form.querySelector('#tipo_oitiva');
+            if (tipoOitivaElement) {
+                 dados.tipo_oitiva = tipoOitivaElement.value.trim();
+            }
+
 
             // O nome do mês deve ser formatado corretamente (título)
             if (dados.data_mes) {
@@ -532,25 +660,31 @@
         }
 
         atualizarPreview() {
-          const modelo = this.modelos[this.modeloAtualId];
+          if (!this.modeloAtualId || !this.procedimentoAtualId) return;
+
+          const proc = this.procedimentos[this.procedimentoAtualId];
+          const modelo = proc.documentos[this.modeloAtualId];
+
           if (modelo && modelo.template) {
             const dados = this.obterDados();
-            this.previewArea.textContent = modelo.template(dados).trim();
+            this.previewArea.textContent = modelo.template(dados, proc).trim(); // Passa proc para o template
           }
         }
 
         // === 3. FUNÇÕES DE AÇÃO ===
 
         gerarPDF() {
-          const dados = this.obterDados();
-          const modelo = this.modelos[this.modeloAtualId];
-          if (!modelo) {
-            this.mostrarToast('Erro: Modelo de documento não definido.', 'erro');
+          if (!this.modeloAtualId || !this.procedimentoAtualId) {
+            this.mostrarToast('Selecione um documento para gerar o PDF.', 'erro');
             return;
           }
+
+          const dados = this.obterDados();
+          const proc = this.procedimentos[this.procedimentoAtualId];
+          const modelo = proc.documentos[this.modeloAtualId];
           
-          const nomeArquivo = `${modelo.titulo.replace(/\s/g, '_').replace(/\//g, '')}_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`;
-          const conteudo = modelo.template(dados);
+          const nomeArquivo = `${proc.id}_${modelo.titulo.replace(/\s/g, '_').replace(/\//g, '')}_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`;
+          const conteudo = modelo.template(dados, proc);
 
           try {
             const doc = new jsPDF({ unit: 'mm', format: 'a4' });
@@ -565,7 +699,8 @@
             let y = margem;
 
             // Título (Centralizado e Negrito)
-            const tituloLinhas = doc.splitTextToSize(modelo.titulo.toUpperCase(), larguraMax);
+            const tituloCompleto = `${proc.nome.toUpperCase()} - ${modelo.titulo.toUpperCase()}`;
+            const tituloLinhas = doc.splitTextToSize(tituloCompleto, larguraMax);
             doc.setFont(doc.getFont().fontName, 'bold');
             doc.text(tituloLinhas, 105, y, { align: 'center' });
             y += tituloLinhas.length * 6; 
