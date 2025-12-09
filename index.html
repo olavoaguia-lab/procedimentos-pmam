@@ -3,37 +3,589 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PMAM - Sistema de Procedimentos</title>
+    <title>SJD PMAM - Gerador de Documentos Disciplinares</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <script>
+      // Configuração de cores e estilos PMAM
       tailwind.config = {
         theme: {
           extend: {
             colors: {
-              pmam: {
-                blue: '#1e3a8a',
-                lightBlue: '#3b82f6',
-                accent: '#eab308', // Gold/Yellow often used in insignias
-                bg: '#f8fafc',
-              }
+              'pmam-blue': '#1e3a8a', // Azul Marinho
+              'pmam-lightBlue': '#3b82f6', // Azul Claro
+              'pmam-accent': '#0ea5e9', // Destaque Moderno
+              'pmam-success': '#10b981', // Verde
+              'pmam-error': '#ef4444', // Vermelho
+              'pmam-secondary': '#64748b', // Cinza
+              'pmam-bg': '#f8fafc', // Fundo Claro
+              'pmam-card': '#ffffff', // Cartão Branco
+            },
+            boxShadow: {
+              'pmam-xl': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+            },
+            borderRadius: {
+              'pmam-lg': '8px',
             }
           }
         }
       }
     </script>
-  <script type="importmap">
-{
-  "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.1/",
-    "react": "https://aistudiocdn.com/react@^19.2.1",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
-    "jspdf": "https://aistudiocdn.com/jspdf@^3.0.4"
-  }
-}
-</script>
-</head>
-  <body class="bg-slate-100 text-slate-800 antialiased">
-    <div id="root"></div>
+    
+    <script type="importmap">
+    {
+      "imports": {
+        "jspdf": "https://aistudiocdn.com/jspdf@^3.0.4"
+      }
+    }
+    </script>
+    
+    <style>
+      /* Estilos para o menu lateral (sidebar) e responsividade */
+      .sidebar {
+        /* Garante que o sidebar se ajuste para mobile */
+        transform: translateX(0);
+        transition: transform 0.3s ease-in-out;
+      }
+      @media (max-width: 768px) {
+        .sidebar {
+          position: fixed;
+          left: 0;
+          height: 100%;
+          z-index: 20;
+          /* Esconder por padrão em mobile */
+          transform: translateX(-100%);
+        }
+        .sidebar.open {
+          transform: translateX(0);
+        }
+      }
+
+      /* Estilo para o item de menu ativo/hover */
+      .sidebar-item:hover, .sidebar-item.ativo {
+        background-color: #0ea5e9; /* pmam-accent */
+        color: #1e3a8a; /* pmam-blue */
+        font-weight: 600;
+      }
+      
+      /* Estilo para a pré-visualização de documento */
+      #preview-documento {
+        white-space: pre-wrap;
+        font-family: monospace;
+        font-size: 0.9rem;
+        color: #333;
+        border: 1px solid #e2e8f0;
+        min-height: 200px;
+        background-color: #f0f4f8; /* Fundo levemente cinza para contraste */
+      }
+      
+      /* Estilo para a animação do Toast */
+      .toast {
+        transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+      }
+    </style>
+  </head>
+  
+  <body class="bg-pmam-bg text-slate-800 antialiased min-h-screen flex">
+    
+    <button id="sidebar-toggle" class="md:hidden fixed top-4 left-4 z-30 p-2 bg-pmam-blue text-pmam-card rounded-md shadow-lg">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div id="sidebar" class="sidebar w-64 bg-pmam-blue text-pmam-card py-5 shadow-pmam-xl z-10 flex-shrink-0">
+      <h2 class="text-center mb-7 text-2xl border-b border-white/10 pb-4 font-semibold">
+        <i class="fas fa-balance-scale-right mr-2"></i> PMAM SJD
+      </h2>
+      <a href="#" class="sidebar-item block py-4 px-5 mx-2 my-1 rounded-pmam-lg text-pmam-card text-sm transition-all" onclick="sistema.carregarModelo('sindicancia')">
+        <i class="fas fa-file-alt mr-2"></i> Termo de Abertura SIND
+      </a>
+      <a href="#" class="sidebar-item block py-4 px-5 mx-2 my-1 rounded-pmam-lg text-pmam-card text-sm transition-all" onclick="sistema.carregarModelo('portaria')">
+        <i class="fas fa-scroll mr-2"></i> Portaria de Instauração
+      </a>
+      <a href="#" class="sidebar-item block py-4 px-5 mx-2 my-1 rounded-pmam-lg text-pmam-card text-sm transition-all" onclick="sistema.carregarModelo('designacaoEscrivao')">
+        <i class="fas fa-user-tie mr-2"></i> Designação de Escrivão
+      </a>
+      <a href="#" class="sidebar-item block py-4 px-5 mx-2 my-1 rounded-pmam-lg text-pmam-card text-sm transition-all" onclick="sistema.carregarModelo('prorrogacao')">
+        <i class="fas fa-clock mr-2"></i> Prorrogação de Prazo
+      </a>
+      <a href="#" class="sidebar-item block py-4 px-5 mx-2 my-1 rounded-pmam-lg text-pmam-card text-sm transition-all" onclick="sistema.carregarModelo('encaminhamento')">
+        <i class="fas fa-share-square mr-2"></i> Ofício de Encaminhamento
+      </a>
+      <a href="#" class="sidebar-item block py-4 px-5 mx-2 my-1 rounded-pmam-lg text-pmam-card text-sm transition-all" onclick="sistema.carregarModelo('defensorDativo')">
+        <i class="fas fa-graduation-cap mr-2"></i> Nomeação Defensor Dativo
+      </a>
+    </div>
+
+    <div class="main-content flex-grow p-5 md:p-10">
+      <div class="card bg-pmam-card p-5 md:p-8 rounded-pmam-lg shadow-pmam-xl">
+        <h1 id="titulo-documento" class="text-pmam-blue mb-5 text-2xl md:text-3xl border-b-2 border-pmam-accent pb-3 font-semibold">
+          <i class="fas fa-file-invoice mr-2"></i> Gerador de Documentos PMAM
+        </h1>
+        <p class="mb-5 text-gray-600">Preencha os campos abaixo para gerar o documento oficial.</p>
+        
+        <form id="form-documento">
+          
+          <div id="campos-dinamicos" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="text-center py-10 text-pmam-secondary">Carregando formulário...</div>
+          </div>
+
+          <div class="mt-8 pt-4 border-t border-gray-200 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="form-group">
+                <label for="data_dia" class="block mb-2 font-semibold text-pmam-blue">Data Atual (Dia):</label>
+                <input type="number" id="data_dia" name="data_dia" min="1" max="31" class="w-full p-3 border border-gray-300 rounded-lg focus:border-pmam-accent focus:outline-none focus:ring-2 focus:ring-pmam-accent/30" required>
+            </div>
+            <div class="form-group">
+                <label for="data_mes" class="block mb-2 font-semibold text-pmam-blue">Data Atual (Mês):</label>
+                <input type="text" id="data_mes" name="data_mes" class="w-full p-3 border border-gray-300 rounded-lg focus:border-pmam-accent focus:outline-none focus:ring-2 focus:ring-pmam-accent/30" required>
+            </div>
+            <div class="form-group">
+                <label for="data_ano" class="block mb-2 font-semibold text-pmam-blue">Data Atual (Ano):</label>
+                <input type="number" id="data_ano" name="data_ano" min="2000" max="2100" class="w-full p-3 border border-gray-300 rounded-lg focus:border-pmam-accent focus:outline-none focus:ring-2 focus:ring-pmam-accent/30" required>
+            </div>
+          </div>
+
+          <div class="form-group mt-6">
+            <label class="block mb-2 font-semibold text-pmam-blue border-b-2 border-pmam-lightBlue pb-1">Pré-visualização do Documento:</label>
+            <div id="preview-documento" class="p-5 mt-2 rounded-lg shadow-inner">
+              ... O documento será renderizado aqui ...
+            </div>
+          </div>
+
+          <div class="botoes-acao flex flex-wrap gap-4 mt-8">
+            <button type="button" class="btn btn-primario bg-pmam-lightBlue text-pmam-card py-3 px-6 rounded-md cursor-pointer font-semibold transition-all hover:bg-pmam-accent hover:shadow-lg hover:shadow-pmam-accent/50 hover:-translate-y-0.5 flex items-center justify-center" onclick="sistema.gerarPDF()">
+              <i class="fas fa-file-pdf mr-2"></i> Gerar PDF
+            </button>
+            <button type="button" class="btn btn-secundario bg-pmam-secondary text-pmam-card py-3 px-6 rounded-md cursor-pointer font-semibold transition-all hover:bg-gray-700 hover:shadow-lg hover:shadow-pmam-secondary/50 hover:-translate-y-0.5 flex items-center justify-center" onclick="sistema.copiarTexto()">
+              <i class="fas fa-copy mr-2"></i> Copiar Texto
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="toast-container fixed top-5 right-5 z-50" id="toast-container">
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+      const { jsPDF } = window.jspdf;
+
+      // Função utilitária para obter o nome do mês
+      const obterNomeMes = (numero) => {
+          const meses = [
+              'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+              'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+          ];
+          return meses[numero - 1];
+      };
+
+      // Classe principal do sistema
+      class SistemaPMAM {
+        constructor() {
+          this.modelos = this.definirModelos();
+          this.camposContainer = document.getElementById('campos-dinamicos');
+          this.previewArea = document.getElementById('preview-documento');
+          this.form = document.getElementById('form-documento');
+          this.tituloDocumento = document.getElementById('titulo-documento');
+          this.sidebar = document.getElementById('sidebar');
+          this.toggleButton = document.getElementById('sidebar-toggle');
+          
+          // Configuração de Datas (preenche automaticamente)
+          const hoje = new Date();
+          document.getElementById('data_dia').value = hoje.getDate();
+          document.getElementById('data_mes').value = obterNomeMes(hoje.getMonth() + 1);
+          document.getElementById('data_ano').value = hoje.getFullYear();
+          
+          // Listeners
+          this.form.addEventListener('input', () => this.atualizarPreview());
+          this.toggleButton.addEventListener('click', () => this.toggleSidebar());
+
+          // Carrega o modelo inicial
+          this.modeloAtualId = 'sindicancia';
+          this.carregarModelo(this.modeloAtualId);
+        }
+
+        // === 1. DEFINIÇÃO DOS MODELOS DE DOCUMENTOS (ROBUSTEZ JURÍDICA) ===
+        definirModelos() {
+          return {
+            sindicancia: {
+              titulo: "Sindicância (Termo de Abertura e Autuação)",
+              campos: [
+                { id: 'numero_portaria', label: 'Nº da Portaria (Instauração)', tipo: 'text', placeholder: 'Ex: 05.02/2024/SIND/SJD/CPA OESTE/PMAM', valorPadrao: 'XX.XX/AAAA/SIND/SJD/PMAM' },
+                { id: 'data_portaria', label: 'Data da Portaria', tipo: 'text', placeholder: 'Ex: 23 de Julho de 2024', valorPadrao: `${document.getElementById('data_dia').value} de ${document.getElementById('data_mes').value} de ${document.getElementById('data_ano').value}` },
+                { id: 'sindicado_nome', label: 'Nome, Posto/Grad e CI do Sindicado', tipo: 'text', placeholder: 'Ex: CAP QOPM Stanley O. De Araújo (CI 20943)', valorPadrao: 'NOME DO MILITAR (POSTO/GRAD CI XXXX)' },
+                { id: 'sindicante_nome', label: 'Nome, Posto/Grad e CI do Sindicante', tipo: 'text', placeholder: 'Ex: MAJ QOPM Olavo P. Da Silva Filho (CI 15000)', valorPadrao: 'NOME DO MILITAR (POSTO/GRAD CI XXXX)' },
+                { id: 'objeto_apuracao', label: 'Objeto da Apuração (Sucinto)', tipo: 'textarea', placeholder: 'Ex: Apurar a suposta irregularidade administrativa e disciplinar de abandono de posto...', valorPadrao: 'APURAR A SUPOSTA IRREGULARIDADE PRATICADA PELO MILITAR ACIMA QUALIFICADO...' },
+                { id: 'local_quartel', label: 'Local do Quartel/Unidade', tipo: 'text', placeholder: 'Ex: Quartel do CPA OESTE', valorPadrao: 'SJD DO COMANDO DE POLICIAMENTO' },
+              ],
+              // Modelo baseado no MODELO SIND ADM DISC - SAD.doc 
+              template: (dados) => `
+                
+                SINDICÂNCIA ADMINISTRATIVA DISCIPLINAR
+                
+                SINDICANTE: ${dados.sindicante_nome || '____________________'}
+                SINDICADO: ${dados.sindicado_nome || '____________________'}
+                OFENDIDO: POLÍCIA MILITAR DO ESTADO DO AMAZONAS
+                
+                
+                A U T U A Ç Ã O
+                
+                Aos ${dados.data_dia || '[Dia]'} dias do mês de ${dados.data_mes || '[Mês]'} do ano de ${dados.data_ano || '[Ano]'}, nesta cidade de Manaus, Estado do Amazonas, na sala da ${dados.local_quartel || '____________________'}, autuo a Portaria nº ${dados.numero_portaria || '__________'}, datada de ${dados.data_portaria || '__________'}, e demais documentos que a este junto, do que para constar, lavro o presente termo. Eu, ${dados.sindicante_nome || '____________________'}, Sindicante que o digitei e assino.
+                
+                __________________________________
+                ${dados.sindicante_nome || '____________________'}
+                Sindicante
+                
+                
+                TERMO DE ABERTURA
+                
+                Aos ${dados.data_dia || '[Dia]'} dias do mês de ${dados.data_mes || '[Mês]'} do ano de ${dados.data_ano || '[Ano]'}, nesta cidade de Manaus, Estado do Amazonas, na ${dados.local_quartel || '____________________'}, dei início à presente Sindicância Administrativa Disciplinar, tendo como objeto: ${dados.objeto_apuracao || '____________________'}. Do que para constar lavro o presente Termo que o escrevi e assino.
+                
+                __________________________________
+                ${dados.sindicante_nome || '____________________'}
+                Sindicante
+              `
+            },
+            portaria: {
+              titulo: "Portaria de Instauração de Sindicância",
+              campos: [
+                { id: 'cmt_nome', label: 'Nome e Posto/Grad do Comandante', tipo: 'text', valorPadrao: 'TC QOPM MARIVALDO DE SOUZA FRANÇA FILHO' },
+                { id: 'cmt_cargo', label: 'Cargo do Comandante', tipo: 'text', valorPadrao: 'COMANDANTE DO BATALHÃO OESTE' },
+                { id: 'sindicante_nome', label: 'Nome, Posto/Grad e CI do Sindicante Designado', tipo: 'text', valorPadrao: 'MAJ QOPM FULANO DA SILVA (CI XXXX)' },
+                { id: 'documento_origem', label: 'Documento de Origem (Nº e Tipo)', tipo: 'text', valorPadrao: 'Ofício nº XX/AAAA-PMAM anexo' },
+              ],
+              template: (dados) => `
+                PORTARIA Nº XX.XX/${dados.data_ano || 'AAAA'}/SJD/PMAM
+                
+                O ${dados.cmt_cargo || '____________________'}, no uso de suas atribuições legais, e em cumprimento ao previsto na legislação em vigor,
+                
+                CONSIDERANDO o teor do ${dados.documento_origem || '____________________'};
+                
+                RESOLVE:
+                
+                I - INSTAURAR SINDICÂNCIA para apurar os fatos mencionados no documento em epígrafe.
+                
+                II - DESIGNAR o ${dados.sindicante_nome || '____________________'} para atuar como SINDICANTE, com prazo de 30 (trinta) dias para conclusão do procedimento, conforme Portaria Normativa nº 001/2019/DJD/PMAM.
+                
+                Quartel em Manaus-AM, ${dados.data_dia || '[Dia]'} de ${dados.data_mes || '[Mês]'} de ${dados.data_ano || '[Ano]'}.
+                
+                __________________________________
+                ${dados.cmt_nome || '____________________'}
+                ${dados.cmt_cargo || '____________________'}
+              `
+            },
+            designacaoEscrivao: {
+                titulo: "Termo de Designação de Escrivão",
+                campos: [
+                    { id: 'sindicante_nome', label: 'Nome e Posto/Grad do Sindicante/Encarregado', tipo: 'text', valorPadrao: 'MAJ QOPM Olavo P. Da Silva Filho (CI 15000)' },
+                    { id: 'escrivao_nome', label: 'Nome, Posto/Grad e CI do Militar Designado (Escrivão)', tipo: 'text', valorPadrao: 'SD PM FULANO DE TAL (CI YYYY)' },
+                    { id: 'procedimento_tipo', label: 'Tipo do Procedimento', tipo: 'select', opcoes: ['Sindicância', 'IPM', 'PAD'], valorPadrao: 'Sindicância' },
+                    { id: 'procedimento_numero', label: 'Nº do Procedimento (Portaria/Instrução)', tipo: 'text', valorPadrao: 'XX.XX/AAAA/SIND/PMAM' },
+                ],
+                // Baseado na necessidade processual (exemplo em 6. DESIGNAÇÃO DE ESCRIVÃO.pdf) 
+                template: (dados) => `
+                    TERMO DE DESIGNAÇÃO DE ESCRIVÃO
+                    
+                    AUTOS: ${dados.procedimento_tipo || 'Sindicância'} nº ${dados.procedimento_numero || '__________'}
+                    ENCARREGADO: ${dados.sindicante_nome || '____________________'}
+                    
+                    Aos ${dados.data_dia || '[Dia]'} dias do mês de ${dados.data_mes || '[Mês]'} de ${dados.data_ano || '[Ano]'}, em face da necessidade de dar andamento regular aos trabalhos, eu, ${dados.sindicante_nome || '____________________'}, Encarregado, RESOLVO:
+                    
+                    DESIGNAR o ${dados.escrivao_nome || '____________________'}, para exercer a função de **Escrivão** no presente ${dados.procedimento_tipo || 'Sindicância'} acima referenciado, devendo cumprir todas as determinações legais inerentes ao cargo, conforme a legislação processual militar.
+                    
+                    Para constar, lavro o presente termo que vai assinado.
+                    
+                    Quartel em Manaus-AM, ${dados.data_dia || '[Dia]'} de ${dados.data_mes || '[Mês]'} de ${dados.data_ano || '[Ano]'}.
+                    
+                    __________________________________
+                    ${dados.sindicante_nome || '____________________'}
+                    Encarregado / Sindicante
+                `
+            },
+            prorrogacao: {
+                titulo: "Ofício de Pedido de Prorrogação de Prazo",
+                campos: [
+                    { id: 'destinatario_posto', label: 'Posto/Grad do Destinatário', tipo: 'text', valorPadrao: 'EXMO. SR. CEL. QOPM' },
+                    { id: 'destinatario_cargo', label: 'Cargo do Destinatário (Autoridade Superior)', tipo: 'text', valorPadrao: 'COMANDANTE DO CPA OESTE' },
+                    { id: 'sindicante_nome', label: 'Nome, Posto/Grad e CI do Encarregado/Sindicante', tipo: 'text', valorPadrao: 'MAJ QOPM FULANO DA SILVA (CI XXXX)' },
+                    { id: 'procedimento_tipo', label: 'Tipo do Procedimento', tipo: 'select', opcoes: ['Sindicância', 'IPM', 'PAD'], valorPadrao: 'Sindicância' },
+                    { id: 'procedimento_numero', label: 'Nº do Procedimento (Portaria/Instrução)', tipo: 'text', valorPadrao: 'XX.XX/AAAA/SIND/PMAM' },
+                    { id: 'prazo_atual', label: 'Prazo Anterior (em dias)', tipo: 'number', valorPadrao: 30 },
+                    { id: 'prazo_solicitado', label: 'Novo Prazo Solicitado (em dias)', tipo: 'number', valorPadrao: 20 },
+                    { id: 'justificativa', label: 'Justificativa Detalhada da Prorrogação', tipo: 'textarea', placeholder: 'Ex: Necessidade de oitiva de novas testemunhas e realização de perícia técnica que ainda não foi concluída...', valorPadrao: 'Em razão da complexidade da apuração, e da necessidade de realização de diligências imprescindíveis (oitiva de XXX e análise de documentos YYY), cujo prazo se esgota no dia [Data], e que demandam tempo para conclusão.' },
+                ],
+                // Baseado no BG nº 031, de 14.02.2022 [cite: 3]
+                template: (dados) => `
+                    OFÍCIO Nº XXX/${dados.data_ano || 'AAAA'}/${dados.procedimento_tipo || 'SIND'} - Quartel em Manaus/AM, ${dados.data_dia || '[Dia]'} de ${dados.data_mes || '[Mês]'} de ${dados.data_ano || '[Ano]'}.
+                    
+                    Ao ${dados.destinatario_posto || '____________________'} ${dados.destinatario_cargo || '____________________'}
+                    
+                    Assunto: Solicita Prorrogação de Prazo para Conclusão de ${dados.procedimento_tipo || 'Sindicância'}
+                    
+                    Senhor Comandante/Diretor,
+                    
+                    Em cumprimento à Portaria de Instauração nº ${dados.procedimento_numero || '__________'}, o Sindicante/Encarregado ${dados.sindicante_nome || '____________________'} vem, respeitosamente, solicitar a Prorrogação do Prazo Legal para conclusão do procedimento em epígrafe.
+                    
+                    O prazo anterior de ${dados.prazo_atual || 'XX'} dias se esgota em [Data de Vencimento], sendo solicitado um prazo adicional de **${dados.prazo_solicitado || 'XX'} ( ${dados.prazo_solicitado || 'XX'} )** dias, com base no Art. 135 da Portaria Normativa nº 001/2019/DJD/PMAM (para Sindicância) ou Art. 20, §1º do CPPM (para IPM)[cite: 3].
+                    
+                    A prorrogação é necessária e imprescindível, conforme justificativa abaixo:
+                    
+                    **JUSTIFICATIVA:**
+                    
+                    ${dados.justificativa || '____________________'}
+                    
+                    Em anexo, segue os autos para apreciação e decisão.
+                    
+                    Atenciosamente,
+                    
+                    __________________________________
+                    ${dados.sindicante_nome || '____________________'}
+                    Encarregado / Sindicante
+                `
+            },
+            defensorDativo: {
+                titulo: "Nomeação de Defensor Dativo",
+                campos: [
+                    { id: 'autoridade_nome', label: 'Nome e Posto/Grad da Autoridade Expedidora', tipo: 'text', valorPadrao: 'CEL QOPM COMANDANTE GERAL' },
+                    { id: 'defensor_nome', label: 'Nome, Posto/Grad e CI do Militar Designado (Defensor Dativo)', tipo: 'text', placeholder: 'Preferencialmente Bacharel em Direito', valorPadrao: 'CAP QOPM FULANO JURISTA (CI XXXX)' },
+                    { id: 'procedimento_tipo', label: 'Tipo do Procedimento', tipo: 'select', opcoes: ['FATD', 'Sindicância', 'PAD', 'IPM'], valorPadrao: 'FATD' },
+                    { id: 'sindicado_nome', label: 'Nome, Posto/Grad e CI do Militar a ser defendido', tipo: 'text', valorPadrao: 'SD PM CICLANO DA SILVA (CI YYYY)' },
+                    { id: 'data_nao_apresentacao', label: 'Data da Certidão de Não Apresentação de Defesa', tipo: 'text', placeholder: 'Ex: 01 de Outubro de 2024', valorPadrao: 'DD de MÊS de AAAA' },
+                ],
+                // Baseado na Nota sobre Defensor Dativo 
+                template: (dados) => `
+                    NOTA PARA BOLETIM GERAL
+                    
+                    ASSUNTO: NOMEAÇÃO DE DEFENSOR DATIVO - ${dados.procedimento_tipo || 'FATD'}
+                    
+                    CONSIDERANDO a determinação sobre a garantia da Ampla Defesa e Contraditório, e o teor da Certidão de Não Apresentação de Defesa Prévia pelo militar ${dados.sindicado_nome || '____________________'}, datada de ${dados.data_nao_apresentacao || '__________'}.
+                    
+                    O ${dados.autoridade_nome || '____________________'}, Autoridade Expedidora, no uso de suas atribuições,
+                    
+                    RESOLVE:
+                    
+                    I - NOMEAR o ${dados.defensor_nome || '____________________'} para atuar como **DEFENSOR DATIVO** nos autos do ${dados.procedimento_tipo || 'FATD'} envolvendo o militar ${dados.sindicado_nome || '____________________'}, para apresentar a Defesa no prazo legal.
+                    
+                    II - DETERMINAR que o Defensor Dativo tome ciência de sua nomeação e apresente a defesa no prazo estipulado em lei (Lei 3278/2008, se for o caso).
+                    
+                    Manaus-AM, ${dados.data_dia || '[Dia]'} de ${dados.data_mes || '[Mês]'} de ${dados.data_ano || '[Ano]'}.
+                    
+                    __________________________________
+                    ${dados.autoridade_nome || '____________________'}
+                    Autoridade Expedidora
+                `
+            },
+            encaminhamento: { titulo: "Ofício de Encaminhamento", campos: [], template: (dados) => "Modelo de Ofício de Encaminhamento: Para oficiar à autoridade superior (ex: BG nº 059/2020 - Cap. Legal [cite: 4]) ou a outros órgãos. Em construção..." },
+          };
+        }
+
+        // === 2. LÓGICA DE INTERFACE E FORMULÁRIO (CORREÇÃO DE BUGS) ===
+        
+        // Responsividade do Sidebar (para dispositivos móveis)
+        toggleSidebar() {
+            this.sidebar.classList.toggle('open');
+            document.body.classList.toggle('overflow-hidden'); // Bloqueia scroll no mobile quando aberto
+        }
+
+        // Cria e insere o campo HTML dinamicamente
+        criarCampoHTML(campo) {
+            const div = document.createElement('div');
+            div.className = 'mb-4';
+            let inputElement;
+
+            const inputClasses = 'w-full p-3 border border-gray-300 rounded-lg box-border text-base transition-all focus:border-pmam-accent focus:outline-none focus:ring-2 focus:ring-pmam-accent/30';
+
+            if (campo.tipo === 'textarea') {
+                inputElement = `<textarea id="${campo.id}" name="${campo.id}" rows="4" placeholder="${campo.placeholder || ''}" class="${inputClasses} resize-y"></textarea>`;
+            } else if (campo.tipo === 'select' && campo.opcoes) {
+                const opcoesHTML = campo.opcoes.map(opt => `<option value="${opt}">${opt}</option>`).join('');
+                inputElement = `<select id="${campo.id}" name="${campo.id}" class="${inputClasses}">${opcoesHTML}</select>`;
+            } else {
+                // Tipo 'text' ou 'number'
+                inputElement = `<input type="${campo.tipo}" id="${campo.id}" name="${campo.id}" placeholder="${campo.placeholder || ''}" class="${inputClasses}" ${campo.tipo === 'number' ? `min="${campo.min || ''}" max="${campo.max || ''}"` : ''}>`;
+            }
+
+            div.innerHTML = `
+                <label for="${campo.id}" class="block mb-2 font-semibold text-pmam-secondary">${campo.label}:</label>
+                ${inputElement}
+            `;
+            
+            // Define o valor padrão após a criação do elemento
+            const element = div.querySelector(`#${campo.id}`);
+            if (element && campo.valorPadrao !== undefined) {
+                element.value = campo.valorPadrao;
+            }
+
+            return div;
+        }
+
+
+        // Carrega o modelo de documento na interface
+        carregarModelo(modeloId) {
+          const modelo = this.modelos[modeloId];
+          if (!modelo) {
+            this.mostrarToast('Modelo não encontrado.', 'erro');
+            return;
+          }
+          
+          // Fecha o sidebar no mobile
+          if (window.innerWidth < 768) {
+              this.toggleSidebar();
+          }
+
+          this.modeloAtualId = modeloId;
+          this.tituloDocumento.innerHTML = `<i class="fas fa-file-invoice mr-2"></i> Gerador de ${modelo.titulo}`;
+          this.camposContainer.innerHTML = ''; // Limpa campos antigos
+          
+          // Cria os campos dinamicamente (usa a função aprimorada)
+          modelo.campos.forEach(campo => {
+            this.camposContainer.appendChild(this.criarCampoHTML(campo));
+          });
+
+          // Remove o estado ativo dos itens do menu e aplica ao novo
+          document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('ativo'));
+          document.querySelector(`[onclick="sistema.carregarModelo('${modeloId}')"]`).classList.add('ativo');
+
+          this.atualizarPreview(); // Atualiza com os valores padrões
+        }
+        
+        // Obtém os dados de todos os campos do formulário
+        obterDados() {
+            const dados = {};
+            // Seleciona todos os inputs, textareas e selects
+            const formElements = this.form.querySelectorAll('input, textarea, select'); 
+            formElements.forEach(element => {
+                if (element.name) {
+                    // Armazena com a chave sendo o 'name' (que é o 'id')
+                    dados[element.name] = element.value.trim().toUpperCase(); // Deixa tudo em CAIXA ALTA
+                }
+            });
+            // O nome do mês deve ser formatado corretamente (título)
+            if (dados.data_mes) {
+                 dados.data_mes = dados.data_mes.charAt(0) + dados.data_mes.slice(1).toLowerCase();
+            }
+            return dados;
+        }
+
+        // Atualiza a pré-visualização (em tempo real)
+        atualizarPreview() {
+          const modelo = this.modelos[this.modeloAtualId];
+          if (modelo && modelo.template) {
+            const dados = this.obterDados();
+            this.previewArea.textContent = modelo.template(dados).trim();
+          }
+        }
+
+        // === 3. FUNÇÕES DE AÇÃO (PRATICIDADE) ===
+
+        // Gera o PDF usando jsPDF
+        gerarPDF() {
+          const dados = this.obterDados();
+          const modelo = this.modelos[this.modeloAtualId];
+          if (!modelo) {
+            this.mostrarToast('Erro: Modelo de documento não definido.', 'erro');
+            return;
+          }
+          
+          const nomeArquivo = `${modelo.titulo.replace(/\s/g, '_')}_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`;
+          const conteudo = modelo.template(dados);
+
+          try {
+            const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+            const margem = 20;
+            const larguraMax = 210 - 2 * margem; // Largura A4 - Margens
+            
+            doc.setFont('times'); // Fonte mais adequada para documentos oficiais
+            doc.setFontSize(12);
+
+            // Adiciona o conteúdo com quebra de linha automática
+            const linhas = doc.splitTextToSize(conteudo, larguraMax);
+            let y = margem;
+
+            // Tratamento especial para o Título (Centralizado e Negrito)
+            const tituloLinhas = doc.splitTextToSize(modelo.titulo.toUpperCase(), larguraMax);
+            doc.setFont(doc.getFont().fontName, 'bold');
+            doc.text(tituloLinhas, 105, y, { align: 'center' });
+            y += tituloLinhas.length * 6; // Ajusta a posição Y
+
+            doc.setFont(doc.getFont().fontName, 'normal'); // Volta ao normal para o corpo
+            y += 5; // Espaço após o título
+
+            // Itera sobre as linhas do conteúdo para adicionar ao PDF
+            linhas.forEach(line => {
+                // Checagem de quebra de página
+                if (y > 280) { // Próximo ao fim da página
+                    doc.addPage();
+                    y = margem;
+                }
+                doc.text(line, margem, y);
+                y += 5; // Espaçamento de linha
+            });
+
+            doc.save(nomeArquivo);
+            this.mostrarToast('PDF gerado com sucesso!', 'sucesso');
+
+          } catch (e) {
+            console.error('Erro ao gerar PDF:', e);
+            this.mostrarToast('Erro ao gerar PDF. Verifique o console.', 'erro');
+          }
+        }
+
+        // Copia o texto para a área de transferência
+        async copiarTexto() {
+          const texto = this.previewArea.textContent;
+          try {
+            await navigator.clipboard.writeText(texto);
+            this.mostrarToast('Texto do documento copiado!', 'sucesso');
+          } catch (err) {
+            console.error('Erro ao copiar texto:', err);
+            this.mostrarToast('Erro ao copiar. Use Ctrl+C / Cmd+C.', 'erro');
+          }
+        }
+
+        // Função para mostrar notificações Toast (feedback visual)
+        mostrarToast(mensagem, tipo = 'info') {
+          const container = document.getElementById('toast-container');
+          const toast = document.createElement('div');
+          let iconeClass = '';
+
+          // Definição de classes e ícones baseado no tipo de Toast
+          if (tipo === 'sucesso') {
+            iconeClass = 'fas fa-check-circle';
+            toast.className = `toast bg-pmam-success text-pmam-card min-w-64 p-4 rounded-pmam-lg shadow-pmam-xl mb-3 opacity-0 transform translate-x-full flex items-center`;
+          } else if (tipo === 'erro') {
+            iconeClass = 'fas fa-times-circle';
+            toast.className = `toast bg-pmam-error text-pmam-card min-w-64 p-4 rounded-pmam-lg shadow-pmam-xl mb-3 opacity-0 transform translate-x-full flex items-center`;
+          } else if (tipo === 'info') {
+            iconeClass = 'fas fa-info-circle';
+            toast.className = `toast bg-pmam-blue text-pmam-card min-w-64 p-4 rounded-pmam-lg shadow-pmam-xl mb-3 opacity-0 transform translate-x-full flex items-center`;
+          }
+
+          toast.innerHTML = `<i class="${iconeClass} mr-3 text-lg"></i> <span>${mensagem}</span>`;
+          container.appendChild(toast);
+
+          // Animação para mostrar
+          setTimeout(() => {
+            toast.classList.remove('opacity-0', 'translate-x-full');
+          }, 10);
+
+          // Animação para remover
+          setTimeout(() => {
+            toast.classList.add('opacity-0', 'translate-x-full');
+            // Remove o elemento após a transição
+            setTimeout(() => {
+              container.removeChild(toast);
+            }, 300); 
+          }, 3000);
+        }
+      }
+
+      // Inicializar o sistema ao carregar a página
+      let sistema;
+      document.addEventListener('DOMContentLoaded', () => {
+        sistema = new SistemaPMAM();
+      });
+    </script>
   </body>
 </html>
