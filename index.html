@@ -1,780 +1,897 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sistema de Procedimentos - PMAM</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SISPRO - PMAM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script>
-      // Configuração de cores e estilos PMAM
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              'pmam-blue': '#1e3a8a', // Azul Marinho
-              'pmam-lightBlue': '#3b82f6', // Azul Claro
-              'pmam-accent': '#0ea5e9', // Destaque Moderno
-              'pmam-success': '#10b981', // Verde
-              'pmam-error': '#ef4444', // Vermelho
-              'pmam-secondary': '#64748b', // Cinza
-              'pmam-bg': '#f8fafc', // Fundo Claro
-              'pmam-card': '#ffffff', // Cartão Branco
-            },
-            boxShadow: {
-              'pmam-xl': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-            },
-            borderRadius: {
-              'pmam-lg': '8px',
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'pmam-blue': '#1e3a8a',
+                        'pmam-light': '#3b82f6',
+                        'pmam-accent': '#0ea5e9',
+                        'pmam-success': '#10b981',
+                        'pmam-error': '#ef4444',
+                        'pmam-gray': '#64748b',
+                        'pmam-bg': '#f8fafc',
+                        'pmam-card': '#ffffff',
+                    }
+                }
             }
-          }
         }
-      }
-    </script>
-    
-    <script type="importmap">
-    {
-      "imports": {
-        "jspdf": "https://aistudiocdn.com/jspdf@^3.0.4"
-      }
-    }
     </script>
     
     <style>
-      /* Estilos para o menu lateral (sidebar) e responsividade */
-      .sidebar {
-        transform: translateX(0);
-        transition: transform 0.3s ease-in-out;
-      }
-      @media (max-width: 768px) {
-        .sidebar {
-          position: fixed;
-          left: 0;
-          height: 100%;
-          z-index: 20;
-          transform: translateX(-100%);
+        /* Estilos para abas */
+        .tab {
+            transition: all 0.3s ease;
         }
-        .sidebar.open {
-          transform: translateX(0);
-        }
-      }
-
-      /* Estilo para o item de menu ativo/hover */
-      .sidebar-item:hover, .sidebar-item.ativo {
-        background-color: #0ea5e9; /* pmam-accent */
-        color: #1e3a8a; /* pmam-blue */
-        font-weight: 600;
-      }
-      
-      /* Estilo para a pré-visualização de documento */
-      #preview-documento {
-        white-space: pre-wrap;
-        font-family: monospace;
-        font-size: 0.9rem;
-        color: #333;
-        border: 1px solid #e2e8f0;
-        min-height: 200px;
-        background-color: #f0f4f8; 
-      }
-      
-      /* Estilo para a animação do Toast */
-      .toast {
-        transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-      }
-    </style>
-  </head>
-  
-  <body class="bg-pmam-bg text-slate-800 antialiased min-h-screen flex">
-    
-    <button id="sidebar-toggle" class="md:hidden fixed top-4 left-4 z-30 p-2 bg-pmam-blue text-pmam-card rounded-md shadow-lg">
-        <i class="fas fa-bars"></i>
-    </button>
-
-    <div id="sidebar" class="sidebar w-64 bg-pmam-blue text-pmam-card py-5 shadow-pmam-xl z-10 flex-shrink-0">
-      <h2 class="text-center mb-7 text-2xl border-b border-white/10 pb-4 font-semibold">
-        <i class="fas fa-balance-scale-right mr-2"></i> PMAM SJD
-      </h2>
-      
-      <div id="menu-procedimentos" class="px-5 text-center text-sm">
-          <p class="text-white/70 mb-2">Procedimento Atual:</p>
-      </div>
-
-      <div id="menu-documentos" class="mt-5 border-t border-white/10 pt-4">
-        <p class="text-white/70 text-center text-sm px-5">Escolha o tipo de Procedimento no campo principal.</p>
-      </div>
-      
-    </div>
-
-    <div class="main-content flex-grow p-5 md:p-10">
-      <div class="card bg-pmam-card p-5 md:p-8 rounded-pmam-lg shadow-pmam-xl">
-        <h1 id="titulo-documento" class="text-pmam-blue mb-5 text-2xl md:text-3xl border-b-2 border-pmam-accent pb-3 font-semibold">
-          <i class="fas fa-file-invoice mr-2"></i> Sistema de Procedimentos - PMAM
-        </h1>
-        <p class="mb-5 text-gray-600" id="descricao-documento">Selecione o tipo de Procedimento para carregar os documentos adequados.</p>
         
-        <div id="selecao-procedimento" class="mb-6 pb-4 border-b border-gray-200">
-            <label for="procedimento-select" class="block mb-2 font-semibold text-pmam-blue text-lg"><i class="fas fa-folder-open mr-2"></i> Tipo de Procedimento:</label>
-            <select id="procedimento-select" class="w-full p-3 border border-gray-300 rounded-lg focus:border-pmam-accent focus:outline-none focus:ring-2 focus:ring-pmam-accent/30" onchange="sistema.carregarProcedimento(this.value)">
-                <option value="" disabled selected>-- Selecione o Tipo de Procedimento --</option>
-                <option value="SD">Sindicância Disciplinar (SD)</option>
-                <option value="SI">Sindicância Investigativa (SI)</option>
-                <option value="IPM">Inquérito Policial Militar (IPM)</option>
-                <option value="PAD">Processo Administrativo Disciplinar (PAD)</option>
-                <option value="PARE">Procedimento de Ressarcimento (PARE)</option>
-            </select>
+        .tab.active {
+            background-color: #0ea5e9;
+            color: white;
+            border-bottom: 3px solid #1e3a8a;
+        }
+        
+        .tab:not(.active):hover {
+            background-color: #e0f2fe;
+        }
+        
+        /* Preview de documento */
+        .preview-doc {
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            background-color: #f0f4f8;
+            border-left: 4px solid #1e3a8a;
+        }
+        
+        /* Animação de abas */
+        .tab-content {
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-pmam-bg text-gray-800 min-h-screen">
+    
+    <!-- Cabeçalho -->
+    <div class="bg-pmam-blue text-white p-4 shadow-lg">
+        <div class="container mx-auto flex items-center justify-between">
+            <h1 class="text-2xl font-bold">
+                <i class="fas fa-balance-scale-right mr-3"></i>
+                SISPRO - PMAM
+            </h1>
+            <div class="text-sm">
+                Sistema de Procedimentos da Polícia Militar do Amazonas
+            </div>
+        </div>
+    </div>
+    
+    <!-- Barra de progresso/abas -->
+    <div class="bg-white shadow-md">
+        <div class="container mx-auto">
+            <div class="flex overflow-x-auto border-b">
+                <button id="tab-procedimento" class="tab active px-6 py-3 font-medium text-sm flex items-center">
+                    <i class="fas fa-folder-open mr-2"></i>
+                    <span class="hidden md:inline">TIPO DE PROCEDIMENTO</span>
+                    <span class="md:hidden">PROCEDIMENTO</span>
+                </button>
+                <button id="tab-caracterizacao" class="tab px-6 py-3 font-medium text-sm flex items-center" disabled>
+                    <i class="fas fa-users mr-2"></i>
+                    <span class="hidden md:inline">CARACTERIZAÇÃO</span>
+                    <span class="md:hidden">ENVOLVIDOS</span>
+                </button>
+                <button id="tab-documentos" class="tab px-6 py-3 font-medium text-sm flex items-center" disabled>
+                    <i class="fas fa-file-alt mr-2"></i>
+                    <span class="hidden md:inline">DOCUMENTOS</span>
+                    <span class="md:hidden">DOCS</span>
+                </button>
+                <button id="tab-preview" class="tab px-6 py-3 font-medium text-sm flex items-center" disabled>
+                    <i class="fas fa-eye mr-2"></i>
+                    PREVIEW
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Conteúdo principal -->
+    <div class="container mx-auto p-4 md:p-6">
+        
+        <!-- Aba 1: Tipo de Procedimento -->
+        <div id="content-procedimento" class="tab-content">
+            <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+                <h2 class="text-xl font-bold text-pmam-blue mb-2">
+                    <i class="fas fa-folder-open mr-2"></i>
+                    Selecione o Tipo de Procedimento
+                </h2>
+                <p class="text-gray-600 mb-6">
+                    Escolha o tipo de procedimento para iniciar a elaboração dos documentos.
+                </p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <button onclick="sistema.selecionarProcedimento('SD')" 
+                            class="procedimento-card bg-white border-2 border-gray-200 rounded-lg p-4 text-left hover:border-pmam-accent hover:shadow-md transition-all">
+                        <div class="text-pmam-blue text-lg font-semibold mb-2">SD</div>
+                        <div class="text-gray-700 font-medium">SINDICÂNCIA DISCIPLINAR</div>
+                        <div class="text-gray-500 text-sm mt-2">
+                            Para apuração de infrações disciplinares
+                        </div>
+                    </button>
+                    
+                    <button onclick="sistema.selecionarProcedimento('SI')" 
+                            class="procedimento-card bg-white border-2 border-gray-200 rounded-lg p-4 text-left hover:border-pmam-accent hover:shadow-md transition-all">
+                        <div class="text-pmam-blue text-lg font-semibold mb-2">SI</div>
+                        <div class="text-gray-700 font-medium">SINDICÂNCIA INVESTIGATIVA</div>
+                        <div class="text-gray-500 text-sm mt-2">
+                            Para investigação de fatos não definidos
+                        </div>
+                    </button>
+                    
+                    <button onclick="sistema.selecionarProcedimento('IPM')" 
+                            class="procedimento-card bg-white border-2 border-gray-200 rounded-lg p-4 text-left hover:border-pmam-accent hover:shadow-md transition-all">
+                        <div class="text-pmam-blue text-lg font-semibold mb-2">IPM</div>
+                        <div class="text-gray-700 font-medium">INQUÉRITO POLICIAL MILITAR</div>
+                        <div class="text-gray-500 text-sm mt-2">
+                            Para investigação de infrações penais militares
+                        </div>
+                    </button>
+                    
+                    <button onclick="sistema.selecionarProcedimento('PAD')" 
+                            class="procedimento-card bg-white border-2 border-gray-200 rounded-lg p-4 text-left hover:border-pmam-accent hover:shadow-md transition-all">
+                        <div class="text-pmam-blue text-lg font-semibold mb-2">PAD</div>
+                        <div class="text-gray-700 font-medium">PROC. ADMINISTRATIVO DISCIPLINAR</div>
+                        <div class="text-gray-500 text-sm mt-2">
+                            Para processos disciplinares formais
+                        </div>
+                    </button>
+                    
+                    <button onclick="sistema.selecionarProcedimento('PARE')" 
+                            class="procedimento-card bg-white border-2 border-gray-200 rounded-lg p-4 text-left hover:border-pmam-accent hover:shadow-md transition-all">
+                        <div class="text-pmam-blue text-lg font-semibold mb-2">PARE</div>
+                        <div class="text-gray-700 font-medium">PROCEDIMENTO DE RESSARCIMENTO</div>
+                        <div class="text-gray-500 text-sm mt-2">
+                            Para apuração de danos à fazenda pública
+                        </div>
+                    </button>
+                </div>
+                
+                <div class="mt-8 pt-6 border-t border-gray-200">
+                    <div id="info-procedimento-selecionado" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="font-bold text-lg text-pmam-blue" id="procedimento-nome"></h3>
+                                <p class="text-gray-600" id="procedimento-descricao"></p>
+                            </div>
+                            <button onclick="sistema.avancarParaCaracterizacao()" 
+                                    class="bg-pmam-accent text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-600 transition-colors">
+                                <i class="fas fa-arrow-right mr-2"></i>
+                                Avançar para Caracterização
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         
-        <form id="form-documento">
-          
-          <div id="campos-dinamicos" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="md:col-span-2 text-center py-10 text-pmam-secondary">Selecione um Procedimento acima para iniciar.</div>
-          </div>
-
-          <div class="mt-8 pt-4 border-t border-gray-200 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="form-group">
-                <label for="data_dia" class="block mb-2 font-semibold text-pmam-blue">Data Atual (Dia):</label>
-                <input type="number" id="data_dia" name="data_dia" min="1" max="31" class="w-full p-3 border border-gray-300 rounded-lg focus:border-pmam-accent focus:outline-none focus:ring-2 focus:ring-pmam-accent/30" required>
+        <!-- Aba 2: Caracterização -->
+        <div id="content-caracterizacao" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-pmam-blue mb-4">
+                    <i class="fas fa-users mr-2"></i>
+                    Caracterização dos Envolvidos
+                </h2>
+                
+                <div class="mb-6 p-4 bg-blue-50 rounded-lg">
+                    <div class="font-medium text-pmam-blue mb-2">
+                        Procedimento Selecionado:
+                    </div>
+                    <div id="procedimento-atual-info" class="text-lg font-bold"></div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Número da Portaria -->
+                    <div class="md:col-span-2 bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-bold text-pmam-blue mb-3">
+                            <i class="fas fa-file-signature mr-2"></i>
+                            Número da Portaria de Instauração
+                        </h3>
+                        <input type="text" id="numero-portaria" 
+                               class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pmam-accent focus:border-pmam-accent"
+                               placeholder="Ex: 05.02/2024/SD/SJD/PMAM">
+                        <div class="text-sm text-gray-500 mt-2">
+                            Este número será utilizado em todos os documentos gerados
+                        </div>
+                    </div>
+                    
+                    <!-- Data da Portaria -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-bold text-pmam-blue mb-3">Data da Portaria</h3>
+                        <div class="grid grid-cols-3 gap-2">
+                            <input type="number" id="data-dia" min="1" max="31" 
+                                   class="p-3 border border-gray-300 rounded-lg text-center"
+                                   placeholder="Dia">
+                            <input type="text" id="data-mes" 
+                                   class="p-3 border border-gray-300 rounded-lg"
+                                   placeholder="Mês">
+                            <input type="number" id="data-ano" min="2000" max="2100"
+                                   class="p-3 border border-gray-300 rounded-lg text-center"
+                                   placeholder="Ano">
+                        </div>
+                    </div>
+                    
+                    <!-- Local -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-bold text-pmam-blue mb-3">Local/Unidade</h3>
+                        <input type="text" id="local-unidade" 
+                               class="w-full p-3 border border-gray-300 rounded-lg"
+                               placeholder="Ex: SJD do Comando de Policiamento Leste">
+                    </div>
+                    
+                    <!-- Encarregado/Sindicante -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-bold text-pmam-blue mb-3">Encarregado/Sindicante</h3>
+                        <input type="text" id="encarregado-nome" 
+                               class="w-full p-3 border border-gray-300 rounded-lg"
+                               placeholder="Nome, Posto/Grad e CI">
+                        <input type="text" id="encarregado-cargo" 
+                               class="w-full p-3 border border-gray-300 rounded-lg mt-2"
+                               placeholder="Cargo/Função">
+                    </div>
+                    
+                    <!-- Acusado/Indiciado -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-bold text-pmam-blue mb-3" id="titulo-acusado">Acusado/Sindicado</h3>
+                        <input type="text" id="acusado-nome" 
+                               class="w-full p-3 border border-gray-300 rounded-lg"
+                               placeholder="Nome, Posto/Grad e CI">
+                        <input type="text" id="acusado-lotacao" 
+                               class="w-full p-3 border border-gray-300 rounded-lg mt-2"
+                               placeholder="Lotação/Unidade">
+                    </div>
+                    
+                    <!-- Ofendido/Vítima -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-bold text-pmam-blue mb-3">Ofendido/Vítima</h3>
+                        <select id="ofendido-tipo" class="w-full p-3 border border-gray-300 rounded-lg mb-2">
+                            <option value="PMAM">Polícia Militar do Amazonas</option>
+                            <option value="FAZENDA">Fazenda Pública/PMAM</option>
+                            <option value="PARTICULAR">Particular</option>
+                        </select>
+                        <input type="text" id="ofendido-nome" 
+                               class="w-full p-3 border border-gray-300 rounded-lg"
+                               placeholder="Nome ou entidade ofendida">
+                    </div>
+                    
+                    <!-- Objeto da Apuração -->
+                    <div class="md:col-span-2 bg-gray-50 p-4 rounded-lg">
+                        <h3 class="font-bold text-pmam-blue mb-3">Objeto da Apuração</h3>
+                        <textarea id="objeto-apuracao" rows="3"
+                                  class="w-full p-3 border border-gray-300 rounded-lg"
+                                  placeholder="Descreva sucintamente o objeto do procedimento..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between mt-8 pt-6 border-t border-gray-200">
+                    <button onclick="sistema.voltarParaProcedimento()" 
+                            class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Voltar
+                    </button>
+                    <button onclick="sistema.avancarParaDocumentos()" 
+                            class="bg-pmam-accent text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors">
+                        Avançar para Documentos
+                        <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="data_mes" class="block mb-2 font-semibold text-pmam-blue">Data Atual (Mês):</label>
-                <input type="text" id="data_mes" name="data_mes" class="w-full p-3 border border-gray-300 rounded-lg focus:border-pmam-accent focus:outline-none focus:ring-2 focus:ring-pmam-accent/30" required>
+        </div>
+        
+        <!-- Aba 3: Documentos -->
+        <div id="content-documentos" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-pmam-blue mb-4">
+                    <i class="fas fa-file-alt mr-2"></i>
+                    Documentos do Procedimento
+                </h2>
+                
+                <div class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <button onclick="sistema.selecionarDocumento('autuacao')" 
+                            class="doc-btn p-4 border rounded-lg text-center hover:border-pmam-accent hover:bg-blue-50 transition-colors">
+                        <i class="fas fa-file-signature text-2xl text-pmam-blue mb-2"></i>
+                        <div class="font-medium">AUTUAÇÃO</div>
+                    </button>
+                    
+                    <button onclick="sistema.selecionarDocumento('abertura')" 
+                            class="doc-btn p-4 border rounded-lg text-center hover:border-pmam-accent hover:bg-blue-50 transition-colors">
+                        <i class="fas fa-folder-open text-2xl text-pmam-blue mb-2"></i>
+                        <div class="font-medium">ABERTURA</div>
+                    </button>
+                    
+                    <button onclick="sistema.selecionarDocumento('designacao')" 
+                            class="doc-btn p-4 border rounded-lg text-center hover:border-pmam-accent hover:bg-blue-50 transition-colors">
+                        <i class="fas fa-user-tie text-2xl text-pmam-blue mb-2"></i>
+                        <div class="font-medium">DESIGNAÇÃO</div>
+                    </button>
+                    
+                    <button onclick="sistema.selecionarDocumento('termos')" 
+                            class="doc-btn p-4 border rounded-lg text-center hover:border-pmam-accent hover:bg-blue-50 transition-colors">
+                        <i class="fas fa-gavel text-2xl text-pmam-blue mb-2"></i>
+                        <div class="font-medium">TERMOS</div>
+                    </button>
+                    
+                    <button onclick="sistema.selecionarDocumento('oficios')" 
+                            class="doc-btn p-4 border rounded-lg text-center hover:border-pmam-accent hover:bg-blue-50 transition-colors">
+                        <i class="fas fa-envelope text-2xl text-pmam-blue mb-2"></i>
+                        <div class="font-medium">OFÍCIOS</div>
+                    </button>
+                    
+                    <button onclick="sistema.selecionarDocumento('certidoes')" 
+                            class="doc-btn p-4 border rounded-lg text-center hover:border-pmam-accent hover:bg-blue-50 transition-colors">
+                        <i class="fas fa-certificate text-2xl text-pmam-blue mb-2"></i>
+                        <div class="font-medium">CERTIDÕES</div>
+                    </button>
+                    
+                    <button onclick="sistema.selecionarDocumento('relatorio')" 
+                            class="doc-btn p-4 border rounded-lg text-center hover:border-pmam-accent hover:bg-blue-50 transition-colors">
+                        <i class="fas fa-file-contract text-2xl text-pmam-blue mb-2"></i>
+                        <div class="font-medium">RELATÓRIO</div>
+                    </button>
+                </div>
+                
+                <!-- Formulário dinâmico do documento selecionado -->
+                <div id="formulario-documento" class="hidden bg-gray-50 p-6 rounded-lg mb-6">
+                    <h3 id="titulo-documento-selecionado" class="text-lg font-bold text-pmam-blue mb-4"></h3>
+                    <div id="campos-documento"></div>
+                </div>
+                
+                <div class="flex justify-between mt-8 pt-6 border-t border-gray-200">
+                    <button onclick="sistema.voltarParaCaracterizacao()" 
+                            class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Voltar
+                    </button>
+                    <button onclick="sistema.avancarParaPreview()" 
+                            class="bg-pmam-accent text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-600 transition-colors">
+                        Visualizar Documento
+                        <i class="fas fa-eye ml-2"></i>
+                    </button>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="data_ano" class="block mb-2 font-semibold text-pmam-blue">Data Atual (Ano):</label>
-                <input type="number" id="data_ano" name="data_ano" min="2000" max="2100" class="w-full p-3 border border-gray-300 rounded-lg focus:border-pmam-accent focus:outline-none focus:ring-2 focus:ring-pmam-accent/30" required>
+        </div>
+        
+        <!-- Aba 4: Preview -->
+        <div id="content-preview" class="tab-content hidden">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-bold text-pmam-blue mb-4">
+                    <i class="fas fa-eye mr-2"></i>
+                    Pré-visualização do Documento
+                </h2>
+                
+                <div class="mb-4 flex justify-between items-center">
+                    <div>
+                        <span class="font-medium text-pmam-blue" id="preview-tipo-procedimento"></span>
+                        <span class="mx-2">•</span>
+                        <span class="font-medium" id="preview-tipo-documento"></span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="sistema.voltarParaDocumentos()" 
+                                class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-edit mr-1"></i> Editar
+                        </button>
+                        <button onclick="sistema.gerarPDF()" 
+                                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                            <i class="fas fa-file-pdf mr-1"></i> Gerar PDF
+                        </button>
+                        <button onclick="sistema.copiarTexto()" 
+                                class="px-4 py-2 bg-pmam-blue text-white rounded-lg hover:bg-blue-800">
+                            <i class="fas fa-copy mr-1"></i> Copiar
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="preview-conteudo" class="preview-doc p-6 rounded-lg min-h-[500px] overflow-auto">
+                    Selecione e preencha um documento para visualizar aqui...
+                </div>
+                
+                <div class="mt-6 pt-6 border-t border-gray-200 flex justify-between">
+                    <button onclick="sistema.voltarParaDocumentos()" 
+                            class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                        <i class="fas fa-arrow-left mr-2"></i>
+                        Voltar para Documentos
+                    </button>
+                    <button onclick="sistema.novoDocumento()" 
+                            class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                        <i class="fas fa-plus mr-2"></i>
+                        Novo Documento
+                    </button>
+                </div>
             </div>
-          </div>
-
-          <div class="form-group mt-6">
-            <label class="block mb-2 font-semibold text-pmam-blue border-b-2 border-pmam-lightBlue pb-1">Pré-visualização do Documento:</label>
-            <div id="preview-documento" class="p-5 mt-2 rounded-lg shadow-inner">
-              ... O documento será renderizado aqui ...
-            </div>
-          </div>
-
-          <div class="botoes-acao flex flex-wrap gap-4 mt-8">
-            <button type="button" class="btn btn-primario bg-pmam-lightBlue text-pmam-card py-3 px-6 rounded-md cursor-pointer font-semibold transition-all hover:bg-pmam-accent hover:shadow-lg hover:shadow-pmam-accent/50 hover:-translate-y-0.5 flex items-center justify-center" onclick="sistema.gerarPDF()">
-              <i class="fas fa-file-pdf mr-2"></i> Gerar PDF
-            </button>
-            <button type="button" class="btn btn-secundario bg-pmam-secondary text-pmam-card py-3 px-6 rounded-md cursor-pointer font-semibold transition-all hover:bg-gray-700 hover:shadow-lg hover:shadow-pmam-secondary/50 hover:-translate-y-0.5 flex items-center justify-center" onclick="sistema.copiarTexto()">
-              <i class="fas fa-copy mr-2"></i> Copiar Texto
-            </button>
-          </div>
-        </form>
-      </div>
+        </div>
     </div>
-
-    <div class="toast-container fixed top-5 right-5 z-50" id="toast-container">
-    </div>
-
+    
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50"></div>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
-      const { jsPDF } = window.jspdf;
-
-      // Função utilitária para obter o nome do mês
-      const obterNomeMes = (numero) => {
-          const meses = [
-              'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-              'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-          ];
-          return meses[numero - 1];
-      };
-
-      // Classe principal do sistema
-      class SistemaProcedimentosPMAM {
-        constructor() {
-          this.procedimentos = this.definirModelos();
-          this.camposContainer = document.getElementById('campos-dinamicos');
-          this.previewArea = document.getElementById('preview-documento');
-          this.form = document.getElementById('form-documento');
-          this.tituloDocumento = document.getElementById('titulo-documento');
-          this.descricaoDocumento = document.getElementById('descricao-documento');
-          this.menuDocumentos = document.getElementById('menu-documentos');
-          this.sidebar = document.getElementById('sidebar');
-          this.toggleButton = document.getElementById('sidebar-toggle');
-          
-          this.procedimentoAtualId = null;
-          this.modeloAtualId = null;
-          
-          // Configuração de Datas (preenche automaticamente)
-          const hoje = new Date();
-          document.getElementById('data_dia').value = hoje.getDate();
-          document.getElementById('data_mes').value = obterNomeMes(hoje.getMonth() + 1);
-          document.getElementById('data_ano').value = hoje.getFullYear();
-          
-          // Listeners
-          this.form.addEventListener('input', () => this.atualizarPreview());
-          this.toggleButton.addEventListener('click', () => this.toggleSidebar());
-
-          // Define o nome do sistema no título principal
-          this.tituloDocumento.innerHTML = `<i class="fas fa-file-invoice mr-2"></i> Sistema de Procedimentos - PMAM`;
-        }
+        const { jsPDF } = window.jspdf;
         
-        // --- MODELO REUTILIZÁVEL: AUTUAÇÃO, ABERTURA E DESIGNAÇÃO DE ESCRIVÃO ---
-        modeloAutuacaoAbertura(procId) {
-            const proc = this.procedimentos[procId];
-            return {
-                titulo: "AUTUAÇÃO, ABERTURA E DESIGNAÇÃO DE ESCRIVÃO",
-                campos: [
-                    { id: 'numero_portaria', label: 'Nº da Portaria (Instauração)', tipo: 'text', placeholder: `Ex: 05.02/2024/${procId}/SJD/PMAM`, valorPadrao: `XX.XX/AAAA/${procId}/SJD/PMAM` },
-                    { id: 'data_portaria', label: 'Data da Portaria', tipo: 'text', placeholder: 'Ex: 23 de Julho de 2024', valorPadrao: `${document.getElementById('data_dia').value} de ${document.getElementById('data_mes').value} de ${document.getElementById('data_ano').value}` },
-                    { id: 'sindicado_nome', label: `Nome, Posto/Grad e CI do Militar ${procId === 'PARE' ? 'Indiciado/Responsável' : 'Acusado/Sindicado'}`, tipo: 'text', placeholder: 'Ex: SD QPPM JOSÉ DE RIBAMAR FERREIRA NETO (25774)', valorPadrao: 'NOME DO MILITAR (POSTO/GRAD CI XXXX)' },
-                    { id: 'sindicante_nome', label: 'Nome, Posto/Grad e CI do Encarregado', tipo: 'text', placeholder: 'Ex: CAP QOPM ELSON PEREIRA DE FARIAS JUNIOR (22826)', valorPadrao: 'NOME DO MILITAR (POSTO/GRAD CI XXXX)' },
-                    { id: 'escrivao_nome', label: 'Nome, Posto/Grad e CI do Militar Designado (Escrivão)', tipo: 'text', valorPadrao: 'SD PM FULANO DE TAL (CI YYYY)' },
-                    { id: 'objeto_apuracao', label: `Objeto da Apuração (${procId === 'PARE' ? 'Ressarcimento' : 'Sucinto'})`, tipo: 'textarea', placeholder: `Ex: ${procId === 'PARE' ? 'APURAR A RESPONSABILIDADE CIVIL QUANTO AO PREJUÍZO À FAZENDA PÚBLICA DECORRENTE DE EXTRAVIO DE 01 (UM) COLETE BALÍSTICO' : 'APURAR A SUPOSTA TRANSGRESSÃO DISCIPLINAR PRATICADA PELO MILITAR ACIMA QUALIFICADO...'}`, valorPadrao: `APURAR A SUPOSTA IRREGULARIDADE PRATICADA PELO MILITAR ACIMA QUALIFICADO...` },
-                    { id: 'local_quartel', label: 'Local do Quartel/Unidade', tipo: 'text', placeholder: 'Ex: Quartel do CPA LESTE', valorPadrao: 'SJD DO COMANDO DE POLICIAMENTO' },
-                ],
-                template: (dados) => `
-                    ${proc.nome.toUpperCase()}
-                    
-                    ENCARREGADO: ${dados.sindicante_nome || '____________________'}
-                    ${procId === 'PARE' ? 'RESPONSÁVEL' : 'ACUSADO'}: ${dados.sindicado_nome || '____________________'}
-                    OFENDIDO: ${procId === 'PARE' ? 'FAZENDA PÚBLICA/PMAM' : 'POLÍCIA MILITAR DO ESTADO DO AMAZONAS'}
-                    
-                    
-                    A U T U A Ç Ã O
-                    
-                    Aos ${dados.data_dia || '[Dia]'} dias do mês de ${dados.data_mes || '[Mês]'} do ano de ${dados.data_ano || '[Ano]'}, nesta cidade de Manaus, Estado do Amazonas, na sala da ${dados.local_quartel || '____________________'}, autuo a Portaria nº ${dados.numero_portaria || '__________'}, datada de ${dados.data_portaria || '__________'}, e demais documentos que a este junto, do que para constar, lavro o presente termo. Eu, ${dados.sindicante_nome || '____________________'}, Encarregado que o digitei e assino.
-                    
-                    __________________________________
-                    ${dados.sindicante_nome || '____________________'}
-                    Encarregado / Sindicante
-                    
-                    
-                    TERMO DE ABERTURA
-                    
-                    Aos ${dados.data_dia || '[Dia]'} dias do mês de ${dados.data_mes || '[Mês]'} do ano de ${dados.data_ano || '[Ano]'}, nesta cidade de Manaus, Estado do Amazonas, na ${dados.local_quartel || '____________________'}, dei início ao presente ${proc.nome.toUpperCase()}, tendo como objeto: ${dados.objeto_apuracao || '____________________'}. Do que para constar lavro o presente Termo que o escrevi e assino.
-                    
-                    
-                    TERMO DE DESIGNAÇÃO DE ESCRIVÃO
-                    
-                    Aos ${dados.data_dia || '[Dia]'} dias do mês de ${dados.data_mes || '[Mês]'} do ano de ${dados.data_ano || '[Ano]'}, eu, ${dados.sindicante_nome || '____________________'}, Encarregado, RESOLVO:
-                    
-                    DESIGNAR o ${dados.escrivao_nome || '____________________'}, para exercer a função de **Escrivão** no presente ${proc.nome.toUpperCase()} acima referenciado, devendo cumprir todas as determinações legais inerentes ao cargo.
-                    
-                    Para constar, lavro o presente termo que vai assinado.
-                    
-                    
-                    __________________________________
-                    ${dados.sindicante_nome || '____________________'}
-                    Encarregado / Sindicante
-                `
-            };
-        }
-
-        // --- MODELO REUTILIZÁVEL: TERMO DE DECLARAÇÃO (Refatorado) ---
-        modeloTermoDeclaracao() {
-            return {
-                titulo: "TERMO DE DECLARAÇÃO",
-                campos: [
-                    { id: 'tipo_declaracao', label: 'Tipo da Declaração', tipo: 'select', 
-                      opcoes: [
-                          'TERMO DE DECLARAÇÃO DO OFENDIDO/VÍTIMA', 
-                          'TERMO DE DECLARAÇÃO DA TESTEMUNHA', 
-                          'TERMO DE INTERROGATÓRIO DO ACUSADO/SINDICADO'
-                      ], 
-                      valorPadrao: 'TERMO DE DECLARAÇÃO DA TESTEMUNHA' 
+        class SistemaProcedimentos {
+            constructor() {
+                this.procedimentoSelecionado = null;
+                this.documentoSelecionado = null;
+                this.dadosCaracterizacao = {};
+                this.definirModelos();
+                this.preencherDataAtual();
+            }
+            
+            definirModelos() {
+                this.modelosDocumentos = {
+                    autuacao: {
+                        titulo: "AUTUAÇÃO",
+                        campos: [
+                            { id: 'escri��o_nome', label: 'Escrivão Designado', tipo: 'text' }
+                        ],
+                        template: (dados) => `
+                            ${dados.procedimento.nome.toUpperCase()}
+                            
+                            ENCARREGADO: ${dados.encarregado.nome}
+                            ACUSADO: ${dados.acusado.nome}
+                            OFENDIDO: ${dados.ofendido.nome}
+                            
+                            A U T U A Ç Ã O
+                            
+                            Aos ${dados.data.dia} dias do mês de ${dados.data.mes} do ano de ${dados.data.ano}, nesta cidade de Manaus, Estado do Amazonas, na ${dados.local.unidade}, autuo a Portaria nº ${dados.portaria.numero}, datada de ${dados.portaria.data}, e demais documentos que a este junto, do que para constar, lavro o presente termo. Eu, ${dados.encarregado.nome}, Encarregado que o digitei e assino.
+                            
+                            __________________________________
+                            ${dados.encarregado.nome}
+                            Encarregado / Sindicante
+                        `
                     },
-                    { id: 'encarregado_nome', label: 'Nome e Posto/Grad do Encarregado', tipo: 'text', valorPadrao: 'MAJ QOPM FULANO DA SILVA (CI XXXX)' },
-                    { id: 'procedimento_numero', label: 'Nº do Procedimento (Portaria/Instrução)', tipo: 'text', valorPadrao: 'XX.XX/AAAA/PROCEDIMENTO/PMAM' },
-                    { id: 'declarante_nome', label: 'Nome Completo', tipo: 'text', placeholder: 'Nome e Qualificação', valorPadrao: 'NOME COMPLETO E QUALIFICAÇÃO' },
-                    { id: 'declarante_cpf', label: 'CPF', tipo: 'text', placeholder: 'Apenas números' },
-                    { id: 'declarante_identidade', label: 'Identidade (RG)', tipo: 'text', placeholder: 'RG e Órgão Emissor' },
-                    { id: 'declarante_filiacao', label: 'Filiação (Mãe e Pai)', tipo: 'text', placeholder: 'Nome da Mãe e do Pai' },
-                    { id: 'declarante_endereco', label: 'Endereço Completo', tipo: 'textarea', placeholder: 'Rua, Número, Bairro, Cidade/UF' },
-                    { id: 'local_oitiva', label: 'Local da Oitiva (Sala/Unidade)', tipo: 'text', placeholder: 'Ex: SJD do Comando de Policiamento Leste', valorPadrao: 'SJD DO COMANDO DE POLICIAMENTO' },
-                    { id: 'depoimento_livre', label: 'DESCREVA: Narração dos Fatos/Perguntas e Respostas', tipo: 'textarea', placeholder: 'O Declarante disse que... (Perguntas e Respostas em tópicos)', valorPadrao: 'O DECLARANTE INICIA SUA OITIVA (DEPOIMENTO LIVRE):\n\nPERGUNTA: [P1]\nRESPOSTA: [R1]\n\nPERGUNTA: [P2]\nRESPOSTA: [R2]' },
-                ],
-                template: (dados, proc) => {
-                    const tipoDeclaracao = dados.tipo_declaracao || 'TERMO DE DECLARAÇÃO DA TESTEMUNHA';
-                    const oitivaTitulo = tipoDeclaracao.toUpperCase().replace(/TERMO DE /g, ''); // Remove "TERMO DE "
-                    const termoAssinatura = tipoDeclaracao.includes('ACUSADO') ? 'Interrogado/Acusado' : 
-                                            tipoDeclaracao.includes('OFENDIDO') ? 'Declarante/Ofendido/Vítima' : 'Declarante/Testemunha';
-
-                    return `
-                        TERMO DE DECLARAÇÃO - ${oitivaTitulo}
-                        
-                        AUTOS: ${proc.nome.toUpperCase()} (${proc.id}) nº ${dados.procedimento_numero || '__________'}
-                        ENCARREGADO: ${dados.encarregado_nome || '____________________'}
-                        
-                        
-                        ${termoAssinatura.toUpperCase()}: ${dados.declarante_nome || '____________________'}
-                        CPF: ${dados.declarante_cpf || '__________'}
-                        IDENTIDADE: ${dados.declarante_identidade || '__________'}
-                        FILIAÇÃO: ${dados.declarante_filiacao || '__________'}
-                        ENDEREÇO: ${dados.declarante_endereco || '__________'}
-                        
-                        
-                        Aos ${dados.data_dia || '[Dia]'} dias do mês de ${dados.data_mes || '[Mês]'} do ano de ${dados.data_ano || '[Ano]'}, nesta Cidade de Manaus, Estado do Amazonas, na ${dados.local_oitiva || '____________________'}, perante o Encarregado, presente o Escrivão, foi inquirido o(a) ${termoAssinatura.toLowerCase()} acima qualificado(a), que ao ser perguntado(a) sobre o objeto da apuração, declarou:
-                        
-                        
-                        ${dados.depoimento_livre || '____________________'}
-                        
-                        
-                        Lida e achada conforme, dou por encerrado o presente Termo, que segue assinado pelo Encarregado, pelo Escrivão e pelo ${termoAssinatura}.
-                        
-                        
-                        Manaus-AM, ${dados.data_dia || '[Dia]'} de ${dados.data_mes || '[Mês]'} de ${dados.data_ano || '[Ano]'}.
-                        
-                        __________________________________
-                        ${dados.declarante_nome || '____________________'}
-                        ${termoAssinatura}
-                        
-                        __________________________________
-                        [NOME DO ESCRIVÃO (Posto/Grad CI)]
-                        Escrivão
-                        
-                        __________________________________
-                        ${dados.encarregado_nome || '____________________'}
-                        Encarregado / Sindicante
-                    `;
-                }
-            };
-        }
-
-        // --- MODELO REUTILIZÁVEL: OFÍCIO GENÉRICO (Substitui Prorrogação e Encaminhamento) ---
-        modeloOficioGenerico() {
-            return { 
-                titulo: "OFÍCIOS (Diversos Assuntos)", 
-                campos: [
-                    { id: 'destinatario_posto', label: 'Posto/Grad do Destinatário', tipo: 'text', valorPadrao: 'EXMO. SR. CEL. QOPM' },
-                    { id: 'destinatario_cargo', label: 'Cargo do Destinatário', tipo: 'text', valorPadrao: 'COMANDANTE GERAL DA PMAM / AUTORIDADE DELEGADA' },
-                    { id: 'remetente_posto', label: 'Posto/Grad do Remetente', tipo: 'text', valorPadrao: 'MAJ QOPM' },
-                    { id: 'remetente_cargo', label: 'Cargo do Remetente', tipo: 'text', valorPadrao: 'SINDICANTE/ENCARREGADO' },
-                    { id: 'assunto', label: 'Assunto do Ofício', tipo: 'text', valorPadrao: 'SOLICITA PRORROGAÇÃO DE PRAZO / SOLICITA OITIVA DE TESTEMUNHA / ENCAMINHAMENTO DE AUTOS' },
-                    { id: 'referencia', label: 'Referência (Portaria ou N° do Procedimento)', tipo: 'text', valorPadrao: 'Portaria nº XX.XX/AAAA/PROCEDIMENTO/PMAM' },
-                    { id: 'conteudo', label: 'Conteúdo do Ofício (Detalhamento do Pedido)', tipo: 'textarea', placeholder: 'Detalhe o pedido: Ex: A prorrogação é necessária devido a..., ou solicito a apresentação do militar..., ou encaminho os autos concluídos.', valorPadrao: 'Tenho a honra de encaminhar a Vossa Excelência o presente OFÍCIO para tratar do assunto em epígrafe. \n\n[DETALHAR O PEDIDO: PRORROGAÇÃO, CONVOCAÇÃO, REMESSA, ETC.]' },
-                ], 
-                template: (dados, proc) => `
-                    OFÍCIO Nº XXX/${dados.data_ano || 'AAAA'}/${proc.id} - Quartel em Manaus/AM, ${dados.data_dia || '[Dia]'} de ${dados.data_mes || '[Mês]'} de ${dados.data_ano || '[Ano]'}.
                     
-                    Ao ${dados.destinatario_posto || '____________________'} ${dados.destinatario_cargo || '____________________'}
+                    abertura: {
+                        titulo: "TERMO DE ABERTURA",
+                        campos: [],
+                        template: (dados) => `
+                            TERMO DE ABERTURA
+                            
+                            Aos ${dados.data.dia} dias do mês de ${dados.data.mes} do ano de ${dados.data.ano}, nesta cidade de Manaus, Estado do Amazonas, na ${dados.local.unidade}, dei início ao presente ${dados.procedimento.nome.toUpperCase()}, tendo como objeto: ${dados.objeto.apuracao}. Do que para constar lavro o presente Termo que o escrevi e assino.
+                            
+                            __________________________________
+                            ${dados.encarregado.nome}
+                            Encarregado / Sindicante
+                        `
+                    },
                     
-                    Assunto: ${dados.assunto || '____________________'} - Ref.: ${dados.referencia || '____________________'}
+                    designacao: {
+                        titulo: "DESIGNAÇÃO DE ESCRIVÃO",
+                        campos: [
+                            { id: 'escrivao_designado', label: 'Nome e Posto/Grad do Escrivão', tipo: 'text' }
+                        ],
+                        template: (dados) => `
+                            TERMO DE DESIGNAÇÃO DE ESCRIVÃO
+                            
+                            Aos ${dados.data.dia} dias do mês de ${dados.data.mes} do ano de ${dados.data.ano}, eu, ${dados.encarregado.nome}, Encarregado, RESOLVO:
+                            
+                            DESIGNAR o ${dados.campos.escrivao_designado || '____________________'}, para exercer a função de **Escrivão** no presente ${dados.procedimento.nome.toUpperCase()} acima referenciado, devendo cumprir todas as determinações legais inerentes ao cargo.
+                            
+                            Para constar, lavro o presente termo que vai assinado.
+                            
+                            __________________________________
+                            ${dados.encarregado.nome}
+                            Encarregado / Sindicante
+                        `
+                    },
                     
-                    Senhor Comandante/Diretor/Autoridade,
+                    termos: {
+                        titulo: "TERMO DE DECLARAÇÃO",
+                        campos: [
+                            { id: 'tipo_declaracao', label: 'Tipo de Declaração', tipo: 'select', 
+                              opcoes: ['Testemunha', 'Acusado', 'Vítima'] },
+                            { id: 'declarante_nome', label: 'Nome do Declarante', tipo: 'text' },
+                            { id: 'depoimento', label: 'Depoimento', tipo: 'textarea' }
+                        ],
+                        template: (dados) => `
+                            TERMO DE DECLARAÇÃO - ${(dados.campos.tipo_declaracao || 'TESTEMUNHA').toUpperCase()}
+                            
+                            AUTOS: ${dados.procedimento.nome.toUpperCase()} (${dados.procedimento.id}) nº ${dados.portaria.numero}
+                            ENCARREGADO: ${dados.encarregado.nome}
+                            
+                            DECLARANTE: ${dados.campos.declarante_nome || '____________________'}
+                            
+                            Aos ${dados.data.dia} dias do mês de ${dados.data.mes} do ano de ${dados.data.ano}, nesta Cidade de Manaus, Estado do Amazonas, na ${dados.local.unidade}, perante o Encarregado, presente o Escrivão, foi inquirido o(a) declarante acima qualificado(a), que ao ser perguntado(a) sobre o objeto da apuração, declarou:
+                            
+                            ${dados.campos.depoimento || '____________________'}
+                            
+                            Lida e achada conforme, dou por encerrado o presente Termo, que segue assinado.
+                            
+                            Manaus-AM, ${dados.data.dia} de ${dados.data.mes} de ${dados.data.ano}.
+                            
+                            __________________________________
+                            ${dados.campos.declarante_nome || '____________________'}
+                            Declarante
+                            
+                            __________________________________
+                            [NOME DO ESCRIVÃO]
+                            Escrivão
+                            
+                            __________________________________
+                            ${dados.encarregado.nome}
+                            Encarregado
+                        `
+                    },
                     
-                    ${dados.conteudo || '____________________'}
+                    oficios: {
+                        titulo: "OFÍCIO",
+                        campos: [
+                            { id: 'destinatario', label: 'Destinatário', tipo: 'text' },
+                            { id: 'assunto', label: 'Assunto', tipo: 'text' },
+                            { id: 'conteudo', label: 'Conteúdo', tipo: 'textarea' }
+                        ],
+                        template: (dados) => `
+                            OFÍCIO Nº XXX/${dados.data.ano}/${dados.procedimento.id}
+                            Quartel em Manaus/AM, ${dados.data.dia} de ${dados.data.mes} de ${dados.data.ano}.
+                            
+                            Ao ${dados.campos.destinatario || '____________________'}
+                            
+                            Assunto: ${dados.campos.assunto || '____________________'}
+                            
+                            Senhor(a),
+                            
+                            ${dados.campos.conteudo || '____________________'}
+                            
+                            Atenciosamente,
+                            
+                            __________________________________
+                            ${dados.encarregado.nome}
+                            Encarregado
+                        `
+                    },
                     
-                    Atenciosamente,
-                    
-                    __________________________________
-                    ${dados.remetente_posto || '____________________'}
-                    ${dados.remetente_cargo || '____________________'}
-                ` 
-            };
-        }
-        
-        // --- NOVO MODELO: RELATÓRIO PADRÃO ---
-        modeloRelatorio(procId) {
-            const proc = this.procedimentos[procId];
-            return {
-                titulo: "RELATÓRIO",
-                campos: [
-                    { id: 'relatorio_procedimento_numero', label: 'Nº do Procedimento (Portaria/Instrução)', tipo: 'text', valorPadrao: `XX.XX/AAAA/${procId}/SJD/PMAM` },
-                    { id: 'relatorio_encarregado_nome', label: 'Nome, Posto/Grad e CI do Encarregado', tipo: 'text', valorPadrao: 'NOME DO MILITAR (POSTO/GRAD CI XXXX)' },
-                    { id: 'relatorio_sindicado_nome', label: `Nome do Militar ${procId === 'PARE' ? 'Indiciado/Responsável' : 'Acusado/Sindicado'}`, tipo: 'text', valorPadrao: 'NOME DO MILITAR (POSTO/GRAD CI XXXX)' },
-                    { id: 'relatorio_historico', label: '1. HISTÓRICO/PREAMBULAR (Fatos e Instauração)', tipo: 'textarea', placeholder: 'Data de Instauração, Fatos Iniciais, Objeto da Apuração.', valorPadrao: 'O presente procedimento foi instaurado pela Portaria nº [Nº PORTARIA], datada de [DATA], publicada no [BOLETIM]. O objeto da apuração consiste em [OBJETO].' },
-                    { id: 'relatorio_diligencias', label: '2. DILIGÊNCIAS REALIZADAS', tipo: 'textarea', placeholder: 'Descrever o que foi feito: Oitiva de Testemunhas, juntada de documentos, perícias...', valorPadrao: 'Foram realizadas as seguintes diligências:\na) Oitivas de [QUANTIDADE] Testemunhas e [QUANTIDADE] Declarações de Ofendidos.\nb) Interrogatório do [ACUSADO/SINDICADO/RESPONSÁVEL].\nc) Juntada dos documentos [Citar documentos].' },
-                    { id: 'relatorio_analise', label: '3. ANÁLISE E FUNDAMENTAÇÃO', tipo: 'textarea', placeholder: 'Confrontar as provas colhidas com a legislação, citando o RDPM/CPPM/Legislação específica.', valorPadrao: 'Após a análise dos fatos e das provas colhidas (folhas XX a XX), verificou-se que a conduta do militar [SINDICADO_NOME] se enquadra [OU NÃO SE ENQUADRA] no previsto no art. [XXX] do RDPM/CPPM. As provas [SÃO SUFICIENTES/INSUFICIENTES] para a comprovação da materialidade e autoria.' },
-                    { id: 'relatorio_conclusao', label: '4. CONCLUSÃO E PROPOSTA', tipo: 'textarea', placeholder: 'Proposta final: Arquivamento, Indiciamento, Remessa para Autoridade Superior.', valorPadrao: 'Diante do exposto e com base nas provas colhidas, o Encarregado propõe: [ARQUIVAMENTO/INDICIAMENTO DO SINDICADO/OUTRAS MEDIDAS].' },
-                ],
-                template: (dados, proc) => `
-                    RELATÓRIO DO ${proc.nome.toUpperCase()} (${proc.id})
-                    
-                    Nº DO PROCEDIMENTO: ${dados.relatorio_procedimento_numero || '____________________'}
-                    ENCARREGADO: ${dados.relatorio_encarregado_nome || '____________________'}
-                    ${procId === 'PARE' ? 'RESPONSÁVEL' : 'ACUSADO'}: ${dados.relatorio_sindicado_nome || '____________________'}
-                    
-                    
-                    1. HISTÓRICO / PREAMBULAR
-                    
-                    ${dados.relatorio_historico || '____________________'}
-                    
-                    
-                    2. DILIGÊNCIAS REALIZADAS
-                    
-                    ${dados.relatorio_diligencias || '____________________'}
-                    
-                    
-                    3. ANÁLISE E FUNDAMENTAÇÃO
-                    
-                    ${dados.relatorio_analise || '____________________'}
-                    
-                    
-                    4. CONCLUSÃO E PROPOSTA
-                    
-                    ${dados.relatorio_conclusao || '____________________'}
-                    
-                    
-                    Manaus-AM, ${dados.data_dia || '[Dia]'} de ${dados.data_mes || '[Mês]'} de ${dados.data_ano || '[Ano]'}.
-                    
-                    __________________________________
-                    ${dados.relatorio_encarregado_nome || '____________________'}
-                    ENCARREGADO / SINDICANTE
-                `
-            };
-        }
-
-
-        // === 1. DEFINIÇÃO DOS MODELOS POR TIPO DE PROCEDIMENTO ===
-        definirModelos() {
-          return {
-            // --- SINDICÂNCIA DISCIPLINAR (SD) ---
-            SD: {
-              id: "SD",
-              nome: "SINDICÂNCIA DISCIPLINAR",
-              documentos: {
-                termoAbertura: this.modeloAutuacaoAbertura('SD'),
-                termoDeclaracao: this.modeloTermoDeclaracao(), 
-                oficioGenerico: this.modeloOficioGenerico(),
-                relatorio: this.modeloRelatorio('SD') // Adicionado Relatório
-              }
-            },
-            
-            // --- SINDICÂNCIA INVESTIGATIVA (SI) ---
-            SI: {
-                id: "SI",
-                nome: "SINDICÂNCIA INVESTIGATIVA",
-                documentos: {
-                    termoAbertura: this.modeloAutuacaoAbertura('SI'),
-                    termoDeclaracao: this.modeloTermoDeclaracao(), 
-                    oficioGenerico: this.modeloOficioGenerico(),
-                    relatorio: this.modeloRelatorio('SI') // Adicionado Relatório
-                }
-            },
-
-            // --- INQUÉRITO POLICIAL MILITAR (IPM) ---
-            IPM: {
-                id: "IPM",
-                nome: "INQUÉRITO POLICIAL MILITAR",
-                documentos: {
-                    termoAbertura: this.modeloAutuacaoAbertura('IPM'),
-                    termoDeclaracao: this.modeloTermoDeclaracao(), 
-                    oficioGenerico: this.modeloOficioGenerico(),
-                    relatorio: this.modeloRelatorio('IPM') // Adicionado Relatório
-                }
-            },
-            
-            // --- PROCESSO ADM. DISCIPLINAR (PAD) ---
-            PAD: {
-                id: "PAD",
-                nome: "PROCESSO ADMINISTRATIVO DISCIPLINAR",
-                documentos: {
-                    termoAbertura: this.modeloAutuacaoAbertura('PAD'),
-                    termoDeclaracao: this.modeloTermoDeclaracao(), 
-                    oficioGenerico: this.modeloOficioGenerico(),
-                    relatorio: this.modeloRelatorio('PAD') // Adicionado Relatório
-                }
-            },
-            
-            // --- PROCEDIMENTO DE RESSARCIMENTO (PARE) ---
-            PARE: {
-                id: "PARE",
-                nome: "PROCEDIMENTO DE RESSARCIMENTO",
-                documentos: {
-                    termoAbertura: this.modeloAutuacaoAbertura('PARE'),
-                    termoDeclaracao: this.modeloTermoDeclaracao(), 
-                    oficioGenerico: this.modeloOficioGenerico(),
-                    relatorio: this.modeloRelatorio('PARE') // Adicionado Relatório
-                }
+                    relatorio: {
+                        titulo: "RELATÓRIO",
+                        campos: [
+                            { id: 'historico', label: 'Histórico', tipo: 'textarea' },
+                            { id: 'diligencias', label: 'Diligências Realizadas', tipo: 'textarea' },
+                            { id: 'analise', label: 'Análise', tipo: 'textarea' },
+                            { id: 'conclusao', label: 'Conclusão', tipo: 'textarea' }
+                        ],
+                        template: (dados) => `
+                            RELATÓRIO DO ${dados.procedimento.nome.toUpperCase()} (${dados.procedimento.id})
+                            
+                            Nº DO PROCEDIMENTO: ${dados.portaria.numero}
+                            ENCARREGADO: ${dados.encarregado.nome}
+                            ACUSADO: ${dados.acusado.nome}
+                            
+                            1. HISTÓRICO / PREAMBULAR
+                            
+                            ${dados.campos.historico || '____________________'}
+                            
+                            2. DILIGÊNCIAS REALIZADAS
+                            
+                            ${dados.campos.diligencias || '____________________'}
+                            
+                            3. ANÁLISE E FUNDAMENTAÇÃO
+                            
+                            ${dados.campos.analise || '____________________'}
+                            
+                            4. CONCLUSÃO E PROPOSTA
+                            
+                            ${dados.campos.conclusao || '____________________'}
+                            
+                            Manaus-AM, ${dados.data.dia} de ${dados.data.mes} de ${dados.data.ano}.
+                            
+                            __________________________________
+                            ${dados.encarregado.nome}
+                            ENCARREGADO
+                        `
+                    }
+                };
             }
-          };
-        }
-
-        // === 2. LÓGICA DE INTERFACE E FORMULÁRIO ===
-        
-        toggleSidebar() {
-            this.sidebar.classList.toggle('open');
-            document.body.classList.toggle('overflow-hidden');
-        }
-
-        criarCampoHTML(campo) {
-            const div = document.createElement('div');
-            div.className = 'mb-4';
-            let inputElement;
-
-            const inputClasses = 'w-full p-3 border border-gray-300 rounded-lg box-border text-base transition-all focus:border-pmam-accent focus:outline-none focus:ring-2 focus:ring-pmam-accent/30';
-
-            if (campo.tipo === 'textarea') {
-                inputElement = `<textarea id="${campo.id}" name="${campo.id}" rows="4" placeholder="${campo.placeholder || ''}" class="${inputClasses} resize-y"></textarea>`;
-            } else if (campo.tipo === 'select' && campo.opcoes) {
-                const opcoesHTML = campo.opcoes.map(opt => `<option value="${opt}">${opt}</option>`).join('');
-                inputElement = `<select id="${campo.id}" name="${campo.id}" class="${inputClasses}">${opcoesHTML}</select>`;
-            } else {
-                inputElement = `<input type="${campo.tipo}" id="${campo.id}" name="${campo.id}" placeholder="${campo.placeholder || ''}" class="${inputClasses}" ${campo.tipo === 'number' ? `min="${campo.min || ''}" max="${campo.max || ''}"` : ''}>`;
-            }
-
-            div.innerHTML = `
-                <label for="${campo.id}" class="block mb-2 font-semibold text-pmam-secondary">${campo.label}:</label>
-                ${inputElement}
-            `;
             
-            const element = div.querySelector(`#${campo.id}`);
-            if (element && campo.valorPadrao !== undefined) {
-                element.value = campo.valorPadrao;
-            }
-
-            return div;
-        }
-
-        carregarProcedimento(procedimentoId) {
-            this.procedimentoAtualId = procedimentoId;
-            this.modeloAtualId = null; 
-            const proc = this.procedimentos[procedimentoId];
-            
-            if (proc) {
-                // Atualiza o menu lateral (Sidebar)
-                let menuHTML = '';
-                for (const [modeloId, modelo] of Object.entries(proc.documentos)) {
-                    menuHTML += `
-                        <a href="#" class="sidebar-item block py-4 px-5 mx-2 my-1 rounded-pmam-lg text-pmam-card text-sm transition-all" onclick="sistema.carregarModelo('${modeloId}')">
-                            <i class="${this.getIcone(modeloId)} mr-2"></i> ${modelo.titulo}
-                        </a>
-                    `;
-                }
-                this.menuDocumentos.innerHTML = menuHTML;
+            selecionarProcedimento(tipo) {
+                const procedimentos = {
+                    SD: { id: 'SD', nome: 'SINDICÂNCIA DISCIPLINAR' },
+                    SI: { id: 'SI', nome: 'SINDICÂNCIA INVESTIGATIVA' },
+                    IPM: { id: 'IPM', nome: 'INQUÉRITO POLICIAL MILITAR' },
+                    PAD: { id: 'PAD', nome: 'PROCESSO ADMINISTRATIVO DISCIPLINAR' },
+                    PARE: { id: 'PARE', nome: 'PROCEDIMENTO DE RESSARCIMENTO' }
+                };
                 
-                // Atualiza cabeçalho
-                this.tituloDocumento.innerHTML = `<i class="fas fa-folder-open mr-2"></i> ${proc.nome} (${proc.id})`;
-                this.descricaoDocumento.textContent = `Selecione um documento no menu lateral para gerar o modelo para o procedimento de ${proc.nome}.`;
-                this.camposContainer.innerHTML = '<div class="md:col-span-2 text-center py-10 text-pmam-secondary">Selecione um tipo de documento no menu lateral.</div>';
-                this.previewArea.textContent = '... O documento será renderizado aqui ...';
-
-                // Fecha sidebar no mobile
-                if (window.innerWidth < 768 && this.sidebar.classList.contains('open')) {
-                    this.toggleSidebar();
+                this.procedimentoSelecionado = procedimentos[tipo];
+                
+                // Atualizar interface
+                document.getElementById('procedimento-nome').textContent = 
+                    `${this.procedimentoSelecionado.id} - ${this.procedimentoSelecionado.nome}`;
+                
+                let descricao = '';
+                switch(tipo) {
+                    case 'SD': descricao = 'Para apuração de infrações disciplinares cometidas por militares.'; break;
+                    case 'SI': descricao = 'Para investigação de fatos que possam configurar infrações disciplinares ou penais.'; break;
+                    case 'IPM': descricao = 'Para investigação de infrações penais militares.'; break;
+                    case 'PAD': descricao = 'Processo formal para apuração de infrações disciplinares graves.'; break;
+                    case 'PARE': descricao = 'Para apuração de responsabilidade civil por danos à fazenda pública.'; break;
                 }
-
-            } else {
-                 this.menuDocumentos.innerHTML = '<p class="text-white/70 text-center text-sm px-5">Escolha o tipo de Procedimento no campo principal.</p>';
+                document.getElementById('procedimento-descricao').textContent = descricao;
+                
+                // Atualizar título do acusado para PARE
+                if (tipo === 'PARE') {
+                    document.getElementById('titulo-acusado').textContent = 'Indiciado/Responsável';
+                } else {
+                    document.getElementById('titulo-acusado').textContent = 'Acusado/Sindicado';
+                }
+                
+                document.getElementById('info-procedimento-selecionado').classList.remove('hidden');
+                
+                // Destacar card selecionado
+                document.querySelectorAll('.procedimento-card').forEach(card => {
+                    card.classList.remove('border-pmam-accent', 'bg-blue-50');
+                });
+                event.currentTarget.classList.add('border-pmam-accent', 'bg-blue-50');
+            }
+            
+            avancarParaCaracterizacao() {
+                if (!this.procedimentoSelecionado) {
+                    this.mostrarToast('Selecione um tipo de procedimento primeiro.', 'erro');
+                    return;
+                }
+                
+                // Atualizar abas
+                this.ativarAba('caracterizacao');
+                
+                // Atualizar info do procedimento
+                document.getElementById('procedimento-atual-info').textContent = 
+                    `${this.procedimentoSelecionado.id} - ${this.procedimentoSelecionado.nome}`;
+                
+                // Preencher número da portaria com padrão
+                const ano = document.getElementById('data-ano').value;
+                const numeroPadrao = `XX.XX/${ano}/${this.procedimentoSelecionado.id}/SJD/PMAM`;
+                document.getElementById('numero-portaria').value = numeroPadrao;
+            }
+            
+            voltarParaProcedimento() {
+                this.ativarAba('procedimento');
+            }
+            
+            avancarParaDocumentos() {
+                // Coletar dados da caracterização
+                this.dadosCaracterizacao = {
+                    procedimento: this.procedimentoSelecionado,
+                    portaria: {
+                        numero: document.getElementById('numero-portaria').value,
+                        data: `${document.getElementById('data-dia').value} de ${document.getElementById('data-mes').value} de ${document.getElementById('data-ano').value}`
+                    },
+                    data: {
+                        dia: document.getElementById('data-dia').value,
+                        mes: document.getElementById('data-mes').value,
+                        ano: document.getElementById('data-ano').value
+                    },
+                    local: {
+                        unidade: document.getElementById('local-unidade').value
+                    },
+                    encarregado: {
+                        nome: document.getElementById('encarregado-nome').value,
+                        cargo: document.getElementById('encarregado-cargo').value
+                    },
+                    acusado: {
+                        nome: document.getElementById('acusado-nome').value,
+                        lotacao: document.getElementById('acusado-lotacao').value
+                    },
+                    ofendido: {
+                        tipo: document.getElementById('ofendido-tipo').value,
+                        nome: document.getElementById('ofendido-nome').value
+                    },
+                    objeto: {
+                        apuracao: document.getElementById('objeto-apuracao').value
+                    }
+                };
+                
+                this.ativarAba('documentos');
+            }
+            
+            voltarParaCaracterizacao() {
+                this.ativarAba('caracterizacao');
+            }
+            
+            selecionarDocumento(tipo) {
+                this.documentoSelecionado = tipo;
+                const modelo = this.modelosDocumentos[tipo];
+                
+                // Atualizar interface
+                document.getElementById('titulo-documento-selecionado').textContent = modelo.titulo;
+                document.getElementById('formulario-documento').classList.remove('hidden');
+                
+                // Gerar campos
+                const container = document.getElementById('campos-documento');
+                container.innerHTML = '';
+                
+                modelo.campos.forEach(campo => {
+                    const div = document.createElement('div');
+                    div.className = 'mb-4';
+                    
+                    let input = '';
+                    if (campo.tipo === 'textarea') {
+                        input = `<textarea id="doc-${campo.id}" class="w-full p-3 border border-gray-300 rounded-lg" rows="4" placeholder="${campo.label}"></textarea>`;
+                    } else if (campo.tipo === 'select') {
+                        const opcoes = campo.opcoes.map(op => `<option value="${op}">${op}</option>`).join('');
+                        input = `<select id="doc-${campo.id}" class="w-full p-3 border border-gray-300 rounded-lg">${opcoes}</select>`;
+                    } else {
+                        input = `<input type="text" id="doc-${campo.id}" class="w-full p-3 border border-gray-300 rounded-lg" placeholder="${campo.label}">`;
+                    }
+                    
+                    div.innerHTML = `
+                        <label class="block mb-2 font-medium text-gray-700">${campo.label}:</label>
+                        ${input}
+                    `;
+                    
+                    container.appendChild(div);
+                });
+                
+                // Destacar botão selecionado
+                document.querySelectorAll('.doc-btn').forEach(btn => {
+                    btn.classList.remove('border-pmam-accent', 'bg-blue-50');
+                });
+                event.currentTarget.classList.add('border-pmam-accent', 'bg-blue-50');
+            }
+            
+            avancarParaPreview() {
+                if (!this.documentoSelecionado) {
+                    this.mostrarToast('Selecione um tipo de documento.', 'erro');
+                    return;
+                }
+                
+                // Coletar dados dos campos do documento
+                const campos = {};
+                const modelo = this.modelosDocumentos[this.documentoSelecionado];
+                
+                modelo.campos.forEach(campo => {
+                    const elemento = document.getElementById(`doc-${campo.id}`);
+                    if (elemento) {
+                        campos[campo.id] = elemento.value;
+                    }
+                });
+                
+                // Combinar dados
+                const dadosCompletos = {
+                    ...this.dadosCaracterizacao,
+                    campos: campos
+                };
+                
+                // Gerar preview
+                const conteudo = modelo.template(dadosCompletos);
+                document.getElementById('preview-conteudo').textContent = conteudo;
+                
+                // Atualizar info
+                document.getElementById('preview-tipo-procedimento').textContent = 
+                    `${this.procedimentoSelecionado.id} - ${this.documentoSelecionado.toUpperCase()}`;
+                document.getElementById('preview-tipo-documento').textContent = 
+                    modelo.titulo;
+                
+                this.ativarAba('preview');
+            }
+            
+            voltarParaDocumentos() {
+                this.ativarAba('documentos');
+            }
+            
+            ativarAba(aba) {
+                // Atualizar abas
+                ['procedimento', 'caracterizacao', 'documentos', 'preview'].forEach(tab => {
+                    const tabBtn = document.getElementById(`tab-${tab}`);
+                    const content = document.getElementById(`content-${tab}`);
+                    
+                    if (tab === aba) {
+                        tabBtn.classList.add('active');
+                        tabBtn.disabled = false;
+                        content.classList.remove('hidden');
+                    } else {
+                        tabBtn.classList.remove('active');
+                        content.classList.add('hidden');
+                        
+                        // Habilitar/desabilitar abas conforme progresso
+                        if (tab === 'caracterizacao' && this.procedimentoSelecionado) {
+                            tabBtn.disabled = false;
+                        } else if (tab === 'documentos' && this.dadosCaracterizacao.procedimento) {
+                            tabBtn.disabled = false;
+                        } else if (tab === 'preview' && this.documentoSelecionado) {
+                            tabBtn.disabled = false;
+                        } else if (tab !== 'procedimento') {
+                            tabBtn.disabled = true;
+                        }
+                    }
+                });
+            }
+            
+            preencherDataAtual() {
+                const hoje = new Date();
+                const meses = [
+                    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+                ];
+                
+                document.getElementById('data-dia').value = hoje.getDate();
+                document.getElementById('data-mes').value = meses[hoje.getMonth()];
+                document.getElementById('data-ano').value = hoje.getFullYear();
+            }
+            
+            gerarPDF() {
+                if (!this.documentoSelecionado) return;
+                
+                const conteudo = document.getElementById('preview-conteudo').textContent;
+                const doc = new jsPDF();
+                
+                doc.setFont('helvetica');
+                doc.setFontSize(11);
+                
+                const margem = 20;
+                const largura = 210 - 2 * margem;
+                
+                const linhas = doc.splitTextToSize(conteudo, largura);
+                doc.text(linhas, margem, margem);
+                
+                const nomeArquivo = `${this.procedimentoSelecionado.id}_${this.documentoSelecionado}_${new Date().getTime()}.pdf`;
+                doc.save(nomeArquivo);
+                
+                this.mostrarToast('PDF gerado com sucesso!', 'sucesso');
+            }
+            
+            copiarTexto() {
+                const texto = document.getElementById('preview-conteudo').textContent;
+                navigator.clipboard.writeText(texto)
+                    .then(() => this.mostrarToast('Texto copiado para a área de transferência!', 'sucesso'))
+                    .catch(() => this.mostrarToast('Erro ao copiar texto.', 'erro'));
+            }
+            
+            novoDocumento() {
+                this.documentoSelecionado = null;
+                this.ativarAba('documentos');
+                document.getElementById('formulario-documento').classList.add('hidden');
+                document.querySelectorAll('.doc-btn').forEach(btn => {
+                    btn.classList.remove('border-pmam-accent', 'bg-blue-50');
+                });
+            }
+            
+            mostrarToast(mensagem, tipo) {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                
+                let cor = 'bg-blue-500';
+                let icone = 'fas fa-info-circle';
+                
+                if (tipo === 'sucesso') {
+                    cor = 'bg-green-500';
+                    icone = 'fas fa-check-circle';
+                } else if (tipo === 'erro') {
+                    cor = 'bg-red-500';
+                    icone = 'fas fa-exclamation-circle';
+                }
+                
+                toast.className = `${cor} text-white p-4 rounded-lg shadow-lg mb-2 flex items-center`;
+                toast.innerHTML = `
+                    <i class="${icone} mr-3"></i>
+                    <span>${mensagem}</span>
+                `;
+                
+                container.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                    setTimeout(() => container.removeChild(toast), 300);
+                }, 3000);
             }
         }
         
-        carregarModelo(modeloId) {
-          if (!this.procedimentoAtualId) {
-              this.mostrarToast('Selecione primeiro o Tipo de Procedimento.', 'erro');
-              return;
-          }
-            
-          const proc = this.procedimentos[this.procedimentoAtualId];
-          const modelo = proc.documentos[modeloId];
-
-          if (!modelo) {
-            this.mostrarToast('Modelo não encontrado.', 'erro');
-            return;
-          }
-          
-          if (window.innerWidth < 768) {
-              this.toggleSidebar();
-          }
-
-          this.modeloAtualId = modeloId;
-          this.tituloDocumento.innerHTML = `<i class="${this.getIcone(modeloId)} mr-2"></i> Gerador de ${modelo.titulo} (${proc.id})`;
-          this.descricaoDocumento.textContent = `Preencha os campos abaixo para gerar o ${modelo.titulo} referente à ${proc.nome}.`;
-          this.camposContainer.innerHTML = '';
-          
-          // Tratamento especial para documentos que usam a largura total
-          const isFullWidth = (modeloId === 'termoDeclaracao' || modeloId === 'oficioGenerico' || modeloId === 'relatorio');
-          this.camposContainer.classList.toggle('md:grid-cols-2', !isFullWidth);
-          this.camposContainer.classList.toggle('md:grid-cols-1', isFullWidth);
-
-
-          modelo.campos.forEach(campo => {
-            const campoElement = this.criarCampoHTML(campo);
-            
-            // Tratamento especial para campos de texto longos (ocupam 2 colunas se houver mais de uma)
-            if (campo.tipo === 'textarea') {
-                 campoElement.classList.add('md:col-span-2');
-            }
-            
-            this.camposContainer.appendChild(campoElement);
-          });
-
-          document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('ativo'));
-          document.querySelector(`[onclick="sistema.carregarModelo('${modeloId}')"]`).classList.add('ativo');
-
-          this.atualizarPreview();
-        }
-
-        getIcone(modeloId) {
-            switch(modeloId) {
-                case 'termoAbertura': return 'fas fa-file-alt';
-                case 'termoDeclaracao': return 'fas fa-microphone-alt';
-                case 'oficioGenerico': return 'fas fa-envelope';
-                case 'relatorio': return 'fas fa-file-contract'; // Ícone para Relatório
-                default: return 'fas fa-file';
-            }
-        }
-        
-        obterDados() {
-            const dados = {};
-            const formElements = this.form.querySelectorAll('input, textarea, select'); 
-            formElements.forEach(element => {
-                if (element.name) {
-                    dados[element.name] = element.value.trim().toUpperCase(); 
-                }
-            });
-            
-            // Exceções para campos que NÃO devem ser em caixa alta (depoimento, conteúdo de ofício, blocos de relatório)
-            
-            // 1. Termo de Declaração
-            const depoimentoElement = this.form.querySelector('#depoimento_livre');
-            if (depoimentoElement) {
-                 dados.depoimento_livre = depoimentoElement.value.trim();
-            }
-            const tipoDeclaracaoElement = this.form.querySelector('#tipo_declaracao');
-            if (tipoDeclaracaoElement) {
-                 dados.tipo_declaracao = tipoDeclaracaoElement.value.trim();
-            }
-
-            // 2. Ofício Genérico
-            const conteudoElement = this.form.querySelector('#conteudo');
-            if (conteudoElement) {
-                 dados.conteudo = conteudoElement.value.trim();
-            }
-
-            // 3. Relatório
-            const relatorioHistorico = this.form.querySelector('#relatorio_historico');
-            if (relatorioHistorico) dados.relatorio_historico = relatorioHistorico.value.trim();
-            
-            const relatorioDiligencias = this.form.querySelector('#relatorio_diligencias');
-            if (relatorioDiligencias) dados.relatorio_diligencias = relatorioDiligencias.value.trim();
-            
-            const relatorioAnalise = this.form.querySelector('#relatorio_analise');
-            if (relatorioAnalise) dados.relatorio_analise = relatorioAnalise.value.trim();
-            
-            const relatorioConclusao = this.form.querySelector('#relatorio_conclusao');
-            if (relatorioConclusao) dados.relatorio_conclusao = relatorioConclusao.value.trim();
-
-
-            // O nome do mês deve ser formatado corretamente (título)
-            if (dados.data_mes) {
-                 dados.data_mes = dados.data_mes.charAt(0) + dados.data_mes.slice(1).toLowerCase();
-            }
-            return dados;
-        }
-
-        atualizarPreview() {
-          if (!this.modeloAtualId || !this.procedimentoAtualId) return;
-
-          const proc = this.procedimentos[this.procedimentoAtualId];
-          const modelo = proc.documentos[this.modeloAtualId];
-
-          if (modelo && modelo.template) {
-            const dados = this.obterDados();
-            this.previewArea.textContent = modelo.template(dados, proc).trim(); // Passa proc para o template
-          }
-        }
-
-        // === 3. FUNÇÕES DE AÇÃO ===
-
-        gerarPDF() {
-          if (!this.modeloAtualId || !this.procedimentoAtualId) {
-            this.mostrarToast('Selecione um documento para gerar o PDF.', 'erro');
-            return;
-          }
-
-          const dados = this.obterDados();
-          const proc = this.procedimentos[this.procedimentoAtualId];
-          const modelo = proc.documentos[this.modeloAtualId];
-          
-          const nomeArquivo = `${proc.id}_${modelo.titulo.replace(/\s/g, '_').replace(/\//g, '')}_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`;
-          const conteudo = modelo.template(dados, proc);
-
-          try {
-            const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-            const margem = 20;
-            const larguraMax = 210 - 2 * margem; 
-            
-            doc.setFont('times'); 
-            doc.setFontSize(12);
-
-            // Adiciona o conteúdo com quebra de linha automática
-            const linhas = doc.splitTextToSize(conteudo, larguraMax);
-            let y = margem;
-
-            // Título (Centralizado e Negrito)
-            const tituloCompleto = `${proc.nome.toUpperCase()} (${proc.id}) - ${modelo.titulo.toUpperCase()}`;
-            const tituloLinhas = doc.splitTextToSize(tituloCompleto, larguraMax);
-            doc.setFont(doc.getFont().fontName, 'bold');
-            doc.text(tituloLinhas, 105, y, { align: 'center' });
-            y += tituloLinhas.length * 6; 
-
-            doc.setFont(doc.getFont().fontName, 'normal'); 
-            y += 5; 
-
-            // Itera sobre as linhas do conteúdo para adicionar ao PDF
-            linhas.forEach(line => {
-                // Checagem de quebra de página
-                if (y > 280) { 
-                    doc.addPage();
-                    y = margem;
-                }
-                doc.text(line, margem, y);
-                y += 5; 
-            });
-
-            doc.save(nomeArquivo);
-            this.mostrarToast('PDF gerado com sucesso!', 'sucesso');
-
-          } catch (e) {
-            console.error('Erro ao gerar PDF:', e);
-            this.mostrarToast('Erro ao gerar PDF. Verifique o console.', 'erro');
-          }
-        }
-
-        async copiarTexto() {
-          const texto = this.previewArea.textContent;
-          try {
-            await navigator.clipboard.writeText(texto);
-            this.mostrarToast('Texto do documento copiado!', 'sucesso');
-          } catch (err) {
-            console.error('Erro ao copiar texto:', err);
-            this.mostrarToast('Erro ao copiar. Use Ctrl+C / Cmd+C.', 'erro');
-          }
-        }
-
-        mostrarToast(mensagem, tipo = 'info') {
-          const container = document.getElementById('toast-container');
-          const toast = document.createElement('div');
-          let iconeClass = '';
-
-          if (tipo === 'sucesso') {
-            iconeClass = 'fas fa-check-circle';
-            toast.className = `toast bg-pmam-success text-pmam-card min-w-64 p-4 rounded-pmam-lg shadow-pmam-xl mb-3 opacity-0 transform translate-x-full flex items-center`;
-          } else if (tipo === 'erro') {
-            iconeClass = 'fas fa-times-circle';
-            toast.className = `toast bg-pmam-error text-pmam-card min-w-64 p-4 rounded-pmam-lg shadow-pmam-xl mb-3 opacity-0 transform translate-x-full flex items-center`;
-          } else if (tipo === 'info') {
-            iconeClass = 'fas fa-info-circle';
-            toast.className = `toast bg-pmam-blue text-pmam-card min-w-64 p-4 rounded-pmam-lg shadow-pmam-xl mb-3 opacity-0 transform translate-x-full flex items-center`;
-          }
-
-          toast.innerHTML = `<i class="${iconeClass} mr-3 text-lg"></i> <span>${mensagem}</span>`;
-          container.appendChild(toast);
-
-          // Animação para mostrar
-          setTimeout(() => {
-            toast.classList.remove('opacity-0', 'translate-x-full');
-          }, 10);
-
-          // Animação para remover
-          setTimeout(() => {
-            toast.classList.add('opacity-0', 'translate-x-full');
-            setTimeout(() => {
-              container.removeChild(toast);
-            }, 300); 
-          }, 3000);
-        }
-      }
-
-      // Inicializar o sistema ao carregar a página
-      let sistema;
-      document.addEventListener('DOMContentLoaded', () => {
-        sistema = new SistemaProcedimentosPMAM();
-      });
+        // Inicializar sistema
+        const sistema = new SistemaProcedimentos();
     </script>
-  </body>
+</body>
 </html>
