@@ -260,6 +260,28 @@
             align-items: center;
             gap: 1rem;
         }
+        
+        /* Estilos para o botão de edição no preview */
+        .edit-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+        }
+        
+        .document-content {
+            position: relative;
+        }
+        
+        .textarea-editable {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+        
+        .document-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        }
     </style>
 </head>
 <body class="text-pmam-text font-sans">
@@ -298,7 +320,7 @@
                 <div class="step-item" id="sidebar-step-3">
                     <div class="step-circle">3</div>
                     <div class="step-label">Documentos<br>Variáveis</div>
-                    <div id="step-3-info" class="text-xs text-pmam-muted mt-1 text-center">0/4 seções</div>
+                    <div id="step-3-info" class="text-xs text-pmam-muted mt-1 text-center">0/5 seções</div>
                 </div>
             </div>
         </div>
@@ -533,6 +555,16 @@
                                        placeholder="Ex: CAP QOPM NOME COMPLETO (12345)">
                             </div>
                             
+                            <!-- NOVO CAMPO: ESCRIVÃO -->
+                            <div>
+                                <label class="block text-sm font-semibold text-pmam-text mb-2">
+                                    <i class="fas fa-pen-fancy text-pmam-gold mr-2"></i>Escrivão*
+                                </label>
+                                <input type="text" id="escrivao-nome" 
+                                       class="input-field w-full p-3 border border-pmam-border rounded-lg focus:outline-none focus:ring-2 focus:ring-pmam-blue"
+                                       placeholder="Ex: 1º TEN QOPM NOME COMPLETO (22892)">
+                            </div>
+                            
                             <div>
                                 <label id="titulo-acusado" class="block text-sm font-semibold text-pmam-text mb-2">
                                     <i class="fas fa-user text-pmam-gold mr-2"></i>Acusado/Sindicado*
@@ -593,7 +625,7 @@
                             <i class="fas fa-check-circle text-green-500 text-2xl"></i>
                             <h3 class="text-xl font-bold text-pmam-navy">Documentos Básicos (Gerados Automaticamente)</h3>
                         </div>
-                        <div id="lista-documentos-basicos" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div id="lista-documentos-basicos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 document-grid">
                             <!-- Preenchido dinamicamente -->
                         </div>
                     </div>
@@ -604,7 +636,7 @@
                             <i class="fas fa-file-alt text-pmam-gold text-2xl"></i>
                             <h3 class="text-xl font-bold text-pmam-navy">Documentos Variáveis</h3>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                             <!-- Ofícios -->
                             <div onclick="sistema.abrirModalDocumento('oficios')" 
                                  class="doc-card rounded-xl p-6 text-center">
@@ -662,7 +694,7 @@
                             <button onclick="sistema.visualizarTodos()" 
                                     class="px-6 py-3 bg-pmam-blue text-white rounded-lg font-medium transition-all flex items-center gap-2">
                                 <i class="fas fa-eye"></i>
-                                Visualizar Todos
+                                Visualizar/Editar Todos
                             </button>
                             <button onclick="sistema.exportarTodosPDF()" 
                                     class="btn-gold px-6 py-3 rounded-lg flex items-center gap-2">
@@ -744,6 +776,11 @@
                             class="flex-1 p-3 border border-pmam-border rounded-lg focus:outline-none focus:ring-2 focus:ring-pmam-blue">
                         <option value="">Selecione um documento</option>
                     </select>
+                    <button onclick="sistema.habilitarEdicaoPreview()" 
+                            class="px-4 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 flex items-center gap-2">
+                        <i class="fas fa-edit"></i>
+                        Editar
+                    </button>
                     <button onclick="sistema.exportarPDFSelecionado()" 
                             class="px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2">
                         <i class="fas fa-file-pdf"></i>
@@ -774,6 +811,8 @@
                     basicos: {
                         autuacao: { gerado: false, conteudo: '', titulo: 'Autuação' },
                         abertura: { gerado: false, conteudo: '', titulo: 'Termo de Abertura' },
+                        designacaoEscrivao: { gerado: false, conteudo: '', titulo: 'Designação do Escrivão' },
+                        termoCompromisso: { gerado: false, conteudo: '', titulo: 'Termo de Compromisso' },
                         designacao: { gerado: false, conteudo: '', titulo: 'Designação de Escrivão' }
                     },
                     variaveis: {
@@ -785,6 +824,7 @@
                 };
                 this.documentoAtualTipo = null;
                 this.procedimentosSalvos = this.carregarProcedimentosSalvos();
+                this.edicaoHabilitada = false;
                 
                 this.init();
             }
@@ -923,6 +963,7 @@
                     },
                     local: document.getElementById('local-unidade').value,
                     encarregado: document.getElementById('encarregado-nome').value,
+                    escrivao: document.getElementById('escrivao-nome').value,
                     acusado: document.getElementById('acusado-nome').value,
                     ofendido: document.getElementById('ofendido-tipo').options[document.getElementById('ofendido-tipo').selectedIndex].text,
                     objeto: document.getElementById('objeto-apuracao').value
@@ -947,6 +988,19 @@
                     titulo: 'Designação de Escrivão'
                 };
                 
+                // NOVOS DOCUMENTOS BÁSICOS
+                this.documentos.basicos.designacaoEscrivao = {
+                    gerado: true,
+                    conteudo: this.gerarDesignacaoEscrivao(),
+                    titulo: 'Designação do Escrivão'
+                };
+                
+                this.documentos.basicos.termoCompromisso = {
+                    gerado: true,
+                    conteudo: this.gerarTermoCompromissoEscrivao(),
+                    titulo: 'Termo de Compromisso'
+                };
+                
                 this.avancarTela(3);
                 this.atualizarListaDocumentosBasicos();
                 this.atualizarListaDocumentosSidebar();
@@ -962,6 +1016,7 @@
                     { id: 'data-ano', nome: 'Ano' },
                     { id: 'local-unidade', nome: 'Local/Unidade' },
                     { id: 'encarregado-nome', nome: 'Encarregado' },
+                    { id: 'escrivao-nome', nome: 'Escrivão' },
                     { id: 'acusado-nome', nome: 'Acusado/Sindicado' },
                     { id: 'objeto-apuracao', nome: 'Objeto da Apuração' }
                 ];
@@ -985,6 +1040,7 @@
                 return `${d.procedimento.nome}
 
 ENCARREGADO: ${d.encarregado}
+ESCRIVÃO: ${d.escrivao}
 ${d.procedimento.id === 'PARE' ? 'RESPONSÁVEL' : 'ACUSADO'}: ${d.acusado}
 OFENDIDO: ${d.ofendido}
 
@@ -1019,12 +1075,43 @@ ${cargo}`;
 
 Aos ${d.data.dia} dias do mês de ${d.data.mes} do ano de ${d.data.ano}, eu, ${d.encarregado}, ${cargo}, RESOLVO:
 
-DESIGNAR o(a) __________________________, para exercer a função de ESCRIVÃO no presente ${d.procedimento.nome} acima referenciado, devendo cumprir todas as determinações legais inerentes ao cargo.
+DESIGNAR o(a) ${d.escrivao}, para exercer a função de ESCRIVÃO no presente ${d.procedimento.nome} acima referenciado, devendo cumprir todas as determinações legais inerentes ao cargo.
 
 Para constar, lavro o presente termo que vai assinado.
 
 __________________________________
 ${d.encarregado}
+${cargo}`;
+            }
+            
+            // NOVO MÉTODO: Designação do Escrivão
+            gerarDesignacaoEscrivao() {
+                const d = this.dadosCaracterizacao;
+                const cargo = d.procedimento.id === 'IPM' ? 'Encarregado do IPM' : 'Sindicante';
+                
+                return `GOVERNO DO ESTADO
+
+DESIGNAÇÃO DE ESCRIVÃO
+
+Designo, nos termos do Art. 11 do Código de Processo Penal Militar, o ${d.escrivao}, para servir como Escrivão do ${d.procedimento.nome} do qual sou encarregado, lavrando-se o competente termo de compromisso.
+
+Manaus, AM, ${d.data.dia} de ${d.data.mes} de ${d.data.ano}.
+
+__________________________________
+${d.encarregado}
+${cargo}`;
+            }
+            
+            // NOVO MÉTODO: Termo de Compromisso do Escrivão
+            gerarTermoCompromissoEscrivao() {
+                const d = this.dadosCaracterizacao;
+                const cargo = d.procedimento.id === 'IPM' ? 'Encarregado do IPM' : 'Sindicante';
+                
+                return `TERMO DE COMPROMISSO DO ESCRIVÃO
+
+Aos ${d.data.dia} dias do mês de ${d.data.mes} de ${d.data.ano}, nesta Cidade de Manaus, Estado do Amazonas, na ${d.local}, foi designado pelo Senhor ${d.encarregado}, Encarregado deste ${d.procedimento.nome}, o ${d.escrivao}, para exercer a função de Escrivão, que perante o referido Encarregado prestou compromisso legal de manter o sigilo do procedimento e cumprir fielmente as determinações legais, durante o exercício da função.
+
+${d.encarregado.split('(')[0].trim()}
 ${cargo}`;
             }
             
@@ -1045,6 +1132,18 @@ ${cargo}`;
                 if (tipo === 'oficios') {
                     conteudoHTML = `
                         <div class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-pmam-text mb-2">Data do Ofício*</label>
+                                    <input type="date" id="campo-data-oficio" class="input-field w-full p-3 border border-pmam-border rounded-lg" value="${new Date().toISOString().split('T')[0]}">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-pmam-text mb-2">Número do Ofício</label>
+                                    <div class="text-sm bg-gray-100 p-3 rounded-lg">
+                                        Automático: ${String(this.documentos.variaveis.oficios.length + 1).padStart(3, '0')}/${this.dadosCaracterizacao.data.ano}/${this.procedimentoSelecionado.id}
+                                    </div>
+                                </div>
+                            </div>
                             <div>
                                 <label class="block text-sm font-semibold text-pmam-text mb-2">Destinatário*</label>
                                 <input type="text" id="campo-destinatario" class="input-field w-full p-3 border border-pmam-border rounded-lg" placeholder="Nome, cargo e unidade">
@@ -1119,20 +1218,20 @@ ${cargo}`;
                     conteudoHTML = `
                         <div class="space-y-4">
                             <div>
-                                <label class="block text-sm font-semibold text-pmam-text mb-2">1. Histórico / Preambular*</label>
-                                <textarea id="campo-historico" rows="4" class="input-field w-full p-3 border border-pmam-border rounded-lg resize-none"></textarea>
+                                <label class="block text-sm font-semibold text-pmam-text mb-2">I – INFORMAÇÕES PRELIMINARES*</label>
+                                <textarea id="campo-historico" rows="4" class="input-field w-full p-3 border border-pmam-border rounded-lg resize-none" placeholder="Descreva as informações preliminares do procedimento..."></textarea>
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-pmam-text mb-2">2. Diligências Realizadas*</label>
-                                <textarea id="campo-diligencias" rows="4" class="input-field w-full p-3 border border-pmam-border rounded-lg resize-none"></textarea>
+                                <label class="block text-sm font-semibold text-pmam-text mb-2">II – DILIGÊNCIAS REALIZADAS*</label>
+                                <textarea id="campo-diligencias" rows="4" class="input-field w-full p-3 border border-pmam-border rounded-lg resize-none" placeholder="Descreva as diligências realizadas..."></textarea>
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-pmam-text mb-2">3. Análise e Fundamentação*</label>
-                                <textarea id="campo-analise" rows="4" class="input-field w-full p-3 border border-pmam-border rounded-lg resize-none"></textarea>
+                                <label class="block text-sm font-semibold text-pmam-text mb-2">III – ANÁLISE E FUNDAMENTAÇÃO*</label>
+                                <textarea id="campo-analise" rows="4" class="input-field w-full p-3 border border-pmam-border rounded-lg resize-none" placeholder="Descreva a análise e fundamentação..."></textarea>
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-pmam-text mb-2">4. Conclusão e Proposta*</label>
-                                <textarea id="campo-conclusao" rows="4" class="input-field w-full p-3 border border-pmam-border rounded-lg resize-none"></textarea>
+                                <label class="block text-sm font-semibold text-pmam-text mb-2">IV – CONCLUSÃO E PROPOSTA*</label>
+                                <textarea id="campo-conclusao" rows="4" class="input-field w-full p-3 border border-pmam-border rounded-lg resize-none" placeholder="Descreva a conclusão e proposta..."></textarea>
                             </div>
                         </div>
                     `;
@@ -1152,17 +1251,31 @@ ${cargo}`;
                     const destinatario = document.getElementById('campo-destinatario').value;
                     const assunto = document.getElementById('campo-assunto').value;
                     const conteudoOf = document.getElementById('campo-conteudo').value;
+                    const dataOfício = document.getElementById('campo-data-oficio').value;
                     
                     if (!destinatario || !assunto || !conteudoOf) {
                         this.mostrarToast('Preencha todos os campos', 'erro');
                         return;
                     }
                     
-                    conteudo = this.gerarOficio(destinatario, assunto, conteudoOf);
+                    // Validar data não retroativa
+                    if (this.documentos.variaveis.oficios.length > 0) {
+                        const ultimoOfício = this.documentos.variaveis.oficios[this.documentos.variaveis.oficios.length - 1];
+                        if (ultimoOfício.data && dataOfício < ultimoOfício.data) {
+                            this.mostrarToast('Data do ofício não pode ser anterior ao último ofício gerado', 'erro');
+                            return;
+                        }
+                    }
+                    
+                    conteudo = this.gerarOficio(destinatario, assunto, conteudoOf, dataOfício);
+                    const numeroOfício = String(this.documentos.variaveis.oficios.length + 1).padStart(3, '0');
+                    
                     this.documentos.variaveis.oficios.push({ 
                         conteudo, 
                         timestamp: Date.now(),
-                        titulo: `Ofício para ${destinatario.split(',')[0]}` 
+                        titulo: `Ofício ${numeroOfício} para ${destinatario.split(',')[0]}`,
+                        data: dataOfício,
+                        numero: numeroOfício
                     });
                     
                 } else if (tipo === 'termos') {
@@ -1227,10 +1340,20 @@ ${cargo}`;
                 this.mostrarToast('Documento salvo com sucesso!', 'sucesso');
             }
             
-            gerarOficio(destinatario, assunto, conteudo) {
+            gerarOficio(destinatario, assunto, conteudo, dataOfício = null) {
                 const d = this.dadosCaracterizacao;
-                return `OFÍCIO Nº XXX/${d.data.ano}/${d.procedimento.id}
-Quartel em Manaus/AM, ${d.data.completa}
+                const numeroOfício = String(this.documentos.variaveis.oficios.length + 1).padStart(3, '0');
+                
+                // Formatar data
+                let dataFormatada = d.data.completa;
+                if (dataOfício) {
+                    const data = new Date(dataOfício);
+                    const meses = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+                    dataFormatada = `${data.getDate()} de ${meses[data.getMonth()]} de ${data.getFullYear()}`;
+                }
+                
+                return `OFÍCIO Nº ${numeroOfício}/${d.data.ano}/${d.procedimento.id}
+Quartel em Manaus/AM, ${dataFormatada}
 
 Ao ${destinatario}
 
@@ -1275,7 +1398,8 @@ ${nome}
 ${tipo}
 
 __________________________________
-[ESCRIVÃO]
+${d.escrivao}
+ESCRIVÃO
 
 __________________________________
 ${d.encarregado}
@@ -1307,23 +1431,27 @@ ${d.procedimento.id === 'IPM' ? 'Encarregado do IPM' : 'Sindicante'}`;
                 
                 return `RELATÓRIO DO ${d.procedimento.nome}
 
-NÚMERO DO PROCEDIMENTO: ${d.portaria}
+REFERÊNCIA: ${d.portaria}
 ENCARREGADO: ${d.encarregado}
-${d.procedimento.id === 'PARE' ? 'RESPONSÁVEL' : 'ACUSADO'}: ${d.acusado}
+ESCRIVÃO: ${d.escrivao}
+${d.procedimento.id === 'PARE' ? 'RESPONSÁVEIS:' : 'INVESTIGADOS:'}
+${d.acusado}
 
-1. HISTÓRICO / PREAMBULAR
+OBJETO: ${d.objeto}
+
+I – INFORMAÇÕES PRELIMINARES
 
 ${historico}
 
-2. DILIGÊNCIAS REALIZADAS
+II – DILIGÊNCIAS REALIZADAS
 
 ${diligencias}
 
-3. ANÁLISE E FUNDAMENTAÇÃO
+III – ANÁLISE E FUNDAMENTAÇÃO
 
 ${analise}
 
-4. CONCLUSÃO E PROPOSTA
+IV – CONCLUSÃO E PROPOSTA
 
 ${conclusao}
 
@@ -1356,18 +1484,27 @@ ${d.procedimento.id === 'IPM' ? 'Encarregado do IPM' : 'Sindicante'}`;
                 const docs = [
                     { id: 'autuacao', nome: 'Autuação', icon: 'fa-file-signature' },
                     { id: 'abertura', nome: 'Termo de Abertura', icon: 'fa-folder-open' },
-                    { id: 'designacao', nome: 'Designação de Escrivão', icon: 'fa-user-tie' }
+                    { id: 'designacao', nome: 'Designação de Escrivão', icon: 'fa-user-tie' },
+                    { id: 'designacaoEscrivao', nome: 'Designação do Escrivão', icon: 'fa-id-card' },
+                    { id: 'termoCompromisso', nome: 'Termo de Compromisso', icon: 'fa-handshake' }
                 ];
                 
-                lista.innerHTML = docs.map(doc => `
-                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                        <div class="flex items-center gap-3 mb-2">
-                            <i class="fas ${doc.icon} text-green-500"></i>
-                            <h5 class="font-semibold text-pmam-navy">${doc.nome}</h5>
+                lista.innerHTML = docs.map(doc => {
+                    const documento = this.documentos.basicos[doc.id];
+                    const gerado = documento && documento.gerado;
+                    
+                    return `
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="flex items-center gap-3 mb-2">
+                                <i class="fas ${doc.icon} ${gerado ? 'text-green-500' : 'text-gray-400'}"></i>
+                                <h5 class="font-semibold text-pmam-navy">${doc.nome}</h5>
+                            </div>
+                            <div class="text-xs ${gerado ? 'text-green-600' : 'text-gray-500'}">
+                                ${gerado ? '✓ Gerado automaticamente' : 'Aguardando dados'}
+                            </div>
                         </div>
-                        <div class="text-xs text-green-600">✓ Gerado automaticamente</div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             }
             
             atualizarListaDocumentosSidebar() {
@@ -1381,7 +1518,7 @@ ${d.procedimento.id === 'IPM' ? 'Encarregado do IPM' : 'Sindicante'}`;
                         totalDocumentos++;
                         html += `<div class="bg-green-50 border border-green-200 p-3 rounded mb-2">
                             <div class="flex items-center justify-between">
-                                <span class="text-sm font-medium text-pmam-navy">${doc.titulo}</span>
+                                <span class="text-sm font-medium text-pmam-navy truncate">${doc.titulo}</span>
                                 <i class="fas fa-check text-green-500"></i>
                             </div>
                         </div>`;
@@ -1434,7 +1571,7 @@ ${d.procedimento.id === 'IPM' ? 'Encarregado do IPM' : 'Sindicante'}`;
                 this.documentos.variaveis.oficios.forEach((doc, index) => {
                     const option = document.createElement('option');
                     option.value = `oficio_${index}`;
-                    option.textContent = `📨 Ofício ${index + 1}`;
+                    option.textContent = `📨 Ofício ${doc.numero || index + 1}`;
                     seletor.appendChild(option);
                 });
                 
@@ -1483,31 +1620,118 @@ ${d.procedimento.id === 'IPM' ? 'Encarregado do IPM' : 'Sindicante'}`;
                 
                 const [tipo, index] = valor.split('_');
                 
+                let conteudo = '';
+                
                 if (tipo === 'basico') {
                     const doc = this.documentos.basicos[index];
                     if (doc) {
-                        preview.textContent = doc.conteudo;
+                        conteudo = doc.conteudo;
                     }
                 } else if (tipo === 'oficio') {
                     const doc = this.documentos.variaveis.oficios[parseInt(index)];
                     if (doc) {
-                        preview.textContent = doc.conteudo;
+                        conteudo = doc.conteudo;
                     }
                 } else if (tipo === 'termo') {
                     const doc = this.documentos.variaveis.termos[parseInt(index)];
                     if (doc) {
-                        preview.textContent = doc.conteudo;
+                        conteudo = doc.conteudo;
                     }
                 } else if (tipo === 'certidao') {
                     const doc = this.documentos.variaveis.certidoes[parseInt(index)];
                     if (doc) {
-                        preview.textContent = doc.conteudo;
+                        conteudo = doc.conteudo;
                     }
                 } else if (tipo === 'relatorio') {
                     const doc = this.documentos.variaveis.relatorio;
                     if (doc.gerado) {
-                        preview.textContent = doc.conteudo;
+                        conteudo = doc.conteudo;
                     }
+                }
+                
+                if (this.edicaoHabilitada) {
+                    preview.innerHTML = `
+                        <div class="mb-4">
+                            <button onclick="sistema.salvarEdicaoPreview()" 
+                                    class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center gap-2">
+                                <i class="fas fa-save"></i>
+                                Salvar Alterações
+                            </button>
+                            <button onclick="sistema.cancelarEdicaoPreview()" 
+                                    class="ml-2 px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400">
+                                Cancelar
+                            </button>
+                        </div>
+                        <textarea id="editor-conteudo" 
+                                  class="w-full h-96 p-4 border border-pmam-border rounded-lg font-mono text-sm resize-none textarea-editable">
+${conteudo}
+                        </textarea>
+                        <div class="text-xs text-gray-500 mt-2">
+                            Pressione Ctrl+S para salvar
+                        </div>
+                    `;
+                    
+                    // Focar no textarea
+                    setTimeout(() => {
+                        document.getElementById('editor-conteudo').focus();
+                    }, 100);
+                    
+                    // Adicionar atalho Ctrl+S
+                    const editor = document.getElementById('editor-conteudo');
+                    editor.addEventListener('keydown', (e) => {
+                        if (e.ctrlKey && e.key === 's') {
+                            e.preventDefault();
+                            this.salvarEdicaoPreview();
+                        }
+                    });
+                } else {
+                    preview.textContent = conteudo;
+                }
+            }
+            
+            habilitarEdicaoPreview() {
+                this.edicaoHabilitada = true;
+                const valor = document.getElementById('seletor-documento-preview').value;
+                if (valor) {
+                    this.mostrarPreview(valor);
+                }
+            }
+            
+            salvarEdicaoPreview() {
+                const valor = document.getElementById('seletor-documento-preview').value;
+                const editor = document.getElementById('editor-conteudo');
+                
+                if (!valor || !editor) {
+                    this.mostrarToast('Nenhum documento selecionado para edição', 'erro');
+                    return;
+                }
+                
+                const [tipo, index] = valor.split('_');
+                const novoConteudo = editor.value;
+                
+                // Atualizar documento na memória
+                if (tipo === 'basico') {
+                    this.documentos.basicos[index].conteudo = novoConteudo;
+                } else if (tipo === 'oficio') {
+                    this.documentos.variaveis.oficios[parseInt(index)].conteudo = novoConteudo;
+                } else if (tipo === 'termo') {
+                    this.documentos.variaveis.termos[parseInt(index)].conteudo = novoConteudo;
+                } else if (tipo === 'certidao') {
+                    this.documentos.variaveis.certidoes[parseInt(index)].conteudo = novoConteudo;
+                } else if (tipo === 'relatorio') {
+                    this.documentos.variaveis.relatorio.conteudo = novoConteudo;
+                }
+                
+                this.edicaoHabilitada = false;
+                this.mostrarToast('Documento atualizado com sucesso!', 'sucesso');
+                this.mostrarPreview(valor);
+            }
+            
+            cancelarEdicaoPreview() {
+                this.edicaoHabilitada = false;
+                const valor = document.getElementById('seletor-documento-preview').value;
+                if (valor) {
+                    this.mostrarPreview(valor);
                 }
             }
             
@@ -1529,7 +1753,7 @@ ${d.procedimento.id === 'IPM' ? 'Encarregado do IPM' : 'Sindicante'}`;
                 } else if (tipo === 'oficio') {
                     const doc = this.documentos.variaveis.oficios[parseInt(index)];
                     conteudo = doc.conteudo;
-                    nomeArquivo = `${this.procedimentoSelecionado.id}_Oficio_${parseInt(index) + 1}`;
+                    nomeArquivo = `${this.procedimentoSelecionado.id}_Oficio_${doc.numero || parseInt(index) + 1}`;
                 } else if (tipo === 'termo') {
                     const doc = this.documentos.variaveis.termos[parseInt(index)];
                     conteudo = doc.conteudo;
@@ -1565,7 +1789,7 @@ ${d.procedimento.id === 'IPM' ? 'Encarregado do IPM' : 'Sindicante'}`;
                 this.documentos.variaveis.oficios.forEach((doc, index) => {
                     todosDocumentos.push({
                         conteudo: doc.conteudo,
-                        nome: `${this.procedimentoSelecionado.id}_Oficio_${index + 1}`
+                        nome: `${this.procedimentoSelecionado.id}_Oficio_${doc.numero || index + 1}`
                     });
                 });
                 
@@ -1702,6 +1926,7 @@ ${d.procedimento.id === 'IPM' ? 'Encarregado do IPM' : 'Sindicante'}`;
             }
             
             fecharPreview() {
+                this.edicaoHabilitada = false;
                 document.getElementById('modal-preview').classList.remove('flex');
                 document.getElementById('modal-preview').classList.add('hidden');
                 document.body.style.overflow = 'auto';
@@ -1820,6 +2045,7 @@ ${d.procedimento.id === 'IPM' ? 'Encarregado do IPM' : 'Sindicante'}`;
                 }
                 document.getElementById('local-unidade').value = procedimento.caracterizacao.local || '';
                 document.getElementById('encarregado-nome').value = procedimento.caracterizacao.encarregado || '';
+                document.getElementById('escrivao-nome').value = procedimento.caracterizacao.escrivao || '';
                 document.getElementById('acusado-nome').value = procedimento.caracterizacao.acusado || '';
                 document.getElementById('objeto-apuracao').value = procedimento.caracterizacao.objeto || '';
                 
