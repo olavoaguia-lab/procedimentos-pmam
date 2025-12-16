@@ -36,16 +36,15 @@
                     },
                     fontFamily: { 'sans': ['Inter', 'system-ui', 'sans-serif'] },
                     boxShadow: { 'pmam-lg': '0 15px 35px -5px rgba(0, 0, 0, 0.1)', 'pmam-xl': '0 25px 50px -12px rgba(0, 0, 0, 0.15)' }
+                    }
                 }
             }
-        }
-    </script>
+        </script>
 
     <style>
         body { background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%); font-feature-settings: "kern", "liga"; -webkit-font-smoothing: antialiased; }
         .header-logo { height: 100px; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.2)); transition: transform 0.4s ease; }
         .header-logo:hover { transform: scale(1.08); }
-        .step-bar::before { background: linear-gradient(to right, #cbd5e1, #D4AF37); height: 4px; top: 22px; }
         .step-circle { width: 48px; height: 48px; font-size: 1.1rem; }
         .step-item.active .step-circle { background: linear-gradient(135deg, #D4AF37, #FFD700); box-shadow: 0 0 25px rgba(212,175,55,0.6); }
         .card-procedimento, .doc-card { transition: all 0.4s ease; }
@@ -59,7 +58,7 @@
 </head>
 <body class="text-pmam-text font-sans">
 
-    <!-- Sidebar -->
+    <!-- Sidebar (mantido, com etapas) -->
     <div id="sidebar" class="sidebar fixed top-0 left-0 h-full w-80 bg-white border-r border-pmam-border shadow-2xl overflow-y-auto z-40 transition-transform duration-300">
         <div class="p-8 border-b border-pmam-border flex flex-col items-center">
             <img src="logo-sispro.png" alt="SISPRO PMAM" class="h-32 mb-6 drop-shadow-2xl">
@@ -73,7 +72,7 @@
                 <div class="step-item" id="sidebar-step-1"><div class="step-circle">1</div><div class="step-label">Tipo</div></div>
                 <div class="step-item" id="sidebar-step-2"><div class="step-circle">2</div><div class="step-label">Qualificação</div></div>
                 <div class="step-item" id="sidebar-step-3"><div class="step-circle">3</div><div class="step-label">Documentos</div></div>
-                <div class="step-item" id="sidebar-step-4"><div class="step-circle">4</div><div class="step-label">Revisão</div></div>
+                <div class="step-item" id="sidebar-step-4"><div class="step-circle">4</div><div class="step-label">Relatório/Revisão</div></div>
             </div>
         </div>
 
@@ -104,34 +103,34 @@
                     <button onclick="sistema.exportarTodosPDF()" class="px-8 py-4 btn-gold text-black rounded-xl font-bold flex items-center gap-3 shadow-lg hover:shadow-xl transition">
                         <i class="fas fa-file-pdf"></i> EXPORTAR PDF
                     </button>
-                    <button onclick="sistema.visualizarTodos()" class="px-8 py-4 bg-pmam-light text-white rounded-xl font-bold flex items-center gap-3 shadow-lg hover:shadow-xl transition">
-                        <i class="fas fa-eye"></i> VISUALIZAR
-                    </button>
                 </div>
             </div>
         </header>
 
-        <!-- TELA 1 - Tipo de Procedimento -->
+        <!-- TELA 1 - Tipo de Procedimento (adicionadas opções SAD, SINDINVEST, PAD, PARE) -->
         <div id="tela-1" class="container mx-auto px-8 py-12">
             <h2 class="text-3xl font-black text-pmam-navy mb-10 text-center">Selecione o Tipo de Procedimento</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Cards de procedimentos (adicione quantos precisar) -->
-                <div onclick="sistema.selecionarProcedimento('Sindacância')" class="card-procedimento rounded-2xl p-10 bg-white text-center shadow-pmam-xl border-2 border-transparent cursor-pointer">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div onclick="sistema.selecionarProcedimento('SAD')" class="card-procedimento rounded-2xl p-10 bg-white text-center shadow-pmam-xl border-2 border-transparent cursor-pointer">
                     <i class="fas fa-balance-scale text-6xl text-pmam-gold mb-6"></i>
-                    <h3 class="text-2xl font-black text-pmam-navy">Sindacância</h3>
+                    <h3 class="text-2xl font-black text-pmam-navy">SAD (Sindicância Admin. Disc.)</h3>
                 </div>
-                <div onclick="sistema.selecionarProcedimento('Inquérito Policial Militar')" class="card-procedimento rounded-2xl p-10 bg-white text-center shadow-pmam-xl border-2 border-transparent cursor-pointer">
+                <div onclick="sistema.selecionarProcedimento('SINDINVEST')" class="card-procedimento rounded-2xl p-10 bg-white text-center shadow-pmam-xl border-2 border-transparent cursor-pointer">
                     <i class="fas fa-search text-6xl text-pmam-gold mb-6"></i>
-                    <h3 class="text-2xl font-black text-pmam-navy">Inquérito Policial Militar</h3>
+                    <h3 class="text-2xl font-black text-pmam-navy">SINDINVEST (Sindicância Investigativa)</h3>
                 </div>
-                <!-- Adicione mais cards aqui conforme necessário -->
-            </div>
-            <div class="text-center mt-12">
-                <button onclick="sistema.novoProcedimento()" class="btn-gold px-10 py-5 text-xl font-bold rounded-xl">NOVO PROCEDIMENTO PERSONALIZADO</button>
+                <div onclick="sistema.selecionarProcedimento('PAD')" class="card-procedimento rounded-2xl p-10 bg-white text-center shadow-pmam-xl border-2 border-transparent cursor-pointer">
+                    <i class="fas fa-gavel text-6xl text-pmam-gold mb-6"></i>
+                    <h3 class="text-2xl font-black text-pmam-navy">PAD (Proc. Admin. Disc.)</h3>
+                </div>
+                <div onclick="sistema.selecionarProcedimento('PARE')" class="card-procedimento rounded-2xl p-10 bg-white text-center shadow-pmam-xl border-2 border-transparent cursor-pointer">
+                    <i class="fas fa-exclamation-triangle text-6xl text-pmam-gold mb-6"></i>
+                    <h3 class="text-2xl font-black text-pmam-navy">PARE (Proc. Admin. Rito Especial)</h3>
+                </div>
             </div>
         </div>
 
-        <!-- TELA 2 - Qualificação / Caracterização -->
+        <!-- TELA 2 - Qualificação (mantida, com preceito legal e testemunhas) -->
         <div id="tela-2" class="hidden container mx-auto px-8 py-12">
             <h2 class="text-3xl font-black text-pmam-navy mb-10 text-center">Qualificação e Caracterização</h2>
             
@@ -147,22 +146,33 @@
                 <!-- Preceito Legal -->
                 <div class="bg-white rounded-2xl p-8 shadow-pmam-xl">
                     <h3 class="text-2xl font-bold text-pmam-navy mb-6">Preceito Legal / Enquadramento</h3>
-                    <textarea id="preceito-legal" rows="6" placeholder="Ex.: Art. 42 do Decreto-Lei..." class="w-full p-4 border border-pmam-border rounded-lg input-field"></textarea>
+                    <textarea id="preceito-legal" rows="6" placeholder="Ex.: Art. 42 da Lei 3278-2008..." class="w-full p-4 border border-pmam-border rounded-lg input-field"></textarea>
                 </div>
             </div>
 
-            <!-- Encarregado / Sindicante / Acusado / Vítima -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-10">
+            <!-- Partes Envolvidas (Encarregado, Sindicado, Ofendido/Vítima) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
                 <div class="bg-white rounded-2xl p-8 shadow-pmam-xl">
-                    <h4 class="text-xl font-bold text-pmam-navy mb-4">Encarregado</h4>
-                    <input type="text" placeholder="Nome" class="w-full p-3 mb-3 border rounded input-field">
-                    <input type="text" placeholder="Posto/Grad" class="w-full p-3 mb-3 border rounded input-field">
-                    <input type="text" placeholder="Matrícula" class="w-full p-3 border rounded input-field">
+                    <h4 class="text-xl font-bold text-pmam-navy mb-4">Encarregado/Sindicante</h4>
+                    <input type="text" id="encarregado-nome" placeholder="Nome" class="w-full p-3 mb-3 border rounded input-field">
+                    <input type="text" id="encarregado-posto" placeholder="Posto/Grad" class="w-full p-3 mb-3 border rounded input-field">
+                    <input type="text" id="encarregado-matricula" placeholder="Matrícula/CI" class="w-full p-3 border rounded input-field">
                 </div>
-                <!-- Repita estrutura para Sindicante, Acusado, Vítima (adicione mais inputs se precisar) -->
+                <div class="bg-white rounded-2xl p-8 shadow-pmam-xl">
+                    <h4 class="text-xl font-bold text-pmam-navy mb-4">Sindicado/Acusado</h4>
+                    <input type="text" id="sindicado-nome" placeholder="Nome" class="w-full p-3 mb-3 border rounded input-field">
+                    <input type="text" id="sindicado-posto" placeholder="Posto/Grad" class="w-full p-3 mb-3 border rounded input-field">
+                    <input type="text" id="sindicado-matricula" placeholder="Matrícula/CI" class="w-full p-3 border rounded input-field">
+                </div>
+                <div class="bg-white rounded-2xl p-8 shadow-pmam-xl">
+                    <h4 class="text-xl font-bold text-pmam-navy mb-4">Ofendido/Vítima</h4>
+                    <input type="text" id="ofendido-nome" placeholder="Nome" class="w-full p-3 mb-3 border rounded input-field">
+                    <input type="text" id="ofendido-posto" placeholder="Posto/Grad (se PM)" class="w-full p-3 mb-3 border rounded input-field">
+                    <input type="text" id="ofendido-matricula" placeholder="Matrícula/RG/CPF" class="w-full p-3 border rounded input-field">
+                </div>
             </div>
 
-            <!-- Testemunhas -->
+            <!-- Testemunhas (múltiplas) -->
             <div class="bg-white rounded-2xl p-8 shadow-pmam-xl mt-10">
                 <h3 class="text-2xl font-bold text-pmam-navy mb-6">Testemunhas</h3>
                 <div id="lista-testemunhas" class="space-y-6"></div>
@@ -170,37 +180,63 @@
             </div>
 
             <div class="text-center mt-12">
-                <button onclick="sistema.avancarParaTela(3)" class="btn-gold px-12 py-6 text-2xl font-bold rounded-xl">PRÓXIMO: DOCUMENTOS</button>
+                <button onclick="sistema.salvarParcial(); sistema.avancarParaTela(3)" class="btn-gold px-12 py-6 text-2xl font-bold rounded-xl">PRÓXIMO: DOCUMENTOS</button>
             </div>
         </div>
 
-        <!-- TELA 3 - Documentos -->
+        <!-- TELA 3 - Documentos (básicos auto-gerados + diversos editáveis) -->
         <div id="tela-3" class="hidden container mx-auto px-8 py-12">
             <h2 class="text-3xl font-black text-pmam-navy mb-10 text-center">Geração de Documentos</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-                <div onclick="sistema.gerarDocumentoDiverso('despacho')" class="doc-card rounded-2xl p-10 bg-white text-center shadow-pmam-xl cursor-pointer">
-                    <i class="fas fa-gavel text-6xl text-pmam-gold mb-6"></i>
-                    <h3 class="text-2xl font-black text-pmam-navy">Despacho</h3>
-                </div>
-                <div onclick="sistema.gerarDocumentoDiverso('oficio')" class="doc-card rounded-2xl p-10 bg-white text-center shadow-pmam-xl cursor-pointer">
-                    <i class="fas fa-envelope text-6xl text-pmam-gold mb-6"></i>
-                    <h3 class="text-2xl font-black text-pmam-navy">Ofício</h3>
-                </div>
-                <div onclick="sistema.gerarDocumentoDiverso('declaracao')" class="doc-card rounded-2xl p-10 bg-white text-center shadow-pmam-xl cursor-pointer">
-                    <i class="fas fa-file-signature text-6xl text-pmam-gold mb-6"></i>
-                    <h3 class="text-2xl font-black text-pmam-navy">Termo de Declaração</h3>
-                </div>
-                <!-- Adicione mais documentos básicos do seu código original aqui -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-bold text-pmam-navy mb-6">Documentos Básicos (Gerados Automaticamente)</h3>
+                <button onclick="sistema.gerarDocumentosBasicos()" class="btn-gold px-8 py-4 rounded-xl font-bold">Gerar Documentos Básicos</button>
+                <div id="lista-documentos-basicos" class="mt-6 space-y-4"></div>
             </div>
-            <div id="lista-documentos-basicos" class="mt-12"></div>
-            <div id="lista-documentos-diversos" class="mt-12"></div>
+            <div>
+                <h3 class="text-2xl font-bold text-pmam-navy mb-6">Documentos Diversos (Editáveis)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                    <div onclick="sistema.gerarDocumentoDiverso('despacho')" class="doc-card rounded-2xl p-10 bg-white text-center shadow-pmam-xl cursor-pointer">
+                        <i class="fas fa-gavel text-6xl text-pmam-gold mb-6"></i>
+                        <h3 class="text-2xl font-black text-pmam-navy">Despacho</h3>
+                    </div>
+                    <div onclick="sistema.gerarDocumentoDiverso('oficio')" class="doc-card rounded-2xl p-10 bg-white text-center shadow-pmam-xl cursor-pointer">
+                        <i class="fas fa-envelope text-6xl text-pmam-gold mb-6"></i>
+                        <h3 class="text-2xl font-black text-pmam-navy">Ofício</h3>
+                    </div>
+                    <div onclick="sistema.gerarDocumentoDiverso('declaracao')" class="doc-card rounded-2xl p-10 bg-white text-center shadow-pmam-xl cursor-pointer">
+                        <i class="fas fa-file-signature text-6xl text-pmam-gold mb-6"></i>
+                        <h3 class="text-2xl font-black text-pmam-navy">Termo de Declaração</h3>
+                    </div>
+                </div>
+                <div id="lista-documentos-diversos" class="mt-12 space-y-4"></div>
+            </div>
+            <div class="text-center mt-12">
+                <button onclick="sistema.salvarParcial(); sistema.avancarParaTela(4)" class="btn-gold px-12 py-6 text-2xl font-bold rounded-xl">PRÓXIMO: RELATÓRIO/REVISÃO</button>
+            </div>
         </div>
 
-        <!-- TELA 4 - Revisão (opcional, pode ser só visualização) -->
+        <!-- TELA 4 - Relatório e Revisão (relatório editável e obrigatório) -->
         <div id="tela-4" class="hidden container mx-auto px-8 py-12">
-            <h2 class="text-3xl font-black text-pmam-navy mb-10 text-center">Revisão Final</h2>
+            <h2 class="text-3xl font-black text-pmam-navy mb-10 text-center">Relatório Final e Revisão</h2>
             <div class="bg-white rounded-2xl p-10 shadow-pmam-xl">
-                <pre id="visualizacao-completa" class="whitespace-pre-wrap font-mono text-sm"></pre>
+                <h3 class="text-2xl font-bold text-pmam-navy mb-6">Relatório (Obrigatório - Edite se Necessário)</h3>
+                <textarea id="relatorio-conteudo" rows="20" class="w-full p-4 border border-pmam-border rounded-lg font-mono text-sm"></textarea>
+                <button onclick="sistema.exportarRelatorioPDF()" class="btn-gold px-8 py-4 rounded-xl font-bold mt-6"><i class="fas fa-file-pdf"></i> Exportar Relatório em PDF</button>
+            </div>
+            <div class="text-center mt-12">
+                <button onclick="sistema.exportarTodosPDF()" class="btn-gold px-12 py-6 text-2xl font-bold rounded-xl">FINALIZAR E EXPORTAR TUDO</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Edição de Documentos (usado para diversos e relatório) -->
+    <div id="modal-edicao" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 w-3/4 max-w-4xl shadow-xl">
+            <h3 id="modal-titulo" class="text-2xl font-bold text-pmam-navy mb-4"></h3>
+            <textarea id="modal-conteudo" rows="15" class="w-full p-4 border border-pmam-border rounded-lg font-mono text-sm"></textarea>
+            <div class="flex gap-4 mt-6">
+                <button onclick="sistema.salvarEdicaoDocumento()" class="btn-gold px-6 py-3 rounded-xl font-bold">Salvar Alterações</button>
+                <button onclick="sistema.fecharModal()" class="px-6 py-3 bg-pmam-error text-white rounded-xl font-bold">Cancelar</button>
             </div>
         </div>
     </div>
@@ -209,8 +245,10 @@
         class SistemaSISPRO {
             constructor() {
                 this.telaAtual = 1;
-                this.dadosCaracterizacao = { testemunhas: [] };
+                this.dados = { tipo: '', portaria: '', data: '', unidade: '', preceitoLegal: '', encarregado: {}, sindicado: {}, ofendido: {}, testemunhas: [] };
                 this.documentos = { basicos: [], diversos: [] };
+                this.relatorio = { conteudo: '' };
+                this.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 this.atualizarEtapas();
             }
 
@@ -223,38 +261,131 @@
             }
 
             selecionarProcedimento(tipo) {
-                this.dadosCaracterizacao.tipo = tipo;
+                this.dados.tipo = tipo;
                 this.avancarParaTela(2);
                 this.notificar(`Procedimento ${tipo} selecionado`);
             }
 
             adicionarTestemunha() {
                 const container = document.getElementById('lista-testemunhas');
+                const index = this.dados.testemunhas.length;
                 const div = document.createElement('div');
                 div.className = 'grid grid-cols-1 md:grid-cols-3 gap-4 p-6 bg-pmam-surface rounded-xl';
                 div.innerHTML = `
-                    <input type="text" placeholder="Nome completo" class="p-4 border rounded input-field">
-                    <input type="text" placeholder="Posto/Graduação" class="p-4 border rounded input-field">
-                    <input type="text" placeholder="Matrícula/RG" class="p-4 border rounded input-field">
-                    <textarea placeholder="Resumo da declaração (opcional)" rows="3" class="col-span-3 p-4 border rounded input-field"></textarea>
+                    <input type="text" id="testemunha-nome-${index}" placeholder="Nome completo" class="p-4 border rounded input-field">
+                    <input type="text" id="testemunha-posto-${index}" placeholder="Posto/Graduação (se PM)" class="p-4 border rounded input-field">
+                    <input type="text" id="testemunha-matricula-${index}" placeholder="Matrícula/RG/CPF" class="p-4 border rounded input-field">
+                    <textarea id="testemunha-declaracao-${index}" placeholder="Resumo da declaração" rows="3" class="col-span-3 p-4 border rounded input-field"></textarea>
                 `;
                 container.appendChild(div);
+                this.dados.testemunhas.push({});
+            }
+
+            salvarParcial() {
+                // Coleta dados da tela 2
+                this.dados.portaria = document.getElementById('portaria').value;
+                this.dados.data = document.getElementById('data').value;
+                this.dados.unidade = document.getElementById('unidade').value;
+                this.dados.preceitoLegal = document.getElementById('preceito-legal').value;
+                this.dados.encarregado = {
+                    nome: document.getElementById('encarregado-nome').value,
+                    posto: document.getElementById('encarregado-posto').value,
+                    matricula: document.getElementById('encarregado-matricula').value
+                };
+                this.dados.sindicado = {
+                    nome: document.getElementById('sindicado-nome').value,
+                    posto: document.getElementById('sindicado-posto').value,
+                    matricula: document.getElementById('sindicado-matricula').value
+                };
+                this.dados.ofendido = {
+                    nome: document.getElementById('ofendido-nome').value,
+                    posto: document.getElementById('ofendido-posto').value,
+                    matricula: document.getElementById('ofendido-matricula').value
+                };
+                this.dados.testemunhas.forEach((t, i) => {
+                    t.nome = document.getElementById(`testemunha-nome-${i}`).value;
+                    t.posto = document.getElementById(`testemunha-posto-${i}`).value;
+                    t.matricula = document.getElementById(`testemunha-matricula-${i}`).value;
+                    t.declaracao = document.getElementById(`testemunha-declaracao-${i}`).value;
+                });
+                localStorage.setItem('sispro-dados', JSON.stringify(this.dados));
+                this.notificar('Progresso salvo!');
+            }
+
+            gerarDocumentosBasicos() {
+                this.documentos.basicos = []; // Limpa anteriores
+                const dados = this.dados;
+                const templates = {
+                    autuacao: `AUTUAÇÃO\n\nAos [data], nesta Cidade de Manaus, Estado do Amazonas, na [unidade], autuo a Portaria nº [portaria], e demais documentos que a este junto, do que para constar lavro o presente termo. Eu, [encarregado.nome] - [encarregado.posto], o digitei e subscrevo.\n\n[encarregado.nome] [encarregado.posto]`,
+                    termoCompromissoEscrivao: `TERMO DE COMPROMISSO DO ESCRIVÃO\n\nAos [data], nesta Cidade de Manaus, Estado do Amazonas, na [unidade], foi designado pelo Senhor [encarregado.nome] [encarregado.posto], Encarregado deste [dados.tipo], o [escrivao] para exercer a função de Escrivão, que perante o referido Encarregado prestou compromisso legal...`,
+                    conclusao: `CONCLUSÃO\n\nAos [data], nesta cidade de Manaus-AM, faço conclusos os presentes autos ao Senhor [encarregado.nome] – [encarregado.posto] – Encarregado. Do que para constar lavrei o presente termo.`,
+                    termoEncerramento: `TERMO DE ENCERRAMENTO\n\nAos [data], nesta Cidade de Manaus, Estado do Amazonas, na [unidade], encerro os trabalhos atinentes a presente [dados.tipo] instaurada pela Portaria nº [portaria]...`,
+                    // Adicione mais templates baseados nos anexos, substituindo placeholders
+                };
+
+                Object.keys(templates).forEach(key => {
+                    let conteudo = templates[key].replace(/\[data\]/g, dados.data || new Date().toLocaleDateString('pt-BR'))
+                        .replace(/\[portaria\]/g, dados.portaria)
+                        .replace(/\[unidade\]/g, dados.unidade)
+                        .replace(/\[encarregado.nome\]/g, dados.encarregado.nome)
+                        .replace(/\[encarregado.posto\]/g, dados.encarregado.posto);
+                    // Ajustes por tipo (ex.: para SINDINVEST adicionar partes investigativas)
+                    if (dados.tipo === 'SINDINVEST') conteudo += '\n\nDiligências investigativas pendentes...';
+                    this.documentos.basicos.push({ titulo: key.toUpperCase(), conteudo });
+                });
+
+                this.atualizarListaDocumentos('basicos');
+                this.notificar('Documentos básicos gerados!');
             }
 
             gerarDocumentoDiverso(tipo) {
+                const dados = this.dados;
                 let template = '';
-                if (tipo === 'despacho') template = `DESPACHO\n\nReferente à Portaria nº ${this.dadosCaracterizacao.portaria || '___'}\n\nDespacho do Encarregado:\n\n...`;
-                if (tipo === 'oficio') template = `OFÍCIO Nº ___ / ${new Date().getFullYear()}\n\nAssunto: ...\n\n...`;
-                if (tipo === 'declaracao') template = `TERMO DE DECLARAÇÃO\n\nDeclaro para os devidos fins...\n\n...`;
-
-                const doc = { titulo: tipo.charAt(0).toUpperCase() + tipo.slice(1), conteudo: template };
+                if (tipo === 'despacho') {
+                    template = `DESPACHO\n\nReferente à Portaria nº ${dados.portaria || '___'}\n\nDespacho do Encarregado: [Edite aqui]\n\n${dados.encarregado.nome} ${dados.encarregado.posto}`;
+                } else if (tipo === 'oficio') {
+                    template = `OFÍCIO Nº ___ / ${new Date().getFullYear()}\n\nÀ [Destinatário]\nAssunto: [Assunto]\n\n[Corpo do ofício - Edite aqui]\n\nAtenciosamente,\n${dados.encarregado.nome || ''}`;
+                } else if (tipo === 'declaracao') {
+                    template = `TERMO DE DECLARAÇÃO\n\nEm ${dados.data || ''}, compareceu ${dados.testemunhas[0]?.nome || '[Nome]'}, que declarou: [Edite declaração aqui]\n\nAssinatura: ___________________`;
+                }
+                const doc = { titulo: tipo.toUpperCase(), conteudo: template };
                 this.documentos.diversos.push(doc);
-                this.atualizarListaDocumentos();
-                this.notificar(`${tipo} gerado!`);
+                this.abrirModalEdicao(this.documentos.diversos.length - 1, 'diversos');
+                this.atualizarListaDocumentos('diversos');
             }
 
-            atualizarListaDocumentos() {
-                // Atualiza sidebar e listas (código similar ao seu original)
+            atualizarListaDocumentos(tipoLista) {
+                const container = document.getElementById(`lista-documentos-${tipoLista}`);
+                container.innerHTML = '';
+                this.documentos[tipoLista].forEach((doc, i) => {
+                    const div = document.createElement('div');
+                    div.className = 'p-4 bg-pmam-surface rounded-xl flex justify-between items-center';
+                    div.innerHTML = `<span>${doc.titulo}</span><button onclick="sistema.abrirModalEdicao(${i}, '${tipoLista}')" class="text-pmam-gold"><i class="fas fa-edit"></i> Editar</button>`;
+                    container.appendChild(div);
+                });
+                document.getElementById('lista-documentos-sidebar').innerHTML = this.documentos.basicos.concat(this.documentos.diversos).map(d => d.titulo).join('<br>');
+            }
+
+            abrirModalEdicao(index, tipoLista) {
+                const doc = this.documentos[tipoLista][index];
+                document.getElementById('modal-titulo').textContent = `Editar ${doc.titulo}`;
+                document.getElementById('modal-conteudo').value = doc.conteudo;
+                document.getElementById('modal-edicao').dataset.index = index;
+                document.getElementById('modal-edicao').dataset.tipo = tipoLista;
+                document.getElementById('modal-edicao').classList.remove('hidden');
+            }
+
+            salvarEdicaoDocumento() {
+                const index = document.getElementById('modal-edicao').dataset.index;
+                const tipoLista = document.getElementById('modal-edicao').dataset.tipo;
+                this.documentos[tipoLista][index].conteudo = document.getElementById('modal-conteudo').value;
+                this.fecharModal();
+                this.atualizarListaDocumentos(tipoLista);
+                this.notificar('Documento atualizado!');
+            }
+
+            fecharModal() {
+                document.getElementById('modal-edicao').classList.add('hidden');
             }
 
             avancarParaTela(num) {
@@ -262,18 +393,68 @@
                 document.getElementById(`tela-${num}`).classList.remove('hidden');
                 this.telaAtual = num;
                 this.atualizarEtapas();
+                if (num === 4) this.gerarRelatorio();
+            }
+
+            gerarRelatorio() {
+                const dados = this.dados;
+                let template = `RELATÓRIO DE ${dados.tipo}\n\nI - DOS FATOS\n[Descreva os fatos baseados em qualificações - Edite aqui]\n\nII - DOS ELEMENTOS DE PROVA\nTestemunhas: ${dados.testemunhas.map(t => t.nome).join(', ')}\n\nIII - DO INDICIAMENTO\nIndícios de infração: ${dados.preceitoLegal || '[Edite tipificação legal]'}\n\nIV - DA INFRAÇÃO DISCIPLINAR\n[Edite análise conforme Lei 3278-2008]\n\nV - DA PRISÃO PREVENTIVA\n[Manifestação sobre necessidade, conforme art. 255 CPPM - Edite]\n\nVI - CONCLUSÃO\n[Conclusão final - Edite]\n\nManaus-AM, ${new Date().toLocaleDateString('pt-BR')}.\n\n${dados.encarregado.nome} ${dados.encarregado.posto}\nEncarregado/Sindicante`;
+                // Ajustes por tipo
+                if (dados.tipo === 'SINDINVEST') template += '\n\nDiligências investigativas realizadas...';
+                if (dados.tipo === 'PAD') template += '\n\nRecomendação de capitulação legal (CPM art. X)...';
+                document.getElementById('relatorio-conteudo').value = template;
+                this.relatorio.conteudo = template;
+            }
+
+            exportarRelatorioPDF() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                doc.setFontSize(12);
+                const lines = doc.splitTextToSize(document.getElementById('relatorio-conteudo').value, 180);
+                doc.text(lines, 15, 20);
+                doc.save(`Relatorio_${this.dados.tipo}_${this.dados.portaria.replace(/\//g, '_')}.pdf`);
+                this.notificar('Relatório exportado!');
+            }
+
+            exportarTodosPDF() {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF();
+                let y = 20;
+                // Adiciona básicos, diversos e relatório
+                this.documentos.basicos.concat(this.documentos.diversos).forEach(d => {
+                    pdf.setFontSize(14);
+                    pdf.text(d.titulo, 15, y);
+                    y += 10;
+                    const lines = pdf.splitTextToSize(d.conteudo, 180);
+                    pdf.setFontSize(10);
+                    pdf.text(lines, 15, y);
+                    y += lines.length * 7 + 10;
+                    if (y > 250) { pdf.addPage(); y = 20; }
+                });
+                pdf.addPage();
+                y = 20;
+                pdf.setFontSize(14);
+                pdf.text('RELATÓRIO FINAL', 15, y);
+                y += 10;
+                const relLines = pdf.splitTextToSize(document.getElementById('relatorio-conteudo').value, 180);
+                pdf.setFontSize(10);
+                pdf.text(relLines, 15, y);
+                pdf.save(`SISPRO_${this.dados.tipo}_${this.dados.portaria.replace(/\//g, '_')}.pdf`);
+                this.notificar('Todos os documentos exportados!');
             }
 
             atualizarEtapas() {
                 document.querySelectorAll('.step-item').forEach((item, i) => {
-                    item.classList.remove('active', 'completed');
-                    if (i + 1 < this.telaAtual) item.classList.add('completed');
+                    item.classList.remove('active');
                     if (i + 1 === this.telaAtual) item.classList.add('active');
                 });
             }
 
-            // Inclua aqui todas as outras funções do seu código original: salvarNoBanco, exportarTodosPDF, carregarDoBanco, etc.
-            // (para não ficar gigante, mantive só as novas/essenciais – se precisar do resto exato, me avisa que colo tudo)
+            async salvarNoBanco() {
+                const { error } = await this.supabase.from('procedimentos').insert([this.dados]);
+                if (error) this.notificar('Erro ao salvar no banco', 'error');
+                else this.notificar('Salvo no banco!');
+            }
         }
 
         const sistema = new SistemaSISPRO();
