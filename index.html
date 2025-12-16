@@ -9,6 +9,7 @@ git push origin main
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SISPRO - PMAM | Sistema de Procedimentos</title>
@@ -61,6 +62,24 @@ git push origin main
                 }
             }
         }
+const SUPABASE_URL = 'SUA_URL_AQUI';
+const SUPABASE_KEY = 'SUA_CHAVE_ANON_AQUI';
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Função para testar se o banco responde
+async function testarBanco() {
+    try {
+        const { data, error } = await supabase.from('procedimentos').select('*').limit(1);
+        if (error) throw error;
+        console.log("✅ Banco de Dados conectado!");
+    } catch (err) {
+        console.error("❌ Erro na conexão:", err.message);
+    }
+}
+
+testarBanco();
+
+        
     </script>
     
     <style>
@@ -2239,6 +2258,7 @@ ${conteudo}
     </script>
 </body>
 </html>
+
 
 
 
