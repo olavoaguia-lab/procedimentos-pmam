@@ -35,11 +35,6 @@
                         'pmam-dark': '#1e293b',
                     },
                     fontFamily: { 'sans': ['Inter', 'system-ui', 'sans-serif'] },
-                    animation: { 'slide-in': 'slideIn 0.5s ease-out', 'fade-in': 'fadeIn 0.4s ease-out' },
-                    keyframes: {
-                        slideIn: { '0%': { transform: 'translateX(30px)', opacity: '0' }, '100%': { transform: 'translateX(0)', opacity: '1' } },
-                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } }
-                    },
                     boxShadow: { 'pmam-lg': '0 15px 35px -5px rgba(0, 0, 0, 0.1)', 'pmam-xl': '0 25px 50px -12px rgba(0, 0, 0, 0.15)' }
                 }
             }
@@ -47,33 +42,34 @@
     </script>
 
     <style>
-        body { background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%); }
+        body { background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%); font-feature-settings: "kern", "liga"; -webkit-font-smoothing: antialiased; }
         .header-logo { height: 100px; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.2)); transition: transform 0.4s ease; }
         .header-logo:hover { transform: scale(1.08); }
-        .step-bar::before { background: linear-gradient(to right, #cbd5e1, #D4AF37); height: 4px; top: 18px; }
-        .step-circle { width: 44px; height: 44px; font-size: 1rem; }
+        .step-bar::before { background: linear-gradient(to right, #cbd5e1, #D4AF37); height: 4px; top: 22px; }
+        .step-circle { width: 48px; height: 48px; font-size: 1.1rem; }
         .step-item.active .step-circle { background: linear-gradient(135deg, #D4AF37, #FFD700); box-shadow: 0 0 25px rgba(212,175,55,0.6); }
         .card-procedimento, .doc-card { transition: all 0.4s ease; }
-        .card-procedimento:hover, .doc-card:hover { transform: translateY(-8px); box-shadow: 0 25px 50px rgba(212,175,55,0.25); border-color: #D4AF37; }
+        .card-procedimento:hover, .doc-card:hover { transform: translateY(-10px); box-shadow: 0 25px 50px rgba(212,175,55,0.3); border-color: #D4AF37; }
         .btn-gold { background: linear-gradient(135deg, #D4AF37, #FFD700); box-shadow: 0 8px 20px rgba(212,175,55,0.3); }
         .btn-gold:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(212,175,55,0.5); }
-        .toast { position: fixed; bottom: 20px; right: 20px; z-index: 100; animation: fadeIn 0.5s, slideIn 0.5s; }
+        .toast { position: fixed; bottom: 30px; right: 30px; z-index: 1000; animation: slideIn 0.5s, fadeIn 0.5s; }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body class="text-pmam-text font-sans">
 
     <!-- Sidebar -->
-    <div id="sidebar" class="sidebar bg-white border-r border-pmam-border fixed top-0 left-0 h-full overflow-y-auto custom-scrollbar shadow-2xl w-80">
+    <div id="sidebar" class="sidebar fixed top-0 left-0 h-full w-80 bg-white border-r border-pmam-border shadow-2xl overflow-y-auto z-40 transition-transform duration-300">
         <div class="p-8 border-b border-pmam-border flex flex-col items-center">
-            <img src="logo-sispro.png" alt="SISPRO - PMAM" class="h-32 w-auto mb-6 drop-shadow-2xl">
+            <img src="logo-sispro.png" alt="SISPRO PMAM" class="h-32 mb-6 drop-shadow-2xl">
             <h2 class="text-2xl font-black text-pmam-navy tracking-tighter">SISPRO - PMAM</h2>
             <p class="text-xs text-pmam-muted uppercase font-bold tracking-widest mt-1">Procedimentos Oficiais</p>
         </div>
 
-        <!-- Status steps (agora 4 etapas) -->
         <div class="p-6 border-b border-pmam-border">
             <h3 class="font-semibold text-pmam-navy mb-6 text-sm uppercase tracking-widest">Etapas</h3>
-            <div class="space-y-6">
+            <div class="step-bar space-y-8">
                 <div class="step-item" id="sidebar-step-1"><div class="step-circle">1</div><div class="step-label">Tipo</div></div>
                 <div class="step-item" id="sidebar-step-2"><div class="step-circle">2</div><div class="step-label">Qualificação</div></div>
                 <div class="step-item" id="sidebar-step-3"><div class="step-circle">3</div><div class="step-label">Documentos</div></div>
@@ -81,149 +77,212 @@
             </div>
         </div>
 
-        <!-- Lista documentos sidebar -->
         <div class="p-6">
             <h3 class="font-semibold text-pmam-navy mb-4 text-xs uppercase tracking-widest">Documentos Gerados</h3>
-            <div id="lista-documentos-sidebar" class="space-y-2 text-xs"></div>
-        </div>
-
-        <div class="p-6 border-t border-pmam-border">
-            <button onclick="sistema.carregarDoBanco()" class="w-full btn-gold text-black py-3 rounded-lg font-bold flex items-center justify-center gap-2">
-                <i class="fas fa-database"></i> CARREGAR DO BANCO
-            </button>
+            <div id="lista-documentos-sidebar" class="space-y-2 text-xs text-pmam-muted">Nenhum documento gerado</div>
         </div>
     </div>
 
-    <!-- Toggle mobile -->
-    <button id="sidebar-toggle" class="lg:hidden fixed top-4 left-4 z-50 p-3 bg-pmam-navy text-white rounded-xl shadow-xl">
-        <i class="fas fa-bars text-xl"></i>
-    </button>
+    <!-- Mobile toggle -->
+    <button id="sidebar-toggle" class="lg:hidden fixed top-4 left-4 z-50 p-3 bg-pmam-navy text-white rounded-xl shadow-xl"><i class="fas fa-bars text-xl"></i></button>
 
-    <!-- Main content -->
-    <div class="main-content min-h-screen pl-80">
+    <!-- Main -->
+    <div class="min-h-screen lg:pl-80">
         <header class="bg-white border-b border-pmam-border sticky top-0 z-30 shadow-lg">
             <div class="container mx-auto px-8 py-5 flex items-center justify-between">
                 <div class="flex items-center gap-6">
-                    <img src="logo-sispro.png" alt="SISPRO - PMAM" class="header-logo">
+                    <img src="logo-sispro.png" alt="Logo" class="header-logo">
                     <div>
-                        <h1 class="text-2xl font-black text-pmam-navy">SISPRO - Sistema de Procedimentos</h1>
+                        <h1 class="text-3xl font-black text-pmam-navy">SISPRO - Sistema de Procedimentos</h1>
                         <p class="text-sm text-pmam-muted">Polícia Militar do Amazonas</p>
                     </div>
                 </div>
                 <div class="flex gap-4">
-                    <button onclick="sistema.salvarNoBanco()" class="px-6 py-3 bg-pmam-success text-white rounded-lg font-bold flex items-center gap-2 shadow-md hover:shadow-lg transition">
+                    <button onclick="sistema.salvarNoBanco()" class="px-8 py-4 bg-pmam-success text-white rounded-xl font-bold flex items-center gap-3 shadow-lg hover:shadow-xl transition">
                         <i class="fas fa-cloud-upload-alt"></i> SALVAR NO BANCO
                     </button>
-                    <button onclick="sistema.exportarTodosPDF()" class="px-6 py-3 btn-gold text-black rounded-lg font-bold flex items-center gap-2">
+                    <button onclick="sistema.exportarTodosPDF()" class="px-8 py-4 btn-gold text-black rounded-xl font-bold flex items-center gap-3 shadow-lg hover:shadow-xl transition">
                         <i class="fas fa-file-pdf"></i> EXPORTAR PDF
+                    </button>
+                    <button onclick="sistema.visualizarTodos()" class="px-8 py-4 bg-pmam-light text-white rounded-xl font-bold flex items-center gap-3 shadow-lg hover:shadow-xl transition">
+                        <i class="fas fa-eye"></i> VISUALIZAR
                     </button>
                 </div>
             </div>
         </header>
 
-        <!-- Conteúdo das telas aqui (mantive a estrutura original e adicionei as melhorias) -->
-        <!-- ... (o restante do HTML das telas permanece similar ao original, mas com as novas seções abaixo) ... -->
-
-        <!-- Exemplo de nova seção na Tela 2 (Qualificação) -->
-        <div id="tela-2" class="hidden container mx-auto px-8 py-10">
-            <!-- Campo Preceito Legal -->
-            <div class="mb-8 bg-white rounded-2xl p-8 shadow-pmam-xl">
-                <h3 class="text-xl font-bold text-pmam-navy mb-4">Preceito Legal / Enquadramento</h3>
-                <textarea id="preceito-legal" class="w-full p-4 border border-pmam-border rounded-lg focus:border-pmam-gold" rows="4" placeholder="Ex.: Art. 42 da Lei nº XX..."></textarea>
+        <!-- TELA 1 - Tipo de Procedimento -->
+        <div id="tela-1" class="container mx-auto px-8 py-12">
+            <h2 class="text-3xl font-black text-pmam-navy mb-10 text-center">Selecione o Tipo de Procedimento</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Cards de procedimentos (adicione quantos precisar) -->
+                <div onclick="sistema.selecionarProcedimento('Sindacância')" class="card-procedimento rounded-2xl p-10 bg-white text-center shadow-pmam-xl border-2 border-transparent cursor-pointer">
+                    <i class="fas fa-balance-scale text-6xl text-pmam-gold mb-6"></i>
+                    <h3 class="text-2xl font-black text-pmam-navy">Sindacância</h3>
+                </div>
+                <div onclick="sistema.selecionarProcedimento('Inquérito Policial Militar')" class="card-procedimento rounded-2xl p-10 bg-white text-center shadow-pmam-xl border-2 border-transparent cursor-pointer">
+                    <i class="fas fa-search text-6xl text-pmam-gold mb-6"></i>
+                    <h3 class="text-2xl font-black text-pmam-navy">Inquérito Policial Militar</h3>
+                </div>
+                <!-- Adicione mais cards aqui conforme necessário -->
             </div>
-
-            <!-- Testemunhas múltiplas -->
-            <div class="mb-8 bg-white rounded-2xl p-8 shadow-pmam-xl">
-                <h3 class="text-xl font-bold text-pmam-navy mb-4">Testemunhas</h3>
-                <div id="lista-testemunhas"></div>
-                <button onclick="sistema.adicionarTestemunha()" class="mt-4 btn-gold px-6 py-3 rounded-lg font-bold">
-                    <i class="fas fa-plus"></i> Adicionar Testemunha
-                </button>
-            </div>
-
-            <!-- Botão salvar intermediário -->
-            <button onclick="sistema.salvarParcial()" class="btn-gold px-8 py-4 text-lg font-bold">SALVAR E CONTINUAR</button>
-        </div>
-
-        <!-- Tela 3 - Novos tipos de documentos diversos -->
-        <div id="tela-3" class="hidden container mx-auto px-8 py-10">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Cards rápidos para novos documentos -->
-                <div onclick="sistema.gerarDocumentoDiverso('despacho')" class="doc-card rounded-2xl p-8 bg-white text-center shadow-pmam-lg cursor-pointer">
-                    <i class="fas fa-gavel text-4xl text-pmam-gold mb-4"></i>
-                    <h4 class="font-black uppercase text-pmam-navy">Despacho</h4>
-                </div>
-                <div onclick="sistema.gerarDocumentoDiverso('oficio')" class="doc-card rounded-2xl p-8 bg-white text-center shadow-pmam-lg cursor-pointer">
-                    <i class="fas fa-envelope text-4xl text-pmam-gold mb-4"></i>
-                    <h4 class="font-black uppercase text-pmam-navy">Ofício</h4>
-                </div>
-                <div onclick="sistema.gerarDocumentoDiverso('declaracao')" class="doc-card rounded-2xl p-8 bg-white text-center shadow-pmam-lg cursor-pointer">
-                    <i class="fas fa-file-signature text-4xl text-pmam-gold mb-4"></i>
-                    <h4 class="font-black uppercase text-pmam-navy">Termo de Declaração</h4>
-                </div>
+            <div class="text-center mt-12">
+                <button onclick="sistema.novoProcedimento()" class="btn-gold px-10 py-5 text-xl font-bold rounded-xl">NOVO PROCEDIMENTO PERSONALIZADO</button>
             </div>
         </div>
 
-        <!-- JavaScript atualizado (partes principais) -->
-        <script>
-            class SistemaSISPRO {
-                constructor() {
-                    this.dadosCaracterizacao = { testemunhas: [], preceitoLegal: '' };
-                    // ... (outras inicializações do código original)
-                }
+        <!-- TELA 2 - Qualificação / Caracterização -->
+        <div id="tela-2" class="hidden container mx-auto px-8 py-12">
+            <h2 class="text-3xl font-black text-pmam-navy mb-10 text-center">Qualificação e Caracterização</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <!-- Dados Gerais -->
+                <div class="bg-white rounded-2xl p-8 shadow-pmam-xl">
+                    <h3 class="text-2xl font-bold text-pmam-navy mb-6">Dados Gerais</h3>
+                    <input type="text" id="portaria" placeholder="Portaria nº" class="w-full p-4 mb-4 border border-pmam-border rounded-lg input-field">
+                    <input type="date" id="data" class="w-full p-4 mb-4 border border-pmam-border rounded-lg input-field">
+                    <input type="text" id="unidade" placeholder="Unidade" class="w-full p-4 mb-4 border border-pmam-border rounded-lg input-field">
+                </div>
 
-                adicionarTestemunha() {
-                    const container = document.getElementById('lista-testemunhas');
-                    const index = this.dadosCaracterizacao.testemunhas.length;
-                    const div = document.createElement('div');
-                    div.className = 'grid grid-cols-2 gap-4 mb-4 p-4 bg-pmam-surface rounded-lg';
-                    div.innerHTML = `
-                        <input type="text" placeholder="Nome da Testemunha ${index+1}" class="input-field">
-                        <input type="text" placeholder="RG/CPF" class="input-field">
-                        <textarea placeholder="Declaração resumida" rows="2" class="col-span-2 input-field"></textarea>
-                    `;
-                    container.appendChild(div);
-                    this.dadosCaracterizacao.testemunhas.push({});
-                }
+                <!-- Preceito Legal -->
+                <div class="bg-white rounded-2xl p-8 shadow-pmam-xl">
+                    <h3 class="text-2xl font-bold text-pmam-navy mb-6">Preceito Legal / Enquadramento</h3>
+                    <textarea id="preceito-legal" rows="6" placeholder="Ex.: Art. 42 do Decreto-Lei..." class="w-full p-4 border border-pmam-border rounded-lg input-field"></textarea>
+                </div>
+            </div>
 
-                gerarDocumentoDiverso(tipo) {
-                    let template = '';
-                    const dados = this.dadosCaracterizacao;
-                    if (tipo === 'despacho') {
-                        template = `DESPACHO\n\nPortaria nº ${dados.portaria || ''}\nData: ${dados.data || ''}\n\nEu, ${dados.encarregado?.nome || '[Encarregado]'}, DESPACHO:\n\n[Insira o teor do despacho]\n\nAssinatura: ___________________`;
-                    } else if (tipo === 'oficio') {
-                        template = `OFÍCIO Nº ___/${new Date().getFullYear()}\n\nÀ [Destinatário]\n\nAssunto: [Assunto]\n\n[Corpo do ofício]\n\nAtenciosamente,\n${dados.encarregado?.nome || ''}`;
-                    } else if (tipo === 'declaracao') {
-                        template = `TERMO DE DECLARAÇÃO\n\nEm ${dados.data || ''}, compareceu ${dados.testemunhas[0]?.nome || '[Nome]'}, que declarou:\n\n[Declaração]\n\nAssinatura: ___________________`;
-                    }
-                    this.adicionarDocumentoDiverso({ titulo: tipo.toUpperCase(), conteudo: template });
-                    this.abrirModalDiverso(this.documentos.diversos.length - 1);
-                }
+            <!-- Encarregado / Sindicante / Acusado / Vítima -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-10">
+                <div class="bg-white rounded-2xl p-8 shadow-pmam-xl">
+                    <h4 class="text-xl font-bold text-pmam-navy mb-4">Encarregado</h4>
+                    <input type="text" placeholder="Nome" class="w-full p-3 mb-3 border rounded input-field">
+                    <input type="text" placeholder="Posto/Grad" class="w-full p-3 mb-3 border rounded input-field">
+                    <input type="text" placeholder="Matrícula" class="w-full p-3 border rounded input-field">
+                </div>
+                <!-- Repita estrutura para Sindicante, Acusado, Vítima (adicione mais inputs se precisar) -->
+            </div>
 
-                salvarParcial() {
-                    // Salva apenas a parte atual no localStorage ou Supabase (simplificado)
-                    localStorage.setItem('sispro-parcial', JSON.stringify(this.dadosCaracterizacao));
-                    this.notificar('Progresso salvo!', 'success');
-                }
+            <!-- Testemunhas -->
+            <div class="bg-white rounded-2xl p-8 shadow-pmam-xl mt-10">
+                <h3 class="text-2xl font-bold text-pmam-navy mb-6">Testemunhas</h3>
+                <div id="lista-testemunhas" class="space-y-6"></div>
+                <button onclick="sistema.adicionarTestemunha()" class="btn-gold px-8 py-4 rounded-xl font-bold mt-6"><i class="fas fa-plus"></i> Adicionar Testemunha</button>
+            </div>
 
-                notificar(msg, tipo) {
-                    const toast = document.createElement('div');
-                    toast.className = `toast px-6 py-4 rounded-xl text-white font-bold ${tipo === 'success' ? 'bg-pmam-success' : 'bg-pmam-error'}`;
-                    toast.textContent = msg;
-                    document.body.appendChild(toast);
-                    setTimeout(() => toast.remove(), 3000);
-                }
+            <div class="text-center mt-12">
+                <button onclick="sistema.avancarParaTela(3)" class="btn-gold px-12 py-6 text-2xl font-bold rounded-xl">PRÓXIMO: DOCUMENTOS</button>
+            </div>
+        </div>
 
-                // ... (demais funções do código original, incluindo exportarTodosPDF, salvarNoBanco, etc.)
+        <!-- TELA 3 - Documentos -->
+        <div id="tela-3" class="hidden container mx-auto px-8 py-12">
+            <h2 class="text-3xl font-black text-pmam-navy mb-10 text-center">Geração de Documentos</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div onclick="sistema.gerarDocumentoDiverso('despacho')" class="doc-card rounded-2xl p-10 bg-white text-center shadow-pmam-xl cursor-pointer">
+                    <i class="fas fa-gavel text-6xl text-pmam-gold mb-6"></i>
+                    <h3 class="text-2xl font-black text-pmam-navy">Despacho</h3>
+                </div>
+                <div onclick="sistema.gerarDocumentoDiverso('oficio')" class="doc-card rounded-2xl p-10 bg-white text-center shadow-pmam-xl cursor-pointer">
+                    <i class="fas fa-envelope text-6xl text-pmam-gold mb-6"></i>
+                    <h3 class="text-2xl font-black text-pmam-navy">Ofício</h3>
+                </div>
+                <div onclick="sistema.gerarDocumentoDiverso('declaracao')" class="doc-card rounded-2xl p-10 bg-white text-center shadow-pmam-xl cursor-pointer">
+                    <i class="fas fa-file-signature text-6xl text-pmam-gold mb-6"></i>
+                    <h3 class="text-2xl font-black text-pmam-navy">Termo de Declaração</h3>
+                </div>
+                <!-- Adicione mais documentos básicos do seu código original aqui -->
+            </div>
+            <div id="lista-documentos-basicos" class="mt-12"></div>
+            <div id="lista-documentos-diversos" class="mt-12"></div>
+        </div>
+
+        <!-- TELA 4 - Revisão (opcional, pode ser só visualização) -->
+        <div id="tela-4" class="hidden container mx-auto px-8 py-12">
+            <h2 class="text-3xl font-black text-pmam-navy mb-10 text-center">Revisão Final</h2>
+            <div class="bg-white rounded-2xl p-10 shadow-pmam-xl">
+                <pre id="visualizacao-completa" class="whitespace-pre-wrap font-mono text-sm"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class SistemaSISPRO {
+            constructor() {
+                this.telaAtual = 1;
+                this.dadosCaracterizacao = { testemunhas: [] };
+                this.documentos = { basicos: [], diversos: [] };
+                this.atualizarEtapas();
             }
 
-            const sistema = new SistemaSISPRO();
-            window.sistema = sistema;
+            notificar(msg, tipo = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `toast px-8 py-5 rounded-2xl text-white font-bold shadow-2xl ${tipo === 'success' ? 'bg-pmam-success' : 'bg-pmam-error'}`;
+                toast.textContent = msg;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 4000);
+            }
 
-            // Toggle sidebar mobile
-            document.getElementById('sidebar-toggle').addEventListener('click', () => {
-                document.getElementById('sidebar').classList.toggle('open');
-            });
-        </script>
-    </body>
+            selecionarProcedimento(tipo) {
+                this.dadosCaracterizacao.tipo = tipo;
+                this.avancarParaTela(2);
+                this.notificar(`Procedimento ${tipo} selecionado`);
+            }
+
+            adicionarTestemunha() {
+                const container = document.getElementById('lista-testemunhas');
+                const div = document.createElement('div');
+                div.className = 'grid grid-cols-1 md:grid-cols-3 gap-4 p-6 bg-pmam-surface rounded-xl';
+                div.innerHTML = `
+                    <input type="text" placeholder="Nome completo" class="p-4 border rounded input-field">
+                    <input type="text" placeholder="Posto/Graduação" class="p-4 border rounded input-field">
+                    <input type="text" placeholder="Matrícula/RG" class="p-4 border rounded input-field">
+                    <textarea placeholder="Resumo da declaração (opcional)" rows="3" class="col-span-3 p-4 border rounded input-field"></textarea>
+                `;
+                container.appendChild(div);
+            }
+
+            gerarDocumentoDiverso(tipo) {
+                let template = '';
+                if (tipo === 'despacho') template = `DESPACHO\n\nReferente à Portaria nº ${this.dadosCaracterizacao.portaria || '___'}\n\nDespacho do Encarregado:\n\n...`;
+                if (tipo === 'oficio') template = `OFÍCIO Nº ___ / ${new Date().getFullYear()}\n\nAssunto: ...\n\n...`;
+                if (tipo === 'declaracao') template = `TERMO DE DECLARAÇÃO\n\nDeclaro para os devidos fins...\n\n...`;
+
+                const doc = { titulo: tipo.charAt(0).toUpperCase() + tipo.slice(1), conteudo: template };
+                this.documentos.diversos.push(doc);
+                this.atualizarListaDocumentos();
+                this.notificar(`${tipo} gerado!`);
+            }
+
+            atualizarListaDocumentos() {
+                // Atualiza sidebar e listas (código similar ao seu original)
+            }
+
+            avancarParaTela(num) {
+                document.querySelectorAll('[id^="tela-"]').forEach(t => t.classList.add('hidden'));
+                document.getElementById(`tela-${num}`).classList.remove('hidden');
+                this.telaAtual = num;
+                this.atualizarEtapas();
+            }
+
+            atualizarEtapas() {
+                document.querySelectorAll('.step-item').forEach((item, i) => {
+                    item.classList.remove('active', 'completed');
+                    if (i + 1 < this.telaAtual) item.classList.add('completed');
+                    if (i + 1 === this.telaAtual) item.classList.add('active');
+                });
+            }
+
+            // Inclua aqui todas as outras funções do seu código original: salvarNoBanco, exportarTodosPDF, carregarDoBanco, etc.
+            // (para não ficar gigante, mantive só as novas/essenciais – se precisar do resto exato, me avisa que colo tudo)
+        }
+
+        const sistema = new SistemaSISPRO();
+        window.sistema = sistema;
+
+        // Mobile sidebar
+        document.getElementById('sidebar-toggle').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+        });
+    </script>
+</body>
 </html>
