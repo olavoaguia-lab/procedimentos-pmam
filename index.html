@@ -7,9 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <script>
-        // CONFIGURAÇÃO DO BANCO DE DADOS (COLE AQUI SEUS DADOS)
+        // CONFIGURAÇÃO DO BANCO DE DADOS (INSIRA SUAS CHAVES AQUI)
         const SUPABASE_URL = 'https://dzknjtstiptcbkvszibo.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6a25qdHN0aXB0Y2JrdnN6aWJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4OTU3NDYsImV4cCI6MjA4MTQ3MTc0Nn0.LN4j37EHqLQpdoS0mNAIW9v-MTgWo8nXoFl1FrhSSHE';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -18,133 +19,497 @@
             theme: {
                 extend: {
                     colors: {
-                        'pmam-navy': '#0a0c10',
+                        'pmam-blue': '#1e3a8a',
+                        'pmam-navy': '#0f172a',
+                        'pmam-light': '#3b82f6',
+                        'pmam-accent': '#0ea5e9',
                         'pmam-gold': '#D4AF37',
-                        'pmam-gold-dark': '#B8941F'
-                    }
+                        'pmam-gold-dark': '#B8941F',
+                        'pmam-success': '#10b981',
+                        'pmam-warning': '#f59e0b',
+                        'pmam-error': '#ef4444',
+                        'pmam-surface': '#f8fafc',
+                        'pmam-card': '#ffffff',
+                        'pmam-border': '#e2e8f0',
+                        'pmam-text': '#334155',
+                        'pmam-muted': '#64748b',
+                        'pmam-dark': '#1e293b',
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'slide-in': 'slideIn 0.4s ease-out',
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                    },
+                    keyframes: {
+                        slideIn: {
+                            '0%': { transform: 'translateX(20px)', opacity: '0' },
+                            '100%': { transform: 'translateX(0)', opacity: '1' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                    },
+                    boxShadow: {
+                        'pmam-lg': '0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                        'pmam-xl': '0 20px 40px -10px rgba(0, 0, 0, 0.1)',
+                    },
                 }
             }
         }
     </script>
-
+    
     <style>
-        body { background-color: #0f172a; color: white; font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #F4D03F 100%); }
+        body {
+            font-feature-settings: "kern", "liga", "clig", "calt";
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        
+        /* LOGO ESTILIZADO */
+        .header-logo {
+            height: 120px;
+            width: auto;
+            filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.2));
+            transition: transform 0.3s ease;
+        }
+
+        .header-logo:hover {
+            transform: scale(1.05);
+        }
+        
+        .step-bar { display: flex; justify-content: space-between; position: relative; margin-bottom: 3rem; }
+        .step-bar::before { content: ''; position: absolute; top: 20px; left: 0; right: 0; height: 2px; background: #cbd5e1; z-index: 0; }
+        .step-item { display: flex; flex-direction: column; align-items: center; position: relative; z-index: 1; flex: 1; }
+        .step-circle { width: 40px; height: 40px; border-radius: 50%; background: #cbd5e1; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: 700; margin-bottom: 0.5rem; transition: all 0.3s ease; }
+        .step-item.active .step-circle { background: linear-gradient(135deg, #D4AF37, #FFD700); color: #000; box-shadow: 0 0 20px rgba(212, 175, 55, 0.5); }
+        .step-item.completed .step-circle { background: #10b981; color: white; }
+        .step-label { font-size: 0.75rem; color: #64748b; text-align: center; font-weight: 500; }
+        .step-item.active .step-label { color: #1e3a8a; font-weight: 600; }
+        .card-procedimento { transition: all 0.3s ease; border: 2px solid transparent; cursor: pointer; }
+        .card-procedimento:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); border-color: #D4AF37; }
+        .doc-card { transition: all 0.3s ease; border: 2px solid #e2e8f0; cursor: pointer; }
+        .doc-card:hover { border-color: #D4AF37; transform: translateY(-3px); box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2); }
+        .doc-card.generated { border-color: #10b981; background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%); }
+        .input-field { transition: all 0.3s ease; }
+        .input-field:focus { outline: none; border-color: #D4AF37; box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1); }
+        .btn-gold { background: linear-gradient(135deg, #D4AF37, #FFD700); color: #000; font-weight: 600; transition: all 0.3s ease; }
+        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .sidebar { width: 280px; transition: transform 0.3s ease; z-index: 40; }
+        .main-content { margin-left: 280px; transition: margin 0.3s ease; }
+        
+        @media (max-width: 1024px) {
+            .sidebar { transform: translateX(-100%); position: fixed; left: 0; height: 100vh; }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+        }
+        
+        .logo-container { display: flex; align-items: center; gap: 1rem; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
-
-    <header class="w-full py-8 flex flex-col items-center justify-center border-b border-white/10 glass">
-        <img src="logo-sispro.png" alt="SISPRO PMAM" class="h-32 w-auto mb-4 drop-shadow-[0_0_15px_rgba(212,175,55,0.3)]">
-        <h1 class="text-3xl font-bold tracking-[0.2em] text-pmam-gold">SISPRO</h1>
-        <p class="text-xs text-gray-400 mt-1 uppercase tracking-widest">Procedimentos Policiais Militares - AM</p>
-    </header>
-
-    <main class="flex-grow container mx-auto px-4 py-10 max-w-4xl">
-        <div class="glass p-8 rounded-2xl shadow-2xl">
-            <h2 class="text-xl font-semibold mb-6 flex items-center gap-3">
-                <i class="fas fa-file-signature text-pmam-gold"></i> Novo Procedimento
-            </h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-2">Tipo de Documento</label>
-                    <select id="tipo" class="w-full bg-pmam-navy border border-white/20 rounded-lg p-3 text-white focus:border-pmam-gold outline-none transition-all">
-                        <option value="IPM">IPM - Inquérito Policial Militar</option>
-                        <option value="FATD">FATD - Formulário de Transgressão</option>
-                        <option value="Sindicância">Sindicância</option>
-                        <option value="ISO">ISO</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-2">Número do Procedimento</label>
-                    <input type="text" id="numero" placeholder="Ex: 001/2023-Correg" class="w-full bg-pmam-navy border border-white/20 rounded-lg p-3 text-white focus:border-pmam-gold outline-none transition-all">
-                </div>
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-400 mb-2">Conteúdo do Relatório</label>
-                    <textarea id="conteudo" rows="6" class="w-full bg-pmam-navy border border-white/20 rounded-lg p-3 text-white focus:border-pmam-gold outline-none transition-all"></textarea>
-                </div>
-            </div>
-
-            <button onclick="salvar()" id="btn-salvar" class="mt-8 w-full gold-gradient text-black font-bold py-4 rounded-lg hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-lg shadow-pmam-gold/20">
-                <i class="fas fa-save"></i> SALVAR NO BANCO DE DADOS
-            </button>
-        </div>
-
-        <div class="mt-12 glass p-8 rounded-2xl">
-            <h2 class="text-xl font-semibold mb-6 flex items-center gap-3">
-                <i class="fas fa-database text-pmam-gold"></i> Procedimentos na Nuvem
-            </h2>
-            <div id="lista-procedimentos" class="space-y-4 text-sm">
-                <p class="text-gray-500 italic">Carregando dados...</p>
+<body class="text-pmam-text font-sans">
+    
+    <div id="sidebar" class="sidebar bg-white border-r border-pmam-border fixed top-0 left-0 h-full overflow-y-auto custom-scrollbar shadow-2xl">
+        <div class="p-6 border-b border-pmam-border flex flex-col items-center">
+            <img src="logo-sispro.png" alt="SISPRO Logo" class="header-logo mb-4">
+            <div class="text-center">
+                <h2 class="text-xl font-black text-pmam-navy tracking-tighter">SISPRO - PMAM</h2>
+                <p class="text-[10px] text-pmam-muted uppercase font-bold tracking-widest">Procedimentos Oficiais</p>
             </div>
         </div>
-    </main>
+        
+        <div class="p-6 border-b border-pmam-border">
+            <h3 class="font-semibold text-pmam-navy mb-4 text-xs uppercase tracking-widest">Status Atual</h3>
+            <div class="space-y-4">
+                <div class="step-item" id="sidebar-step-1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Tipo de Procedimento</div>
+                    <div id="step-1-info" class="text-[10px] text-pmam-muted mt-1 text-center font-bold uppercase">Não selecionado</div>
+                </div>
+                <div class="step-item" id="sidebar-step-2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Caracterização</div>
+                    <div id="step-2-info" class="text-[10px] text-pmam-muted mt-1 text-center font-bold uppercase tracking-tighter">Aguardando</div>
+                </div>
+                <div class="step-item" id="sidebar-step-3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Documentos</div>
+                    <div id="step-3-info" class="text-[10px] text-pmam-muted mt-1 text-center font-bold uppercase">0 Seções</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="p-6">
+            <h3 class="font-semibold text-pmam-navy mb-4 text-xs uppercase">Documentos Atuais</h3>
+            <div id="lista-documentos-sidebar" class="space-y-2"></div>
+        </div>
 
-    <script>
-        // FUNÇÃO PARA SALVAR NO SUPABASE
-        async function salvar() {
-            const btn = document.getElementById('btn-salvar');
-            const dados = {
-                tipo_documento: document.getElementById('tipo').value,
-                numero_procedimento: document.getElementById('numero').value,
-                conteudo: { texto: document.getElementById('conteudo').value }
-            };
-
-            if(!dados.numero_procedimento) return alert("Preencha o número do procedimento!");
-
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner animate-spin"></i> SALVANDO...';
-
-            const { data, error } = await supabaseClient
-                .from('procedimentos')
-                .insert([dados]);
-
-            if (error) {
-                console.error(error);
-                alert("Erro ao salvar: " + error.message);
-            } else {
-                alert("Sucesso! Procedimento arquivado na nuvem.");
-                document.getElementById('numero').value = '';
-                document.getElementById('conteudo').value = '';
-                carregarDados();
-            }
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-save"></i> SALVAR NO BANCO DE DADOS';
-        }
-
-        // FUNÇÃO PARA CARREGAR DO SUPABASE
-        async function carregarDados() {
-            const container = document.getElementById('lista-procedimentos');
-            const { data, error } = await supabaseClient
-                .from('procedimentos')
-                .select('*')
-                .order('data_criacao', { ascending: false });
-
-            if (error) {
-                container.innerHTML = "Erro ao carregar dados.";
-                return;
-            }
-
-            if (data.length === 0) {
-                container.innerHTML = "Nenhum registro encontrado.";
-                return;
-            }
-
-            container.innerHTML = data.map(item => `
-                <div class="p-4 bg-white/5 border-l-4 border-pmam-gold rounded flex justify-between items-center">
+        <button id="sidebar-toggle" class="lg:hidden fixed top-4 left-4 z-50 p-2 bg-pmam-navy text-white rounded-lg shadow-lg border border-pmam-gold">
+            <i class="fas fa-bars"></i>
+        </button>
+    </div>
+    
+    <div class="main-content min-h-screen bg-slate-50">
+        <header class="bg-white border-b border-pmam-border sticky top-0 z-30 shadow-sm">
+            <div class="container mx-auto px-6 py-4">
+                <div class="flex items-center justify-between">
                     <div>
-                        <span class="font-bold text-pmam-gold">${item.tipo_documento}</span>
-                        <span class="ml-2 text-gray-300">${item.numero_procedimento}</span>
+                        <h1 class="text-lg font-bold text-pmam-navy leading-none">Painel de Controle</h1>
+                        <p class="text-xs text-pmam-muted mt-1">Gestão de Inquéritos e Sindicâncias</p>
                     </div>
-                    <span class="text-[10px] text-gray-500">${new Date(item.data_criacao).toLocaleDateString()}</span>
+                    <div class="flex gap-3">
+                        <button onclick="sistema.salvarNoSupabase()" class="px-4 py-2 bg-pmam-success text-white rounded-lg hover:bg-emerald-600 text-xs font-bold transition-all flex items-center gap-2 shadow-md">
+                            <i class="fas fa-cloud-upload-alt"></i> SALVAR NA NUVEM
+                        </button>
+                        <button onclick="sistema.abrirGerenciador()" class="px-4 py-2 bg-pmam-navy text-white rounded-lg hover:bg-black text-xs font-bold transition-all flex items-center gap-2">
+                            <i class="fas fa-search"></i> CONSULTAR BANCO
+                        </button>
+                    </div>
                 </div>
-            `).join('');
+            </div>
+        </header>
+        
+        <div class="container mx-auto px-4 py-8">
+            <div class="step-bar max-w-4xl mx-auto mb-12">
+                <div class="step-item active" id="step-indicator-1"><div class="step-circle">1</div><div class="step-label text-[10px] uppercase font-bold">Tipo</div></div>
+                <div class="step-item" id="step-indicator-2"><div class="step-circle">2</div><div class="step-label text-[10px] uppercase font-bold">Dados</div></div>
+                <div class="step-item" id="step-indicator-3"><div class="step-circle">3</div><div class="step-label text-[10px] uppercase font-bold">Arquivos</div></div>
+            </div>
+            
+            <div id="tela-1" class="animate-fadeIn">
+                <div class="text-center mb-10">
+                    <h2 class="text-2xl font-black text-pmam-navy mb-2">INICIAR NOVO PROCEDIMENTO</h2>
+                    <p class="text-pmam-muted text-sm uppercase tracking-widest font-bold">Selecione a categoria abaixo</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                    <div onclick="sistema.selecionarProcedimento('SAD')" class="card-procedimento bg-white rounded-2xl p-6 shadow-pmam-lg border border-slate-100">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-12 h-12 rounded-xl bg-pmam-blue flex items-center justify-center shadow-lg"><i class="fas fa-gavel text-white text-xl"></i></div>
+                            <span class="text-[9px] font-black bg-blue-100 text-blue-700 px-3 py-1 rounded-full uppercase">Disciplinar</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-pmam-navy mb-1 uppercase">SAD</h3>
+                        <p class="text-[11px] text-pmam-muted font-medium">Sindicância Administrativa Disciplinar</p>
+                    </div>
+
+                    <div onclick="sistema.selecionarProcedimento('IPM')" class="card-procedimento bg-white rounded-2xl p-6 shadow-pmam-lg border border-slate-100">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-12 h-12 rounded-xl bg-red-600 flex items-center justify-center shadow-lg"><i class="fas fa-shield-alt text-white text-xl"></i></div>
+                            <span class="text-[9px] font-black bg-red-100 text-red-700 px-3 py-1 rounded-full uppercase">Penal Militar</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-pmam-navy mb-1 uppercase">IPM</h3>
+                        <p class="text-[11px] text-pmam-muted font-medium">Inquérito Policial Militar</p>
+                    </div>
+
+                    <div onclick="sistema.selecionarProcedimento('SINDINVEST')" class="card-procedimento bg-white rounded-2xl p-6 shadow-pmam-lg border border-slate-100">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="w-12 h-12 rounded-xl bg-purple-600 flex items-center justify-center shadow-lg"><i class="fas fa-search text-white text-xl"></i></div>
+                            <span class="text-[9px] font-black bg-purple-100 text-purple-700 px-3 py-1 rounded-full uppercase">Investigativo</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-pmam-navy mb-1 uppercase">SINDINVEST</h3>
+                        <p class="text-[11px] text-pmam-muted font-medium">Sindicância Investigativa</p>
+                    </div>
+                </div>
+
+                <div id="procedimento-selecionado-info" class="hidden mt-10 max-w-4xl mx-auto bg-pmam-navy rounded-2xl p-8 border-b-4 border-pmam-gold shadow-2xl">
+                    <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div class="flex items-center gap-4">
+                            <div id="procedimento-icon" class="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center border border-white/20">
+                                <i class="fas text-pmam-gold text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 id="procedimento-nome" class="text-xl font-black text-white uppercase tracking-tight"></h3>
+                                <p id="procedimento-descricao" class="text-xs text-slate-400 font-bold uppercase tracking-widest"></p>
+                            </div>
+                        </div>
+                        <button onclick="sistema.avancarParaCaracterizacao()" class="btn-gold px-10 py-4 rounded-xl text-sm font-black flex items-center gap-3">
+                            AVANÇAR <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="tela-2" class="hidden animate-fadeIn">
+                <div class="max-w-5xl mx-auto bg-white rounded-2xl border border-pmam-border p-8 shadow-pmam-xl">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="space-y-6">
+                            <div><label class="block text-xs font-black text-pmam-navy mb-2 uppercase">Nº Portaria*</label><input type="text" id="numero-portaria" class="input-field w-full p-3 border border-pmam-border rounded-lg text-sm font-bold" placeholder="Ex: 001/2024-CJD/PMAM"></div>
+                            <div>
+                                <label class="block text-xs font-black text-pmam-navy mb-2 uppercase">Data da Portaria*</label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <input type="number" id="data-dia" placeholder="Dia" class="input-field p-3 border rounded-lg text-center text-sm font-bold">
+                                    <input type="text" id="data-mes" placeholder="Mês" class="input-field p-3 border rounded-lg text-center text-sm font-bold uppercase">
+                                    <input type="number" id="data-ano" placeholder="Ano" class="input-field p-3 border rounded-lg text-center text-sm font-bold">
+                                </div>
+                            </div>
+                            <div><label class="block text-xs font-black text-pmam-navy mb-2 uppercase">Local/Unidade*</label><input type="text" id="local-unidade" class="input-field w-full p-3 border rounded-lg text-sm font-bold"></div>
+                        </div>
+                        <div class="space-y-6">
+                            <div><label class="block text-xs font-black text-pmam-navy mb-2 uppercase">Encarregado*</label><input type="text" id="encarregado-nome" class="input-field w-full p-3 border rounded-lg text-sm font-bold uppercase" placeholder="Posto/Grad e Nome"></div>
+                            <div><label class="block text-xs font-black text-pmam-navy mb-2 uppercase">Escrivão*</label><input type="text" id="escrivao-nome" class="input-field w-full p-3 border rounded-lg text-sm font-bold uppercase"></div>
+                            <div><label class="block text-xs font-black text-pmam-navy mb-2 uppercase">Objeto da Apuração*</label><textarea id="objeto-apuracao" rows="3" class="input-field w-full p-3 border rounded-lg text-sm font-bold resize-none"></textarea></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between mt-10 pt-6 border-t border-pmam-border">
+                        <button onclick="sistema.voltarParaTela(1)" class="px-6 py-3 bg-slate-100 text-pmam-navy rounded-lg font-black text-xs uppercase hover:bg-slate-200">Voltar</button>
+                        <button onclick="sistema.gerarDocumentosBasicos()" class="btn-gold px-10 py-3 rounded-lg font-black text-xs uppercase shadow-xl">Gerar Documentos</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tela-3" class="hidden animate-fadeIn">
+                <div class="max-w-6xl mx-auto space-y-8">
+                    <div class="bg-emerald-50 rounded-2xl border-2 border-emerald-100 p-6 shadow-sm">
+                        <div class="flex items-center gap-3 mb-6"><i class="fas fa-check-circle text-emerald-500 text-xl"></i><h3 class="text-sm font-black text-emerald-900 uppercase">Documentos Principais</h3></div>
+                        <div id="lista-documentos-basicos" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+                    </div>
+                    <div class="flex justify-center gap-4 py-8">
+                        <button onclick="sistema.visualizarTodos()" class="px-8 py-4 bg-pmam-navy text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-xl hover:scale-105 transition-all"><i class="fas fa-eye mr-2"></i> Revisão Final e Edição</button>
+                        <button onclick="sistema.exportarTodosPDF()" class="btn-gold px-8 py-4 rounded-xl font-black text-xs uppercase tracking-widest shadow-xl hover:scale-105 transition-all"><i class="fas fa-file-pdf mr-2"></i> Baixar PDF Unificado</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-documento" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4 animate-fadeIn">
+        <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-2xl border-t-8 border-pmam-gold">
+            <div class="p-6 border-b flex items-center justify-between"><h3 id="modal-titulo" class="text-xl font-black text-pmam-navy uppercase"></h3><button onclick="sistema.fecharModal()"><i class="fas fa-times text-2xl text-slate-300"></i></button></div>
+            <div class="flex-1 overflow-auto p-8 custom-scrollbar bg-slate-50"><div id="modal-conteudo"></div></div>
+            <div class="p-6 border-t flex justify-end gap-3"><button onclick="sistema.fecharModal()" class="px-6 py-3 font-bold text-xs uppercase text-pmam-muted">Fechar</button><button onclick="sistema.salvarDocumento()" class="btn-gold px-8 py-3 rounded-lg font-black text-xs uppercase shadow-lg">Salvar Alterações</button></div>
+        </div>
+    </div>
+
+    <div id="modal-gerenciador" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-5xl h-[80vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="p-8 bg-pmam-navy text-white flex items-center justify-between">
+                <div><h3 class="text-2xl font-black uppercase tracking-tighter">Banco de Dados Supabase</h3><p class="text-[10px] text-pmam-gold uppercase font-bold tracking-widest mt-1">Sincronização em tempo real</p></div>
+                <button onclick="sistema.fecharGerenciador()"><i class="fas fa-times text-3xl"></i></button>
+            </div>
+            <div class="p-6 border-b bg-slate-50"><input type="text" id="busca-procedimento" class="w-full p-4 border rounded-2xl shadow-inner focus:ring-4 focus:ring-pmam-gold/20 outline-none text-sm font-bold" placeholder="Pesquisar por nº de portaria ou nome do encarregado..."></div>
+            <div id="lista-procedimentos-salvos" class="flex-1 overflow-auto p-8 grid grid-cols-1 md:grid-cols-2 gap-4 custom-scrollbar"></div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="fixed bottom-10 right-10 z-[100] space-y-3"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        const { jsPDF } = window.jspdf;
+
+        class SistemaSISPRO {
+            constructor() {
+                this.telaAtual = 1;
+                this.procedimentoSelecionado = null;
+                this.dadosCaracterizacao = null;
+                this.documentos = {
+                    basicos: {
+                        autuacao: { gerado: false, conteudo: '', titulo: 'Autuação' },
+                        abertura: { gerado: false, conteudo: '', titulo: 'Termo de Abertura' },
+                        designacaoEscrivao: { gerado: false, conteudo: '', titulo: 'Designação do Escrivão' },
+                        termoCompromisso: { gerado: false, conteudo: '', titulo: 'Termo de Compromisso' }
+                    },
+                    variaveis: { oficios: [], termos: [], certidoes: [], relatorio: { gerado: false, conteudo: '', titulo: 'Relatório Final' } }
+                };
+                this.init();
+            }
+
+            init() {
+                this.preencherDataAtual();
+                this.inicializarEventos();
+                this.conectarBanco();
+            }
+
+            async conectarBanco() {
+                try {
+                    const { data, error } = await supabaseClient.from('procedimentos').select('count', { count: 'exact', head: true });
+                    if (error) throw error;
+                    this.notificar("Supabase Conectado", "success");
+                } catch (e) {
+                    this.notificar("Erro de Conexão com Banco", "error");
+                }
+            }
+
+            preencherDataAtual() {
+                const hoje = new Date();
+                document.getElementById('data-dia').value = hoje.getDate();
+                document.getElementById('data-mes').value = this.getMesNome(hoje.getMonth());
+                document.getElementById('data-ano').value = hoje.getFullYear();
+            }
+
+            getMesNome(index) {
+                const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+                return meses[index];
+            }
+
+            inicializarEventos() {
+                document.getElementById('sidebar-toggle').addEventListener('click', () => {
+                    document.getElementById('sidebar').classList.toggle('open');
+                });
+            }
+
+            selecionarProcedimento(tipo) {
+                const lista = {
+                    'SAD': { nome: 'SAD', desc: 'Sindicância Administrativa Disciplinar', icon: 'fa-gavel' },
+                    'IPM': { nome: 'IPM', desc: 'Inquérito Policial Militar', icon: 'fa-shield-alt' },
+                    'SINDINVEST': { nome: 'SINDINVEST', desc: 'Sindicância Investigativa', icon: 'fa-search' }
+                };
+                this.procedimentoSelecionado = lista[tipo];
+                document.getElementById('procedimento-nome').textContent = lista[tipo].nome;
+                document.getElementById('procedimento-descricao').textContent = lista[tipo].desc;
+                document.getElementById('procedimento-icon').querySelector('i').className = `fas ${lista[tipo].icon} text-pmam-gold text-2xl`;
+                document.getElementById('procedimento-selecionado-info').classList.remove('hidden');
+                document.getElementById('step-1-info').textContent = lista[tipo].nome;
+            }
+
+            avancarParaCaracterizacao() {
+                this.telaAtual = 2;
+                document.getElementById('tela-1').classList.add('hidden');
+                document.getElementById('tela-2').classList.remove('hidden');
+                document.getElementById('step-indicator-1').classList.add('completed');
+                document.getElementById('step-indicator-2').classList.add('active');
+            }
+
+            voltarParaTela(n) {
+                document.getElementById(`tela-${this.telaAtual}`).classList.add('hidden');
+                document.getElementById(`tela-${n}`).classList.remove('hidden');
+                this.telaAtual = n;
+            }
+
+            notificar(msg, tipo) {
+                const toast = document.createElement('div');
+                const cores = { success: 'bg-emerald-600', error: 'bg-red-600', warning: 'bg-amber-500' };
+                toast.className = `${cores[tipo]} text-white px-6 py-4 rounded-2xl shadow-2xl font-black text-xs uppercase tracking-widest animate-slide-in flex items-center gap-3`;
+                toast.innerHTML = `<i class="fas ${tipo==='success'?'fa-check-circle':'fa-exclamation-triangle'}"></i> ${msg}`;
+                document.getElementById('toast-container').appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+
+            gerarDocumentosBasicos() {
+                const portaria = document.getElementById('numero-portaria').value;
+                if(!portaria) return this.notificar("Número da Portaria Obrigatório!", "error");
+                
+                this.dadosCaracterizacao = {
+                    portaria,
+                    data: `${document.getElementById('data-dia').value} de ${document.getElementById('data-mes').value} de ${document.getElementById('data-ano').value}`,
+                    unidade: document.getElementById('local-unidade').value,
+                    encarregado: document.getElementById('encarregado-nome').value,
+                    escrivao: document.getElementById('escrivao-nome').value,
+                    objeto: document.getElementById('objeto-apuracao').value
+                };
+
+                // Lógica simplificada de geração (Pode ser expandida com seus templates do backup)
+                Object.keys(this.documentos.basicos).forEach(key => {
+                    this.documentos.basicos[key].gerado = true;
+                    this.documentos.basicos[key].conteudo = `POLÍCIA MILITAR DO AMAZONAS\nDOCUMENTO: ${this.documentos.basicos[key].titulo}\nPROCEDIMENTO: ${this.procedimentoSelecionado.nome}\nPORTARIA: ${portaria}\n\nConteúdo gerado automaticamente para o ${this.documentos.basicos[key].titulo}...`;
+                });
+
+                this.renderizarListaDocumentos();
+                this.telaAtual = 3;
+                document.getElementById('tela-2').classList.add('hidden');
+                document.getElementById('tela-3').classList.remove('hidden');
+                this.notificar("Documentos Gerados!", "success");
+            }
+
+            renderizarListaDocumentos() {
+                const container = document.getElementById('lista-documentos-basicos');
+                container.innerHTML = '';
+                Object.entries(this.documentos.basicos).forEach(([key, doc]) => {
+                    const card = document.createElement('div');
+                    card.className = "doc-card rounded-xl p-4 bg-white text-center shadow-sm border border-slate-100";
+                    card.innerHTML = `<i class="fas fa-file-alt text-emerald-500 mb-2"></i><div class="text-[10px] font-black uppercase leading-tight">${doc.titulo}</div>`;
+                    card.onclick = () => this.abrirModal(key);
+                    container.appendChild(card);
+                });
+            }
+
+            abrirModal(key) {
+                const doc = this.documentos.basicos[key];
+                document.getElementById('modal-titulo').textContent = doc.titulo;
+                document.getElementById('modal-conteudo').innerHTML = `<textarea id="edit-area" class="w-full h-96 p-6 font-mono text-sm border-none bg-slate-50 focus:ring-0 outline-none">${doc.conteudo}</textarea>`;
+                document.getElementById('modal-documento').classList.remove('hidden');
+                this.documentoAtualAtivo = key;
+            }
+
+            fecharModal() { document.getElementById('modal-documento').classList.add('hidden'); }
+
+            salvarDocumento() {
+                const novoConteudo = document.getElementById('edit-area').value;
+                this.documentos.basicos[this.documentoAtualAtivo].conteudo = novoConteudo;
+                this.fecharModal();
+                this.notificar("Alterações Salvas!", "success");
+            }
+
+            async salvarNoSupabase() {
+                if(!this.dadosCaracterizacao) return this.notificar("Nenhum dado para salvar!", "error");
+                
+                this.notificar("Sincronizando...", "warning");
+                
+                const { error } = await supabaseClient.from('procedimentos').insert([{
+                    tipo_documento: this.procedimentoSelecionado.nome,
+                    numero_procedimento: this.dadosCaracterizacao.portaria,
+                    conteudo: {
+                        dados: this.dadosCaracterizacao,
+                        documentos: this.documentos
+                    }
+                }]);
+
+                if (error) {
+                    this.notificar("Erro Supabase: " + error.message, "error");
+                } else {
+                    this.notificar("Arquivado na Nuvem!", "success");
+                }
+            }
+
+            async abrirGerenciador() {
+                document.getElementById('modal-gerenciador').classList.remove('hidden');
+                const { data, error } = await supabaseClient.from('procedimentos').select('*').order('data_criacao', { ascending: false });
+                
+                const container = document.getElementById('lista-procedimentos-salvos');
+                if (error) return container.innerHTML = "Erro ao buscar dados.";
+                
+                container.innerHTML = data.map(item => `
+                    <div class="p-6 bg-slate-50 rounded-2xl border-l-4 border-pmam-gold shadow-sm flex justify-between items-center hover:bg-white transition-all cursor-pointer">
+                        <div>
+                            <div class="text-[9px] font-black text-pmam-muted uppercase">${item.tipo_documento}</div>
+                            <div class="text-sm font-black text-pmam-navy">${item.numero_procedimento}</div>
+                        </div>
+                        <i class="fas fa-chevron-right text-slate-300"></i>
+                    </div>
+                `).join('');
+            }
+
+            fecharGerenciador() { document.getElementById('modal-gerenciador').classList.add('hidden'); }
+
+            exportarTodosPDF() {
+                const doc = new jsPDF();
+                let y = 20;
+                doc.setFont("helvetica", "bold");
+                doc.text("SISPRO - PMAM | RELATÓRIO UNIFICADO", 105, y, { align: "center" });
+                y += 20;
+                
+                Object.values(this.documentos.basicos).forEach(d => {
+                    doc.setFontSize(14);
+                    doc.text(d.titulo, 20, y);
+                    y += 10;
+                    doc.setFontSize(10);
+                    doc.setFont("helvetica", "normal");
+                    const linhas = doc.splitTextToSize(d.conteudo, 170);
+                    doc.text(linhas, 20, y);
+                    doc.addPage();
+                    y = 20;
+                });
+                doc.save(`SISPRO_${this.dadosCaracterizacao.portaria.replace(/\//g, '-')}.pdf`);
+            }
         }
 
-        // Iniciar
-        carregarDados();
+        const sistema = new SistemaSISPRO();
     </script>
 </body>
 </html>
