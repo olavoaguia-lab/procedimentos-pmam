@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+
     <script>
         tailwind.config = {
             theme: {
@@ -283,6 +283,7 @@
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         }
     </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="text-pmam-text font-sans">
     
@@ -804,7 +805,24 @@
         
         class SistemaSISPRO {
             constructor() {
-                this.telaAtual = 1;
+               // No topo da sua classe SistemaSISPRO
+constructor() {
+    this.supabase = supabase.createClient('SUA_URL_DO_SUPABASE', 'SUA_CHAVE_ANON_PUBLIC');
+    // ... restante do construtor
+}
+
+async salvarProcedimento(dados) {
+    const { data, error } = await this.supabase
+        .from('procedimentos')
+        .insert([{ 
+            tipo_documento: dados.tipo, 
+            conteudo: dados,
+            numero_procedimento: dados.numero 
+        }]);
+    
+    if (error) throw error;
+    this.notificar('Procedimento salvo com sucesso!', 'success');
+} this.telaAtual = 1;
                 this.procedimentoSelecionado = null;
                 this.dadosCaracterizacao = null;
                 this.documentos = {
@@ -2218,3 +2236,4 @@ ${conteudo}
     </script>
 </body>
 </html>
+
