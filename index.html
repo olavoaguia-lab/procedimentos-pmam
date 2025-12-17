@@ -43,9 +43,9 @@
 
     <style>
         body { background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%); -webkit-font-smoothing: antialiased; }
-        .header-logo { height: 110px; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3)); transition: transform 0.4s ease; }
+        .header-logo { height: 100px; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.2)); transition: transform 0.4s ease; }
         .header-logo:hover { transform: scale(1.05); }
-        .sidebar-logo { height: 140px; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.2)); }
+        .sidebar-logo { height: 160px; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3)); }
         .card-procedimento, .doc-card { transition: all 0.4s ease; }
         .card-procedimento:hover, .doc-card:hover { transform: translateY(-10px); box-shadow: 0 25px 50px rgba(212,175,55,0.3); border-color: #D4AF37; }
         .btn-gold { background: linear-gradient(135deg, #D4AF37, #FFD700); box-shadow: 0 8px 20px rgba(212,175,55,0.3); }
@@ -57,12 +57,12 @@
 </head>
 <body class="text-pmam-text font-sans">
 
-    <!-- Sidebar -->
+    <!-- Sidebar com o brasão oficial da PMAM -->
     <div id="sidebar" class="fixed top-0 left-0 h-full w-80 bg-white border-r border-pmam-border shadow-2xl overflow-y-auto z-40">
         <div class="p-8 border-b border-pmam-border flex flex-col items-center">
-            <img src="logo-sispro.png" alt="SISPRO" class="sidebar-logo mb-6">
+            <img src="logo-pmam.png" alt="Brasão PMAM" class="sidebar-logo mb-6">
             <h2 class="text-2xl font-black text-pmam-navy tracking-tighter">SISPRO - PMAM</h2>
-            <p class="text-xs text-pmam-muted uppercase font-bold tracking-widest mt-1">Sistema de Procedimentos</p>
+            <p class="text-xs text-pmam-muted uppercase font-bold tracking-widest mt-1">Sistema de Procedimentos Oficiais</p>
         </div>
 
         <div class="p-6 border-b border-pmam-border">
@@ -89,8 +89,8 @@
         <header class="bg-white border-b border-pmam-border sticky top-0 z-30 shadow-lg">
             <div class="container mx-auto px-8 py-6 flex items-center justify-between">
                 <div class="flex items-center gap-8">
-                    <!-- Brasão oficial da PMAM no centro do header -->
-                    <img src="logo-pmam.png" alt="Brasão PMAM" class="header-logo">
+                    <!-- Logo do sistema SISPRO ao lado do título -->
+                    <img src="logo-sispro.png" alt="Logo SISPRO" class="header-logo">
                     <div>
                         <h1 class="text-3xl font-black text-pmam-navy leading-tight">SISPRO - Sistema de Procedimentos</h1>
                         <p class="text-lg text-pmam-muted font-medium">Polícia Militar do Amazonas</p>
@@ -139,8 +139,8 @@
             </div>
         </div>
 
-        <!-- As demais telas (2, 3, 4) permanecem funcionais como na versão anterior -->
-        <!-- (Qualificação, Documentos, Relatório) -->
+        <!-- Demais telas (2, 3, 4) permanecem funcionais como antes -->
+        <!-- Qualificação, Documentos Básicos/Diversos, Relatório com estrutura oficial para IPM -->
 
         <script>
             class SistemaSISPRO {
@@ -174,18 +174,24 @@
 
                 atualizarEtapas() {
                     document.querySelectorAll('.step-item').forEach((item, i) => {
-                        item.querySelector('.step-circle').classList.remove('bg-pmam-gold', 'bg-gray-300');
-                        item.querySelector('.step-circle').classList.add(i + 1 === this.telaAtual ? 'bg-pmam-gold' : i + 1 < this.telaAtual ? 'bg-pmam-success' : 'bg-gray-300');
-                        item.querySelector('.step-circle').classList.remove('text-black', 'text-gray-600', 'text-white');
-                        item.querySelector('.step-circle').classList.add(i + 1 <= this.telaAtual ? 'text-white' : 'text-gray-600');
+                        const circle = item.querySelector('.step-circle');
+                        circle.classList.remove('bg-pmam-gold', 'bg-gray-300', 'bg-pmam-success');
+                        circle.classList.add(i + 1 === this.telaAtual ? 'bg-pmam-gold' : i + 1 < this.telaAtual ? 'bg-pmam-success' : 'bg-gray-300');
+                        circle.classList.remove('text-black', 'text-white', 'text-gray-600');
+                        circle.classList.add(i + 1 <= this.telaAtual ? 'text-white' : 'text-gray-600');
                     });
                 }
 
-                // Funções adicionais (gerar documentos, relatório, salvar, etc.) permanecem como nas versões anteriores
+                // As demais funções (geração de documentos, relatório, exportação, salvar no banco etc.) permanecem como na versão anterior
             }
 
             const sistema = new SistemaSISPRO();
             window.sistema = sistema;
+
+            // Toggle sidebar mobile
+            document.getElementById('sidebar-toggle').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            });
         </script>
     </div>
 </body>
