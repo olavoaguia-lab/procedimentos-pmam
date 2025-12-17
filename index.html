@@ -7,421 +7,224 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-    <script>
-        const SUPABASE_URL = 'https://dzknjtstiptcbkvszibo.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6a25qdHN0aXB0Y2JrdnN6aWJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4OTU3NDYsImV4cCI6MjA4MTQ3MTc0Nn0.LN4j37EHqLQpdoS0mNAIW9v-MTgWo8nXoFl1FrhSSHE';
-
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'pmam-blue': '#1e3a8a',
-                        'pmam-navy': '#0f172a',
-                        'pmam-light': '#3b82f6',
-                        'pmam-accent': '#0ea5e9',
-                        'pmam-gold': '#D4AF37',
-                        'pmam-gold-dark': '#B8941F',
-                        'pmam-success': '#10b981',
-                        'pmam-warning': '#f59e0b',
-                        'pmam-error': '#ef4444',
-                        'pmam-surface': '#f8fafc',
-                        'pmam-card': '#ffffff',
-                        'pmam-border': '#e2e8f0',
-                        'pmam-text': '#334155',
-                        'pmam-muted': '#64748b',
-                        'pmam-dark': '#1e293b',
-                    },
-                    fontFamily: { 'sans': ['Inter', 'system-ui', 'sans-serif'] },
-                    boxShadow: { 'pmam-lg': '0 15px 35px -5px rgba(0, 0, 0, 0.1)', 'pmam-xl': '0 25px 50px -12px rgba(0, 0, 0, 0.15)' }
-                }
-            }
-        }
-    </script>
-
     <style>
-        body { background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%); -webkit-font-smoothing: antialiased; }
-        .header-logo { height: 90px; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.2)); transition: transform 0.4s ease; }
-        .header-logo:hover { transform: scale(1.05); }
-        .sidebar-logo { height: 140px; filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3)); }
-        .card-procedimento, .doc-card { transition: all 0.4s ease; }
-        .card-procedimento:hover, .doc-card:hover { transform: translateY(-10px); box-shadow: 0 25px 50px rgba(212,175,55,0.3); border-color: #D4AF37; }
-        .btn-gold { background: linear-gradient(135deg, #D4AF37, #FFD700); box-shadow: 0 8px 20px rgba(212,175,55,0.3); }
-        .btn-gold:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(212,175,55,0.5); }
-        .toast { position: fixed; bottom: 30px; right: 30px; z-index: 1000; animation: slideIn 0.5s, fadeIn 0.5s; }
-        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* Responsividade do sidebar */
-        #sidebar {
-            transition: transform 0.3s ease-in-out;
-        }
-        @media (max-width: 1023px) {
-            #sidebar {
-                position: fixed;
-                top: 0;
-                left: 0;
-                height: 100vh;
-                transform: translateX(-100%);
-                z-index: 60;
-            }
-            #sidebar.open {
-                transform: translateX(0);
-            }
-            .main-content {
-                padding-left: 0 !important;
-            }
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .input-field { @apply w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 outline-none transition-all text-sm; }
+        .active-step { @apply bg-yellow-500 text-slate-900 font-bold shadow-md; }
+        .doc-card { @apply p-5 bg-white rounded-xl border border-gray-100 hover:border-yellow-500 cursor-pointer shadow-sm transition-all; }
     </style>
 </head>
-<body class="text-pmam-text font-sans">
+<body class="flex">
 
-    <!-- Sidebar com brasão oficial da PMAM -->
-    <div id="sidebar" class="fixed top-0 left-0 h-full w-80 bg-white border-r border-pmam-border shadow-2xl overflow-y-auto z-50 lg:translate-x-0">
-        <div class="p-8 border-b border-pmam-border flex flex-col items-center">
-            <img src="logo-pmam.png" alt="Brasão PMAM" class="sidebar-logo mb-6">
-            <h2 class="text-2xl font-black text-pmam-navy tracking-tighter">SISPRO - PMAM</h2>
-            <p class="text-xs text-pmam-muted uppercase font-bold tracking-widest mt-1">Sistema de Procedimentos Oficiais</p>
+    <aside class="fixed h-screen w-64 bg-slate-900 text-slate-300 p-6 flex flex-col">
+        <div class="mb-10 text-center border-b border-slate-700 pb-6">
+            <h1 class="text-2xl font-black text-white italic">SISPRO</h1>
+            <p class="text-[10px] tracking-[0.2em] text-yellow-500">PMAM • PROCEDIMENTOS</p>
         </div>
+        
+        <nav class="flex-1 space-y-2">
+            <button onclick="app.navegar(1)" id="b-1" class="w-full flex items-center gap-3 p-3 rounded-lg active-step"><i class="fas fa-list"></i> 1. Tipo</button>
+            <button onclick="app.navegar(2)" id="b-2" class="w-full flex items-center gap-3 p-3 rounded-lg"><i class="fas fa-user-edit"></i> 2. Qualificação</button>
+            <button onclick="app.navegar(3)" id="b-3" class="w-full flex items-center gap-3 p-3 rounded-lg"><i class="fas fa-file-alt"></i> 3. Documentos</button>
+            <button onclick="app.navegar(4)" id="b-4" class="w-full flex items-center gap-3 p-3 rounded-lg"><i class="fas fa-print"></i> 4. Processo</button>
+        </nav>
 
-        <div class="p-6 border-b border-pmam-border">
-            <h3 class="font-semibold text-pmam-navy mb-6 text-sm uppercase tracking-widest">Etapas do Procedimento</h3>
-            <div class="space-y-8">
-                <div class="step-item flex items-center gap-4"><div class="step-circle w-12 h-12 rounded-full bg-pmam-gold text-white font-bold flex items-center justify-center">1</div><div class="step-label font-medium">Tipo</div></div>
-                <div class="step-item flex items-center gap-4"><div class="step-circle w-12 h-12 rounded-full bg-gray-300 text-gray-600 font-bold flex items-center justify-center">2</div><div class="step-label font-medium">Qualificação</div></div>
-                <div class="step-item flex items-center gap-4"><div class="step-circle w-12 h-12 rounded-full bg-gray-300 text-gray-600 font-bold flex items-center justify-center">3</div><div class="step-label font-medium">Documentos</div></div>
-                <div class="step-item flex items-center gap-4"><div class="step-circle w-12 h-12 rounded-full bg-gray-300 text-gray-600 font-bold flex items-center justify-center">4</div><div class="step-label font-medium">Relatório/Revisão</div></div>
+        <div class="pt-6 border-t border-slate-700">
+            <button onclick="app.salvarNoSupabase()" class="w-full bg-emerald-600 text-white p-3 rounded-xl font-bold hover:bg-emerald-700 transition-all flex items-center justify-center gap-2">
+                <i class="fas fa-cloud"></i> SALVAR NUVEM
+            </button>
+        </div>
+    </aside>
+
+    <main class="ml-64 flex-1 p-10">
+        
+        <section id="tela-1" class="space-y-6">
+            <h2 class="text-3xl font-black text-slate-800 mb-8">Tipo de Procedimento</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div onclick="app.setTipo('IPM')" class="doc-card text-center py-10">
+                    <i class="fas fa-gavel text-4xl mb-4 text-slate-700"></i>
+                    <h3 class="font-bold text-xl uppercase">IPM</h3>
+                </div>
+                <div onclick="app.setTipo('SINDICÂNCIA')" class="doc-card text-center py-10">
+                    <i class="fas fa-balance-scale text-4xl mb-4 text-slate-700"></i>
+                    <h3 class="font-bold text-xl uppercase">SINDICÂNCIA</h3>
+                </div>
+                <div onclick="app.setTipo('SAD')" class="doc-card text-center py-10">
+                    <i class="fas fa-search text-4xl mb-4 text-slate-700"></i>
+                    <h3 class="font-bold text-xl uppercase">SAD</h3>
+                </div>
             </div>
-        </div>
+        </section>
 
-        <div class="p-6">
-            <h3 class="font-semibold text-pmam-navy mb-4 text-xs uppercase tracking-widest">Documentos Gerados</h3>
-            <div id="lista-documentos-sidebar" class="space-y-2 text-xs text-pmam-muted">Nenhum documento gerado ainda</div>
+        <section id="tela-2" class="hidden space-y-6">
+            <div class="flex justify-between items-end">
+                <h2 class="text-3xl font-black text-slate-800">Qualificação dos Envolvidos</h2>
+                <div class="flex gap-2">
+                    <button onclick="app.abrirModal('Encarregado')" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm">+ Encarregado</button>
+                    <button onclick="app.abrirModal('Escrivão')" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm">+ Escrivão</button>
+                    <button onclick="app.abrirModal('Acusado')" class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm">+ Acusado</button>
+                    <button onclick="app.abrirModal('Testemunha')" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm">+ Testemunha</button>
+                </div>
+            </div>
+
+            <div id="lista-qualificados" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                </div>
+        </section>
+
+        <section id="tela-3" class="hidden space-y-6">
+            <h2 class="text-3xl font-black text-slate-800">Documentos Padrão</h2>
+            <div id="grid-docs" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                </div>
+        </section>
+
+        <section id="tela-4" class="hidden space-y-6">
+            <div class="bg-white p-8 rounded-3xl shadow-xl border border-gray-200">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 id="doc-title" class="text-xl font-bold">Visualização do Documento</h3>
+                    <div class="flex gap-2">
+                        <button onclick="app.navegar(3)" class="bg-slate-200 px-6 py-2 rounded-xl font-bold uppercase text-xs">Editar/Voltar</button>
+                        <button onclick="app.exportarPDF()" class="bg-red-600 text-white px-6 py-2 rounded-xl font-bold uppercase text-xs flex items-center gap-2">
+                            <i class="fas fa-file-pdf"></i> Exportar PDF
+                        </button>
+                    </div>
+                </div>
+                <textarea id="editor" class="w-full h-[500px] p-10 bg-slate-50 border-0 rounded-2xl font-mono text-sm leading-relaxed" spellcheck="false"></textarea>
+            </div>
+        </section>
+    </main>
+
+    <div id="modal-q" class="fixed inset-0 bg-slate-900/90 hidden items-center justify-center z-[100] backdrop-blur-sm">
+        <div class="bg-white w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl">
+            <div class="p-6 bg-slate-800 text-white flex justify-between">
+                <h3 class="font-bold">Qualificar: <span id="span-papel" class="text-yellow-500"></span></h3>
+                <button onclick="app.fecharModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="p-8 grid grid-cols-2 gap-4">
+                <div class="col-span-2"><label class="text-[10px] font-bold uppercase text-gray-400">Nome Completo</label><input type="text" id="q-nome" class="input-field"></div>
+                <div><label class="text-[10px] font-bold uppercase text-gray-400">RG / Matrícula</label><input type="text" id="q-rg" class="input-field"></div>
+                <div><label class="text-[10px] font-bold uppercase text-gray-400">Posto/Grad</label><input type="text" id="q-posto" class="input-field"></div>
+                <div><label class="text-[10px] font-bold uppercase text-gray-400">Naturalidade</label><input type="text" id="q-natural" class="input-field"></div>
+                <div><label class="text-[10px] font-bold uppercase text-gray-400">Profissão</label><input type="text" id="q-profissao" class="input-field"></div>
+                <div class="col-span-2"><label class="text-[10px] font-bold uppercase text-gray-400">Filiação</label><input type="text" id="q-filiacao" class="input-field"></div>
+                <div class="col-span-2"><label class="text-[10px] font-bold uppercase text-gray-400">Endereço</label><input type="text" id="q-endereco" class="input-field"></div>
+                <div><label class="text-[10px] font-bold uppercase text-gray-400">Início Oitiva</label><input type="time" id="q-inicio" class="input-field"></div>
+                <div><label class="text-[10px] font-bold uppercase text-gray-400">Fim Oitiva</label><input type="time" id="q-fim" class="input-field"></div>
+                <button onclick="app.confirmarQualif()" class="col-span-2 bg-yellow-500 text-slate-900 font-black p-4 rounded-xl mt-4 uppercase">Salvar e Qualificar</button>
+            </div>
         </div>
     </div>
 
-    <!-- Botão hamburger (mobile) -->
-    <button id="sidebar-toggle" class="lg:hidden fixed top-4 left-4 z-70 p-4 bg-pmam-navy text-white rounded-xl shadow-2xl">
-        <i class="fas fa-bars text-2xl"></i>
-    </button>
+    <script>
+        const SB_URL = "https://dzknjtstiptcbkvszibo.supabase.co";
+        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6a25qdHN0aXB0Y2JrdnN6aWJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4OTU3NDYsImV4cCI6MjA4MTQ3MTc0Nn0.LN4j37EHqLQpdoS0mNAIW9v-MTgWo8nXoFl1FrhSSHE";
+        const _supabase = window.supabase.createClient(SB_URL, SB_KEY);
 
-    <!-- Conteúdo Principal -->
-    <div class="min-h-screen lg:pl-80 main-content">
-        <header class="bg-white border-b border-pmam-border sticky top-0 z-30 shadow-lg">
-            <div class="container mx-auto px-6 py-5 flex items-center justify-between">
-                <div class="flex items-center gap-6">
-                    <img src="logo-sispro.png" alt="Logo SISPRO" class="header-logo">
-                    <div>
-                        <h1 class="text-2xl lg:text-3xl font-black text-pmam-navy leading-tight">SISPRO - Sistema de Procedimentos</h1>
-                        <p class="text-base lg:text-lg text-pmam-muted font-medium">Polícia Militar do Amazonas</p>
-                    </div>
-                </div>
-                <div class="flex gap-4">
-                    <button onclick="sistema.salvarNoBanco()" class="px-6 py-3 bg-pmam-success text-white rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-xl transition">
-                        <i class="fas fa-cloud-upload-alt"></i> SALVAR NO BANCO
-                    </button>
-                    <button onclick="sistema.exportarTodosPDF()" class="px-6 py-3 btn-gold text-black rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-xl transition">
-                        <i class="fas fa-file-pdf"></i> EXPORTAR PDF
-                    </button>
-                </div>
-            </div>
-        </header>
-
-        <!-- TELA 1 - Seleção de Procedimento -->
-        <div id="tela-1" class="container mx-auto px-6 py-12 lg:py-16">
-            <h2 class="text-3xl lg:text-4xl font-black text-pmam-navy mb-10 text-center">Selecione o Tipo de Procedimento</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto">
-                <div onclick="sistema.selecionarProcedimento('IPM')" class="card-procedimento rounded-3xl p-10 bg-white text-center shadow-pmam-xl border-4 border-transparent cursor-pointer">
-                    <i class="fas fa-gavel text-7xl text-pmam-gold mb-6"></i>
-                    <h3 class="text-3xl font-black text-pmam-navy">IPM</h3>
-                    <p class="text-lg text-pmam-muted mt-2">Inquérito Policial Militar</p>
-                </div>
-                <div onclick="sistema.selecionarProcedimento('SAD')" class="card-procedimento rounded-3xl p-10 bg-white text-center shadow-pmam-xl border-4 border-transparent cursor-pointer">
-                    <i class="fas fa-balance-scale text-7xl text-pmam-gold mb-6"></i>
-                    <h3 class="text-3xl font-black text-pmam-navy">SAD</h3>
-                    <p class="text-lg text-pmam-muted mt-2">Sindicância Administrativa Disciplinar</p>
-                </div>
-                <div onclick="sistema.selecionarProcedimento('SINDINVEST')" class="card-procedimento rounded-3xl p-10 bg-white text-center shadow-pmam-xl border-4 border-transparent cursor-pointer">
-                    <i class="fas fa-magnifying-glass text-7xl text-pmam-gold mb-6"></i>
-                    <h3 class="text-3xl font-black text-pmam-navy">SINDINVEST</h3>
-                    <p class="text-lg text-pmam-muted mt-2">Sindicância Investigativa</p>
-                </div>
-                <div onclick="sistema.selecionarProcedimento('PAD')" class="card-procedimento rounded-3xl p-10 bg-white text-center shadow-pmam-xl border-4 border-transparent cursor-pointer">
-                    <i class="fas fa-file-contract text-7xl text-pmam-gold mb-6"></i>
-                    <h3 class="text-3xl font-black text-pmam-navy">PAD</h3>
-                    <p class="text-lg text-pmam-muted mt-2">Processo Administrativo Disciplinar</p>
-                </div>
-                <div onclick="sistema.selecionarProcedimento('PARE')" class="card-procedimento rounded-3xl p-10 bg-white text-center shadow-pmam-xl border-4 border-transparent cursor-pointer">
-                    <i class="fas fa-exclamation-triangle text-7xl text-pmam-gold mb-6"></i>
-                    <h3 class="text-3xl font-black text-pmam-navy">PARE</h3>
-                    <p class="text-lg text-pmam-muted mt-2">Procedimento de Rito Especial</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- TELA 2 - Qualificação -->
-        <div id="tela-2" class="hidden container mx-auto px-6 py-12">
-            <h2 class="text-3xl font-black text-pmam-navy mb-10 text-center">Qualificação e Caracterização</h2>
-            <!-- Campos de qualificação como antes -->
-            <!-- ... (mantido o mesmo da versão anterior) ... -->
-            <div class="text-center mt-12">
-                <button onclick="sistema.salvarParcial(); sistema.avancarParaTela(3)" class="btn-gold px-12 py-6 text-2xl font-bold rounded-xl">PRÓXIMO: DOCUMENTOS</button>
-            </div>
-        </div>
-
-        <!-- TELA 3 - Documentos -->
-        <div id="tela-3" class="hidden container mx-auto px-6 py-12">
-            <h2 class="text-3xl font-black text-pmam-navy mb-10 text-center">Geração de Documentos</h2>
-            <!-- Cards com prorrogação, escrivão, defensor dativo, etc. -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-                <div onclick="sistema.gerarDocumentoDiverso('prorrogacao')" class="doc-card rounded-2xl p-10 bg-white text-center shadow-pmam-xl cursor-pointer">
-                    <i class="fas fa-clock text-6xl text-pmam-gold mb-6"></i>
-                    <h3 class="text-2xl font-black text-pmam-navy">Prorrogação de Prazo</h3>
-                </div>
-                <div onclick="sistema.gerarDocumentoDiverso('escrivao')" class="doc-card rounded-2xl p-10 bg-white text-center shadow-pmam-xl cursor-pointer">
-                    <i class="fas fa-user-tie text-6xl text-pmam-gold mb-6"></i>
-                    <h3 class="text-2xl font-black text-pmam-navy">Designação de Escrivão</h3>
-                </div>
-                <div onclick="sistema.gerarDocumentoDiverso('defensorDativo')" class="doc-card rounded-2xl p-10 bg-white text-center shadow-pmam-xl cursor-pointer">
-                    <i class="fas fa-user-shield text-6xl text-pmam-gold mb-6"></i>
-                    <h3 class="text-2xl font-black text-pmam-navy">Defensor Dativo</h3>
-                </div>
-                <!-- Outros cards -->
-            </div>
-            <div id="lista-documentos-diversos" class="mt-12 space-y-4"></div>
-            <div class="text-center mt-12">
-                <button onclick="sistema.salvarParcial(); sistema.avancarParaTela(4)" class="btn-gold px-12 py-6 text-2xl font-bold rounded-xl">PRÓXIMO: RELATÓRIO</button>
-            </div>
-        </div>
-
-        <!-- TELA 4 - Relatório com capitulação obrigatória -->
-        <div id="tela-4" class="hidden container mx-auto px-6 py-12">
-            <h2 class="text-3xl font-black text-pmam-navy mb-10 text-center">Relatório Final</h2>
-            <div class="bg-white rounded-2xl p-10 shadow-pmam-xl">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <label class="block text-pmam-navy font-bold mb-2">Tipificação Direta (Obrigatória)</label>
-                        <input type="text" id="tipificacao-direta" class="w-full p-4 border rounded-lg" placeholder="ex.: art. 160 CPM">
-                    </div>
-                    <div>
-                        <label class="block text-pmam-navy font-bold mb-2">Tipificação Indireta (Obrigatória)</label>
-                        <input type="text" id="tipificacao-indireta" class="w-full p-4 border rounded-lg" placeholder="ex.: inc. I art. 9º CPM">
-                    </div>
-                </div>
-                <textarea id="relatorio-conteudo" rows="20" class="w-full p-4 border rounded-lg font-mono text-sm"></textarea>
-                <button onclick="sistema.exportarRelatorioPDF()" class="btn-gold px-8 py-4 mt-6 rounded-xl font-bold">Exportar Relatório</button>
-            </div>
-        </div>
-
-        <!-- Modal de edição -->
-        <div id="modal-edicao" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white rounded-2xl p-8 w-11/12 max-w-4xl shadow-xl">
-                <h3 id="modal-titulo" class="text-2xl font-bold text-pmam-navy mb-4"></h3>
-                <textarea id="modal-conteudo" rows="15" class="w-full p-4 border rounded-lg font-mono text-sm"></textarea>
-                <div class="flex gap-4 mt-6 justify-end">
-                    <button onclick="sistema.salvarEdicaoDocumento()" class="btn-gold px-6 py-3 rounded-xl font-bold">Salvar</button>
-                    <button onclick="sistema.fecharModal()" class="px-6 py-3 bg-pmam-error text-white rounded-xl font-bold">Cancelar</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- JavaScript completo integrado -->
-        <script>
-            class SistemaSISPRO {
-                constructor() {
-                    this.telaAtual = 1;
-                    this.dados = { tipo: '', portaria: '', data: '', unidade: '', preceitoLegal: '', encarregado: {}, sindicado: {}, ofendido: {}, testemunhas: [] };
-                    this.documentos = { basicos: [], diversos: [] };
-                    this.relatorio = { conteudo: '', tipDireta: '', tipIndireta: '' };
-                    this.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                    this.atualizarEtapas();
-                }
-
-                notificar(msg, tipo = 'success') {
-                    const toast = document.createElement('div');
-                    toast.className = `toast px-8 py-5 rounded-2xl text-white font-bold shadow-2xl ${tipo === 'success' ? 'bg-pmam-success' : 'bg-pmam-error'}`;
-                    toast.textContent = msg;
-                    document.body.appendChild(toast);
-                    setTimeout(() => toast.remove(), 4000);
-                }
-
-                selecionarProcedimento(tipo) {
-                    this.dados.tipo = tipo;
-                    this.avancarParaTela(2);
-                    this.notificar(`Procedimento ${tipo} selecionado`);
-                }
-
-                adicionarTestemunha() {
-                    const container = document.getElementById('lista-testemunhas');
-                    const index = this.dados.testemunhas.length;
-                    const div = document.createElement('div');
-                    div.className = 'grid grid-cols-1 md:grid-cols-3 gap-4 p-6 bg-pmam-surface rounded-xl';
-                    div.innerHTML = `
-                        <input type="text" placeholder="Nome completo" class="p-4 border rounded input-field">
-                        <input type="text" placeholder="Posto/Graduação" class="p-4 border rounded input-field">
-                        <input type="text" placeholder="Matrícula/RG/CPF" class="p-4 border rounded input-field">
-                        <textarea placeholder="Declaração" rows="3" class="col-span-3 p-4 border rounded input-field"></textarea>
-                    `;
-                    container.appendChild(div);
-                    this.dados.testemunhas.push({});
-                }
-
-                salvarParcial() {
-                    // Coleta todos os campos da tela 2
-                    this.dados.portaria = document.getElementById('portaria')?.value || '';
-                    this.dados.data = document.getElementById('data')?.value || '';
-                    this.dados.unidade = document.getElementById('unidade')?.value || '';
-                    this.dados.preceitoLegal = document.getElementById('preceito-legal')?.value || '';
-                    this.dados.encarregado = {
-                        nome: document.getElementById('encarregado-nome')?.value || '',
-                        posto: document.getElementById('encarregado-posto')?.value || '',
-                        matricula: document.getElementById('encarregado-matricula')?.value || ''
-                    };
-                    this.dados.sindicado = {
-                        nome: document.getElementById('sindicado-nome')?.value || '',
-                        posto: document.getElementById('sindicado-posto')?.value || '',
-                        matricula: document.getElementById('sindicado-matricula')?.value || ''
-                    };
-                    localStorage.setItem('sispro-dados', JSON.stringify(this.dados));
-                    this.notificar('Progresso salvo localmente!');
-                }
-
-                gerarDocumentosBasicos() {
-                    this.documentos.basicos = [];
-                    const d = this.dados;
-                    const data = d.data || new Date().toLocaleDateString('pt-BR');
-                    this.documentos.basicos.push({
-                        titulo: 'AUTUAÇÃO',
-                        conteudo: `AUTUAÇÃO\n\nAos ${data}, na ${d.unidade || '[Unidade]'}, autuo a Portaria nº ${d.portaria || '[Nº]'}...\n\n${d.encarregado.nome || '[Encarregado]'} ${d.encarregado.posto || ''}`
-                    });
-                    // Outros documentos básicos
-                    this.atualizarListaDocumentos();
-                    this.notificar('Documentos básicos gerados');
-                }
-
-                gerarDocumentoDiverso(tipo) {
-                    const d = this.dados;
-                    let template = '';
-                    if (tipo === 'prorrogacao') {
-                        template = `PEDIDO DE PRORROGAÇÃO DE PRAZO\n\nPortaria nº ${d.portaria}\nJustificativa: [Edite - necessidade real, diligências/perícias]\nDiligências pendentes: [Especifique]\nSolicito prorrogação via SIGED, 48h antes do término.\n\n${d.encarregado.nome} ${d.encarregado.posto}`;
-                    } else if (tipo === 'escrivao') {
-                        template = `DESIGNAÇÃO DE ESCRIVÃO\n\nPortaria nº ${d.portaria}\nDesigno [Nome Escrivão] para função de escrivão.\nPrestou compromisso de sigilo.\n\n${d.encarregado.nome} ${d.encarregado.posto}`;
-                    } else if (tipo === 'defensorDativo') {
-                        template = `NOMEAÇÃO DE DEFENSOR DATIVO\n\nPortaria nº ${d.portaria}\nSindicado ${d.sindicado.nome} notificado, não constituiu defensor.\nNomeio [Nome Defensor] como dativo.\n\n${d.encarregado.nome} ${d.encarregado.posto}`;
-                    } else if (tipo === 'despacho') {
-                        template = `DESPACHO\n\nPortaria nº ${d.portaria}\n[Edite o despacho]\n\n${d.encarregado.nome} ${d.encarregado.posto}`;
-                    }
-                    const doc = { titulo: tipo.toUpperCase(), conteudo: template };
-                    this.documentos.diversos.push(doc);
-                    this.abrirModalEdicao(this.documentos.diversos.length - 1, 'diversos');
-                    this.atualizarListaDocumentos();
-                }
-
-                gerarRelatorio() {
-                    const d = this.dados;
-                    const direta = document.getElementById('tipificacao-direta').value;
-                    const indireta = document.getElementById('tipificacao-indireta').value;
-                    if (!direta || !indireta) {
-                        this.notificar('Preencha a capitulação legal!', 'error');
-                        return;
-                    }
-                    const template = `RELATÓRIO DE ${d.tipo}\n\nI - DOS FATOS\n[...]\n\nII - DAS PROVAS\n[...]\n\nIII - DO INDICIAMENTO\nTipificação Direta: ${direta}\nTipificação Indireta: ${indireta}\n\nIV - INFRAÇÃO DISCIPLINAR\n[... Lei 3278/2008]\n\nV - PRISÃO PREVENTIVA\n[... art. 255 CPPM]\n\nVI - CONCLUSÃO\n[...]\n\n${d.encarregado.nome} ${d.encarregado.posto}`;
-                    document.getElementById('relatorio-conteudo').value = template;
-                }
-
-                exportarRelatorioPDF() {
-                    this.gerarRelatorio();
-                    const { jsPDF } = window.jspdf;
-                    const doc = new jsPDF();
-                    const text = document.getElementById('relatorio-conteudo').value;
-                    const lines = doc.splitTextToSize(text, 180);
-                    doc.text(lines, 15, 20);
-                    doc.save(`Relatorio_${this.dados.tipo}.pdf`);
-                }
-
-                exportarTodosPDF() {
-                    const { jsPDF } = window.jspdf;
-                    const pdf = new jsPDF();
-                    let y = 20;
-                    [...this.documentos.basicos, ...this.documentos.diversos].forEach(doc => {
-                        pdf.text(doc.titulo, 15, y);
-                        y += 10;
-                        const lines = pdf.splitTextToSize(doc.conteudo, 180);
-                        pdf.text(lines, 15, y);
-                        y += lines.length * 7 + 10;
-                        if (y > 280) { pdf.addPage(); y = 20; }
-                    });
-                    pdf.save(`SISPRO_Completo.pdf`);
-                }
-
-                async salvarNoBanco() {
-                    const { error } = await this.supabase.from('procedimentos').insert([{ dados: this.dados }]);
-                    this.notificar(error ? 'Erro ao salvar' : 'Salvo no banco!', error ? 'error' : 'success');
-                }
-
-                abrirModalEdicao(index, lista) {
-                    const doc = this.documentos[lista][index];
-                    document.getElementById('modal-titulo').textContent = `Editar ${doc.titulo}`;
-                    document.getElementById('modal-conteudo').value = doc.conteudo;
-                    document.getElementById('modal-edicao').dataset.index = index;
-                    document.getElementById('modal-edicao').dataset.lista = lista;
-                    document.getElementById('modal-edicao').classList.remove('hidden');
-                }
-
-                salvarEdicaoDocumento() {
-                    const index = document.getElementById('modal-edicao').dataset.index;
-                    const lista = document.getElementById('modal-edicao').dataset.lista;
-                    this.documentos[lista][index].conteudo = document.getElementById('modal-conteudo').value;
-                    this.fecharModal();
-                    this.atualizarListaDocumentos();
-                }
-
-                fecharModal() {
-                    document.getElementById('modal-edicao').classList.add('hidden');
-                }
-
-                avancarParaTela(num) {
-                    document.querySelectorAll('[id^="tela-"]').forEach(t => t.classList.add('hidden'));
-                    document.getElementById(`tela-${num}`).classList.remove('hidden');
-                    this.telaAtual = num;
-                    this.atualizarEtapas();
-                    if (num === 4) this.gerarRelatorio();
-                }
-
-                atualizarEtapas() {
-                    document.querySelectorAll('.step-item').forEach((item, i) => {
-                        const circle = item.querySelector('.step-circle');
-                        circle.classList.toggle('bg-pmam-gold', i + 1 === this.telaAtual);
-                        circle.classList.toggle('bg-pmam-success', i + 1 < this.telaAtual);
-                        circle.classList.toggle('bg-gray-300', i + 1 > this.telaAtual);
-                        circle.classList.toggle('text-white', i + 1 <= this.telaAtual);
-                        circle.classList.toggle('text-gray-600', i + 1 > this.telaAtual);
-                    });
-                }
-
-                atualizarListaDocumentos() {
-                    const sidebar = document.getElementById('lista-documentos-sidebar');
-                    sidebar.innerHTML = [...this.documentos.basicos, ...this.documentos.diversos].map(d => d.titulo).join('<br>') || 'Nenhum documento gerado ainda';
-                }
+        class SISPRO {
+            constructor() {
+                this.dados = { tipo: '', envolvidos: [], id: 'PROC-'+Date.now() };
+                this.papelAtual = '';
             }
 
-            const sistema = new SistemaSISPRO();
-            window.sistema = sistema;
+            navegar(p) {
+                document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+                document.getElementById(`tela-${p}`).classList.remove('hidden');
+                document.querySelectorAll('nav button').forEach(b => b.classList.remove('active-step'));
+                document.getElementById(`b-${p}`).classList.add('active-step');
+                if(p === 3) this.gerarDocumentos();
+            }
 
-            // Controle do sidebar mobile
-            document.getElementById('sidebar-toggle').addEventListener('click', (e) => {
-                e.stopPropagation();
-                document.getElementById('sidebar').classList.toggle('open');
-            });
+            setTipo(t) { this.dados.tipo = t; this.navegar(2); }
 
-            document.addEventListener('click', () => {
-                document.getElementById('sidebar').classList.remove('open');
-            });
+            abrirModal(papel) {
+                this.papelAtual = papel;
+                document.getElementById('span-papel').innerText = papel;
+                document.getElementById('modal-q').style.display = 'flex';
+            }
 
-            document.getElementById('sidebar').addEventListener('click', (e) => e.stopPropagation());
-        </script>
-    </div>
+            fecharModal() { document.getElementById('modal-q').style.display = 'none'; }
+
+            confirmarQualif() {
+                const qualificado = {
+                    papel: this.papelAtual,
+                    nome: document.getElementById('q-nome').value,
+                    rg: document.getElementById('q-rg').value,
+                    posto: document.getElementById('q-posto').value,
+                    naturalidade: document.getElementById('q-natural').value,
+                    profissao: document.getElementById('q-profissao').value,
+                    filiacao: document.getElementById('q-filiacao').value,
+                    endereco: document.getElementById('q-endereco').value,
+                    inicio: document.getElementById('q-inicio').value,
+                    fim: document.getElementById('q-fim').value
+                };
+                this.dados.envolvidos.push(qualificado);
+                this.renderLista();
+                this.fecharModal();
+            }
+
+            renderLista() {
+                const list = document.getElementById('lista-qualificados');
+                list.innerHTML = this.dados.envolvidos.map((e, i) => `
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 border-yellow-500 flex justify-between items-center">
+                        <div>
+                            <span class="text-[9px] font-black uppercase text-yellow-600">${e.papel}</span>
+                            <h4 class="font-bold text-slate-800">${e.nome}</h4>
+                            <p class="text-[10px] text-gray-400">${e.posto} • RG ${e.rg}</p>
+                        </div>
+                        <button onclick="app.remover(${i})" class="text-red-300 hover:text-red-500"><i class="fas fa-trash"></i></button>
+                    </div>
+                `).join('');
+            }
+
+            remover(i) { this.dados.envolvidos.splice(i, 1); this.renderLista(); }
+
+            async salvarNoSupabase() {
+                const { error } = await _supabase.from('procedimentos').upsert([{ 
+                    id_ext: this.dados.id, 
+                    tipo: this.dados.tipo, 
+                    conteudo: this.dados 
+                }]);
+                alert(error ? "Erro ao conectar Supabase" : "Salvo na Nuvem com Sucesso!");
+            }
+
+            gerarDocumentos() {
+                const container = document.getElementById('grid-docs');
+                const enc = this.dados.envolvidos.find(e => e.papel === 'Encarregado') || {nome: '_________', posto: '____'};
+                const esc = this.dados.envolvidos.find(e => e.papel === 'Escrivão') || {nome: '_________', rg: '____'};
+                const acu = this.dados.envolvidos.find(e => e.papel === 'Acusado') || {nome: '_________', filiacao: '_______'};
+                const hoje = new Date().toLocaleDateString('pt-BR');
+
+                const lista = [
+                    { t: 'Autuação', c: `ESTADO DO AMAZONAS\nPOLÍCIA MILITAR DO AMAZONAS\n\nAUTUAÇÃO\n\nAos ${hoje}, autuo a portaria do presente ${this.dados.tipo}.\n\n__________________________\n${esc.nome}\nEscrivão` },
+                    { t: 'Termo de Compromisso', c: `TERMO DE COMPROMISSO\n\nDesignado o ${esc.posto} ${esc.nome}, este presta compromisso de manter sigilo e fidelidade no presente ${this.dados.tipo}.\n\n__________________________\nEncarregado` },
+                    { t: 'Juntada', c: `TERMO DE JUNTADA\n\nAos ${hoje}, faço a juntada da Folha de Alterações do ${acu.nome} aos autos.\n\n__________________________\nEscrivão` }
+                ];
+
+                container.innerHTML = lista.map(d => `
+                    <div onclick="app.verDoc('${d.t}', \`${d.c}\`)" class="doc-card">
+                        <h4 class="font-bold text-slate-700">${d.t}</h4>
+                        <p class="text-[10px] text-emerald-600 font-bold uppercase mt-1 italic">Preenchido com dados colhidos</p>
+                    </div>
+                `).join('');
+            }
+
+            verDoc(t, c) {
+                document.getElementById('doc-title').innerText = t;
+                document.getElementById('editor').value = c;
+                this.navegar(4);
+            }
+
+            exportarPDF() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const lines = doc.splitTextToSize(document.getElementById('editor').value, 180);
+                doc.text(lines, 15, 20);
+                doc.save(`${this.dados.tipo}_Documento.pdf`);
+            }
+        }
+
+        const app = new SISPRO();
+    </script>
 </body>
 </html>
