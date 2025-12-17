@@ -3,213 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISPRO - PMAM | Excelência em Procedimentos</title>
+    <title>SISPRO PMAM v5.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #334155; }
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
-        .nav-btn { @apply flex-1 py-5 text-sm font-bold transition-all border-b-4 border-transparent text-slate-400 hover:text-slate-600; }
-        .nav-btn.active { @apply border-yellow-600 text-slate-900 bg-white shadow-sm; }
-        .input-official { @apply w-full p-4 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-yellow-500/20 outline-none bg-white text-sm transition-all shadow-inner; }
-        .proc-card { @apply flex flex-col items-center justify-center p-8 rounded-[2rem] bg-white border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all cursor-pointer; }
-        .proc-card i { @apply text-5xl mb-4 text-slate-700; }
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Roboto+Mono&display=swap');
+        body { font-family: 'Montserrat', sans-serif; background-color: #f8fafc; }
+        .proc-card { @apply flex flex-col items-center justify-center p-10 rounded-[2.5rem] transition-all cursor-pointer border-4 border-transparent hover:scale-105 hover:shadow-2xl shadow-lg; }
+        .input-pmam { @apply w-full p-4 border-2 border-slate-200 rounded-2xl focus:border-blue-600 outline-none transition-all font-semibold text-slate-700; }
+        .doc-item { @apply flex items-center justify-between p-6 bg-white rounded-3xl border-l-8 border-slate-300 shadow-sm hover:border-blue-600 transition-all cursor-pointer; }
     </style>
 </head>
-<body class="min-h-screen">
+<body class="pb-20">
 
-    <header class="bg-slate-900 text-white p-6 shadow-2xl sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-6">
-                <img src="logo-pmam.png" alt="PMAM" class="h-16">
-                <h1 class="text-3xl font-extrabold tracking-tighter italic uppercase">SISPRO <span class="text-yellow-500">PMAM</span></h1>
+    <header class="bg-[#0f172a] text-white p-8 shadow-2xl rounded-b-[3rem] mb-10">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div>
+                <h1 class="text-4xl font-black italic tracking-tighter uppercase text-yellow-500">SISPRO PMAM</h1>
+                <p class="text-xs font-bold tracking-[0.3em] text-slate-400">Sistema de Procedimentos Administrativos</p>
             </div>
-            <div class="flex gap-3">
-                <button onclick="app.abrirBusca()" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-full text-xs font-bold uppercase transition-all">
-                    <i class="fas fa-search mr-2 text-yellow-500"></i> Consultar Banco
-                </button>
-                <button onclick="app.salvarNoSupabase()" class="bg-yellow-600 hover:bg-yellow-700 px-6 py-3 rounded-full text-xs font-black uppercase shadow-lg">
-                    Sincronizar Nuvem
-                </button>
-            </div>
+            <button onclick="app.abrirBusca()" class="bg-white/10 hover:bg-yellow-600 p-4 rounded-full transition-all">
+                <i class="fas fa-database mr-2"></i> Pesquisar Salvos
+            </button>
         </div>
     </header>
 
-    <nav class="bg-slate-50 border-b border-slate-200 sticky top-[100px] z-40 shadow-md">
-        <div class="max-w-5xl mx-auto flex">
-            <button onclick="app.navegar(1)" id="n-1" class="nav-btn active">1. TIPO</button>
-            <button onclick="app.navegar(2)" id="n-2" class="nav-btn">2. QUALIFICAÇÃO</button>
-            <button onclick="app.navegar(3)" id="n-3" class="nav-btn">3. DOCUMENTAÇÃO</button>
-            <button onclick="app.navegar(4)" id="n-4" class="nav-btn">4. RELATÓRIO</button>
-        </div>
-    </nav>
-
-    <main class="max-w-7xl mx-auto p-8">
-
-        <section id="tela-1" class="space-y-12">
-            <div class="text-center space-y-2">
-                <h2 class="text-4xl font-black text-slate-800">Início de Procedimento</h2>
-                <p class="text-slate-500 font-medium italic">Selecione o rito jurídico-militar para iniciar a compilação</p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-6">
-                <div onclick="app.setTipo('IPM')" class="proc-card hover:border-yellow-500">
-                    <i class="fas fa-gavel text-red-800"></i>
-                    <span class="font-black text-sm uppercase">IPM</span>
+    <main class="max-w-6xl mx-auto px-6">
+        
+        <section id="tela-1" class="space-y-10">
+            <h2 class="text-2xl font-black text-slate-800 text-center uppercase italic">Selecione o Procedimento</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div onclick="app.setTipo('IPM')" class="proc-card bg-blue-600 text-white">
+                    <i class="fas fa-balance-scale text-7xl mb-4"></i>
+                    <span class="text-2xl font-black uppercase">IPM</span>
                 </div>
-                <div onclick="app.setTipo('Sindicância Adm.')" class="proc-card hover:border-yellow-500">
-                    <i class="fas fa-balance-scale text-blue-800"></i>
-                    <span class="font-black text-sm uppercase">Sind. Adm.</span>
+                <div onclick="app.setTipo('Sindicância Adm.')" class="proc-card bg-emerald-600 text-white">
+                    <i class="fas fa-file-invoice text-7xl mb-4"></i>
+                    <span class="text-2xl font-black uppercase">SIND. ADM.</span>
                 </div>
-                <div onclick="app.setTipo('Sindicância Inv.')" class="proc-card hover:border-yellow-500">
-                    <i class="fas fa-shield-virus text-emerald-800"></i>
-                    <span class="font-black text-sm uppercase">Sind. Inv.</span>
+                <div onclick="app.setTipo('Sindicância Inv.')" class="proc-card bg-amber-600 text-white">
+                    <i class="fas fa-search-plus text-7xl mb-4"></i>
+                    <span class="text-2xl font-black uppercase">SIND. INV.</span>
                 </div>
-                <div onclick="app.setTipo('PARE')" class="proc-card hover:border-yellow-500">
-                    <i class="fas fa-file-contract text-orange-800"></i>
-                    <span class="font-black text-sm uppercase">PARE</span>
+                <div onclick="app.setTipo('PARE')" class="proc-card bg-red-700 text-white">
+                    <i class="fas fa-hand-paper text-7xl mb-4"></i>
+                    <span class="text-2xl font-black uppercase">PARE</span>
                 </div>
-                <div onclick="app.setTipo('PAD')" class="proc-card hover:border-yellow-500">
-                    <i class="fas fa-user-secret text-slate-800"></i>
-                    <span class="font-black text-sm uppercase">PAD</span>
+                <div onclick="app.setTipo('PAD')" class="proc-card bg-indigo-900 text-white">
+                    <i class="fas fa-gavel text-7xl mb-4"></i>
+                    <span class="text-2xl font-black uppercase">PAD</span>
                 </div>
             </div>
         </section>
 
-        <section id="tela-2" class="hidden space-y-8 max-w-5xl mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="md:col-span-1 bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
-                    <h3 class="text-xs font-black text-slate-400 mb-4 uppercase tracking-widest">Identificação do Feito</h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="text-[10px] font-bold text-slate-500">Nº DA PORTARIA</label>
-                            <input type="text" id="num-portaria" class="input-official" placeholder="Ex: 001/2024-DJD">
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold text-slate-500">DATA DA PORTARIA</label>
-                            <input type="date" id="data-portaria" class="input-official">
-                        </div>
+        <section id="tela-2" class="hidden space-y-8 animate-fadeIn">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-8 rounded-[3rem] shadow-xl border border-slate-100">
+                <div class="space-y-4">
+                    <h3 class="font-black text-blue-900 uppercase italic border-b-2 border-blue-100 pb-2">Identificação da Portaria</h3>
+                    <input type="text" id="num-portaria" class="input-pmam" placeholder="Nº da Portaria (Ex: 005.02/2023)">
+                    <input type="date" id="data-portaria" class="input-pmam">
+                </div>
+                <div class="space-y-4">
+                    <h3 class="font-black text-blue-900 uppercase italic border-b-2 border-blue-100 pb-2">Resumo do Objeto</h3>
+                    <textarea id="fatos" class="input-pmam h-[124px]" placeholder="Transcreva o objeto da portaria..."></textarea>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-3 justify-center">
+                <button onclick="app.abrirModal('Encarregado')" class="bg-slate-800 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase hover:bg-black transition-all">Definir Encarregado</button>
+                <button onclick="app.abrirModal('Escrivão')" class="bg-slate-800 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase hover:bg-black transition-all">Designar Escrivão</button>
+                <button onclick="app.abrirModal('Acusado')" class="bg-red-700 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase hover:bg-red-800 transition-all">Qualificar Acusado</button>
+                <button onclick="app.abrirModal('Testemunha')" class="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase hover:bg-blue-800 transition-all">Adicionar Testemunha</button>
+            </div>
+            
+            <div id="lista-qualificados" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            <button onclick="app.navegar(3)" class="w-full bg-yellow-600 p-6 rounded-[2.5rem] font-black text-white shadow-xl hover:bg-yellow-700 transition-all text-xl uppercase italic">Prosseguir para Documentação</button>
+        </section>
+
+        <section id="tela-3" class="hidden space-y-10">
+            <div class="bg-white p-10 rounded-[3rem] shadow-xl border border-slate-100">
+                <h3 class="text-2xl font-black text-blue-900 mb-6 uppercase italic border-l-8 border-yellow-500 pl-4">Documentos Padrão PMAM</h3>
+                <div id="grid-padrão" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10"></div>
+
+                <h3 class="text-2xl font-black text-blue-900 mb-6 uppercase italic border-l-8 border-blue-500 pl-4">Atos de Instrução e Diversos</h3>
+                <div id="grid-diversos" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            </div>
+            <button onclick="app.navegar(4)" class="w-full bg-blue-900 p-6 rounded-[2.5rem] font-black text-white shadow-xl hover:bg-black transition-all text-xl uppercase italic">Gerar Relatório Final</button>
+        </section>
+
+        <section id="tela-4" class="hidden space-y-6">
+            <div class="bg-white p-12 rounded-[3.5rem] shadow-2xl border border-slate-200">
+                <div class="flex flex-wrap justify-between items-center mb-8 gap-4">
+                    <h2 class="text-2xl font-black text-slate-800 uppercase italic">Relatório do Encarregado</h2>
+                    <div class="flex gap-2">
+                        <button onclick="app.toggleEditRelatorio()" class="bg-amber-500 text-white px-6 py-3 rounded-2xl font-black text-xs hover:bg-amber-600">
+                            <i class="fas fa-edit mr-2"></i> EDITAR
+                        </button>
+                        <button onclick="app.salvarNoSupabase()" class="bg-emerald-600 text-white px-6 py-3 rounded-2xl font-black text-xs hover:bg-emerald-700">
+                            <i class="fas fa-save mr-2"></i> SALVAR
+                        </button>
+                        <button onclick="app.gerarPDF('relatorio')" class="bg-red-600 text-white px-6 py-3 rounded-2xl font-black text-xs hover:bg-red-700">
+                            <i class="fas fa-file-pdf mr-2"></i> PDF
+                        </button>
                     </div>
                 </div>
-                <div class="md:col-span-2 bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
-                    <h3 class="text-xs font-black text-slate-400 mb-4 uppercase tracking-widest">Resumo dos Fatos (Objeto)</h3>
-                    <textarea id="fatos" class="input-official h-[160px]" placeholder="Transcreva aqui a finalidade do procedimento conforme portaria de designação..."></textarea>
-                </div>
-            </div>
-
-            <div class="bg-white p-4 rounded-3xl flex flex-wrap gap-2 justify-center shadow-sm">
-                <button onclick="app.abrirModal('Encarregado')" class="bg-slate-800 text-white px-6 py-3 rounded-2xl text-[10px] font-black hover:bg-black uppercase">Encarregado</button>
-                <button onclick="app.abrirModal('Escrivão')" class="bg-slate-800 text-white px-6 py-3 rounded-2xl text-[10px] font-black hover:bg-black uppercase">Escrivão</button>
-                <button onclick="app.abrirModal('Acusado')" class="bg-red-600 text-white px-6 py-3 rounded-2xl text-[10px] font-black hover:bg-red-700 uppercase">Acusado</button>
-                <button onclick="app.abrirModal('Testemunha')" class="bg-slate-600 text-white px-6 py-3 rounded-2xl text-[10px] font-black hover:bg-slate-700 uppercase">Testemunha</button>
-            </div>
-            <div id="lista-qualificados" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-            
-            <button onclick="app.navegar(3)" class="w-full bg-yellow-600 p-6 rounded-[2rem] font-black text-white shadow-xl hover:bg-yellow-700 transition-all text-lg">CONSOLIDAR DOCUMENTAÇÃO</button>
-        </section>
-
-        <section id="tela-3" class="hidden space-y-12 animate-fadeIn">
-            <div class="flex items-end justify-between border-b-2 border-slate-200 pb-4">
-                <div>
-                    <h2 class="text-3xl font-black text-slate-800 uppercase">Documentação</h2>
-                    <p class="text-slate-500 text-sm">Controle de numeração e cronologia oficial</p>
-                </div>
-                <div class="bg-blue-50 text-blue-700 p-4 rounded-2xl text-xs font-bold flex items-center gap-3">
-                    <i class="fas fa-info-circle"></i> Datas retroativas estão bloqueadas para novos documentos.
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-                <div class="space-y-4">
-                    <h3 class="text-xs font-black text-yellow-600 uppercase tracking-widest border-l-4 border-yellow-500 pl-3">Modelos Padrão (PMAM)</h3>
-                    <div id="grid-padrão" class="grid grid-cols-1 gap-3"></div>
-                </div>
-                <div class="space-y-4">
-                    <h3 class="text-xs font-black text-blue-600 uppercase tracking-widest border-l-4 border-blue-600 pl-3">Atos de Instrução (Ofícios/Termos)</h3>
-                    <div id="grid-diversos" class="grid grid-cols-1 gap-3"></div>
-                </div>
+                <textarea id="relatorio-final" class="w-full h-[800px] p-10 bg-slate-50 border-2 border-transparent rounded-[2rem] font-mono text-sm leading-relaxed outline-none transition-all focus:bg-white focus:border-blue-200" readonly></textarea>
             </div>
         </section>
 
-        <section id="tela-4" class="hidden max-w-5xl mx-auto">
-            <div class="bg-white p-12 rounded-[3rem] shadow-2xl border border-slate-200">
-                <div class="flex justify-between items-center mb-10">
-                    <h2 class="text-2xl font-black uppercase tracking-tight">Relatório Final Compilado</h2>
-                    <button onclick="app.gerarPDF('relatorio')" class="bg-red-600 text-white px-8 py-3 rounded-full font-black text-xs hover:bg-red-700 shadow-lg">
-                        <i class="fas fa-file-pdf mr-2"></i> EXPORTAR PDF
-                    </button>
-                </div>
-                <textarea id="relatorio-final" class="w-full h-[700px] p-12 bg-slate-50 border-0 rounded-[2rem] font-mono text-sm leading-relaxed shadow-inner" spellcheck="false"></textarea>
-            </div>
-        </section>
     </main>
 
-    <div id="modal-busca" class="fixed inset-0 bg-slate-900/90 hidden items-center justify-center z-[200] backdrop-blur-md p-6">
-        <div class="bg-white w-full max-w-4xl rounded-[3rem] shadow-2xl flex flex-col max-h-[85vh]">
-            <div class="p-8 border-b flex justify-between items-center bg-slate-50 rounded-t-[3rem]">
-                <h3 class="font-black text-slate-800 uppercase italic">Explorar Banco de Dados</h3>
-                <button onclick="app.fecharBusca()" class="text-2xl"><i class="fas fa-times-circle"></i></button>
+    <div id="modal-q" class="fixed inset-0 bg-slate-900/90 hidden items-center justify-center z-[100] backdrop-blur-md p-4">
+        <div class="bg-white w-full max-w-2xl rounded-[3rem] overflow-hidden shadow-2xl animate-zoomIn">
+            <div class="p-8 bg-blue-900 text-white">
+                <h3 id="papel-tit" class="text-3xl font-black uppercase italic text-yellow-500">Qualificação</h3>
             </div>
-            <div class="p-8 overflow-y-auto">
-                <input type="text" id="input-busca" placeholder="Filtrar por nome, portaria ou tipo..." class="input-official mb-6">
-                <div id="resultados-busca" class="grid grid-cols-1 gap-4"></div>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-q" class="fixed inset-0 bg-slate-900/80 hidden items-center justify-center z-[100] p-4 backdrop-blur-sm">
-        <div class="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden animate-zoomIn">
-            <div class="p-8 bg-slate-800 text-white">
-                <h3 class="text-xs font-black uppercase tracking-[0.2em] mb-1">Cadastrar Envolvido</h3>
-                <p id="papel-tit" class="text-2xl font-bold text-yellow-500"></p>
-            </div>
-            <div class="p-10 grid grid-cols-2 gap-5">
-                <div class="col-span-2"><label class="text-[10px] font-black text-slate-400">NOME COMPLETO</label><input type="text" id="q-nome" class="input-official"></div>
-                <div><label class="text-[10px] font-black text-slate-400">RG / CI PM</label><input type="text" id="q-rg" class="input-official"></div>
-                <div><label class="text-[10px] font-black text-slate-400">POSTO / GRADUAÇÃO</label><input type="text" id="q-posto" class="input-official"></div>
-                <button onclick="app.salvarEnvolvido()" class="col-span-2 bg-yellow-600 text-white py-5 rounded-2xl font-black mt-4 shadow-xl hover:bg-yellow-700 transition-all">FINALIZAR QUALIFICAÇÃO</button>
+            <div class="p-10 space-y-4">
+                <input type="text" id="q-nome" class="input-pmam" placeholder="Nome Completo">
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="text" id="q-rg" class="input-pmam" placeholder="RG / CI PM">
+                    <input type="text" id="q-posto" class="input-pmam" placeholder="Posto/Graduação">
+                </div>
+                <input type="text" id="q-filiacao" class="input-pmam" placeholder="Filiação">
+                <button onclick="app.salvarEnvolvido()" class="w-full bg-blue-900 text-white py-5 rounded-2xl font-black mt-4 hover:bg-black">CONFIRMAR DADOS</button>
             </div>
         </div>
     </div>
 
-    <div id="modal-edit" class="fixed inset-0 bg-black/90 hidden items-center justify-center z-[110] p-6">
-        <div class="bg-white w-full max-w-5xl h-[90vh] rounded-[3rem] flex flex-col shadow-2xl overflow-hidden">
-            <div class="p-8 bg-slate-100 flex justify-between items-center px-12 border-b">
-                <h3 id="edit-tit" class="font-black text-slate-800 uppercase italic text-lg tracking-tight">Documento Oficial</h3>
+    <div id="modal-edit" class="fixed inset-0 bg-black/95 hidden items-center justify-center z-[110] p-6">
+        <div class="bg-white w-full max-w-5xl h-[90vh] rounded-[3rem] flex flex-col overflow-hidden">
+            <div class="p-8 bg-slate-50 border-b flex justify-between items-center px-12">
+                <h3 id="edit-tit" class="font-black text-slate-800 uppercase text-lg italic tracking-tight">Documento</h3>
                 <div class="flex gap-4">
-                    <button onclick="app.fecharEditor()" class="text-xs font-bold text-slate-400 uppercase">Descartar</button>
-                    <button onclick="app.confirmarEdicao()" class="bg-emerald-600 text-white px-10 py-3 rounded-full font-black text-[10px] hover:bg-emerald-700 shadow-lg">SALVAR DOCUMENTO</button>
+                    <button onclick="app.fecharEditor()" class="text-xs font-bold text-slate-400">FECHAR</button>
+                    <button onclick="app.confirmarEdicao()" class="bg-blue-900 text-white px-10 py-3 rounded-full font-black text-[10px]">SALVAR ALTERAÇÕES</button>
                 </div>
             </div>
-            <textarea id="edit-area" class="flex-1 p-16 font-mono text-sm leading-relaxed outline-none border-0 bg-white shadow-inner"></textarea>
+            <textarea id="edit-area" class="flex-1 p-16 font-mono text-sm leading-relaxed outline-none border-0 bg-white"></textarea>
         </div>
     </div>
 
     <script>
-        const SB_URL = "https://dzknjtstiptcbkvszibo.supabase.co";
-        const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6a25qdHN0aXB0Y2JrdnN6aWJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4OTU3NDYsImV4cCI6MjA4MTQ3MTc0Nn0.LN4j37EHqLQpdoS0mNAIW9v-MTgWo8nXoFl1FrhSSHE";
-        const _supabase = window.supabase.createClient(SB_URL, SB_KEY);
-
-        class SISPRO_V4 {
+        class SISPRO_V5 {
             constructor() {
                 this.dados = { tipo: '', portaria: '', dataP: '', fatos: '', envolvidos: [], docs: {}, numOficio: 1 };
-                this.travarDataRetroativa();
-            }
-
-            travarDataRetroativa() {
-                const hoje = new Date().toISOString().split('T')[0];
-                document.getElementById('data-portaria').setAttribute('min', hoje);
+                this.editMode = false;
             }
 
             navegar(n) {
                 document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
                 document.getElementById(`tela-${n}`).classList.remove('hidden');
-                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-                document.getElementById(`n-${n}`).classList.add('active');
                 if(n === 3) this.gerarDocumentos();
                 if(n === 4) this.gerarRelatorio();
+                window.scrollTo(0,0);
             }
 
             setTipo(t) { this.dados.tipo = t; this.navegar(2); }
@@ -220,8 +168,6 @@
                 document.getElementById('modal-q').style.display = 'flex';
             }
 
-            fecharModal() { document.getElementById('modal-q').style.display = 'none'; }
-
             salvarEnvolvido() {
                 const p = {
                     papel: this.papelAtual,
@@ -231,24 +177,35 @@
                 };
                 this.dados.envolvidos.push(p);
                 this.renderLista();
-                this.fecharModal();
-                this.notificar('Envolvido qualificado!');
+                document.getElementById('modal-q').style.display = 'none';
+                this.limparModal();
+            }
+
+            limparModal() {
+                ['q-nome','q-rg','q-posto','q-filiacao'].forEach(id => document.getElementById(id).value = '');
             }
 
             renderLista() {
                 const div = document.getElementById('lista-qualificados');
                 div.innerHTML = this.dados.envolvidos.map((e, i) => `
-                    <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex justify-between items-center group hover:bg-slate-50">
+                    <div class="bg-white p-6 rounded-3xl shadow-md border-l-8 border-blue-900 flex justify-between items-center animate-fadeIn">
                         <div>
-                            <span class="text-[8px] font-black text-yellow-600 uppercase tracking-widest">${e.papel}</span>
-                            <h4 class="font-bold text-slate-800 text-sm">${e.posto} ${e.nome}</h4>
-                            <p class="text-[10px] text-slate-400">RG ${e.rg}</p>
+                            <span class="text-[9px] font-black text-blue-600 uppercase tracking-widest">${e.papel}</span>
+                            <h4 class="font-bold text-slate-800 text-base">${e.posto} ${e.nome}</h4>
+                            <p class="text-xs text-slate-400 font-mono">CI Nº ${e.rg}</p>
                         </div>
-                        <button onclick="app.remover(${i})" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-200 group-hover:bg-red-50 group-hover:text-red-500 transition-all">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
+                        <button onclick="app.remover(${i})" class="text-red-300 hover:text-red-600"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 `).join('');
+            }
+
+            remover(i) { this.dados.envolvidos.splice(i,1); this.renderLista(); }
+
+            formatarDataExtenso(dataStr) {
+                if(!dataStr) return "____ de __________ de 202__";
+                const meses = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+                const d = new Date(dataStr + "T12:00:00");
+                return `${d.getDate()} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
             }
 
             gerarDocumentos() {
@@ -256,42 +213,33 @@
                 this.dados.dataP = document.getElementById('data-portaria').value;
                 this.dados.fatos = document.getElementById('fatos').value;
                 
-                const enc = this.dados.envolvidos.find(x => x.papel === 'Encarregado') || {nome: '______', posto: '____', rg: '____'};
-                const esc = this.dados.envolvidos.find(x => x.papel === 'Escrivão') || {nome: '______', posto: '____', rg: '____'};
-                const acu = this.dados.envolvidos.find(x => x.papel === 'Acusado') || {nome: '______', rg: '____', posto: '____'};
-                const dataFormatada = this.formatarDataExtenso(new Date().toISOString().split('T')[0]);
+                const enc = this.dados.envolvidos.find(x => x.papel === 'Encarregado') || {nome: '________________', posto: '____'};
+                const esc = this.dados.envolvidos.find(x => x.papel === 'Escrivão') || {nome: '________________', posto: '____', rg: '____'};
+                const dataExt = this.formatarDataExtenso(new Date().toISOString().split('T')[0]);
+                const dataPort = this.formatarDataExtenso(this.dados.dataP);
 
                 const padrao = {
-                    'Autuação': `ESTADO DO AMAZONAS\nPOLÍCIA MILITAR DO AMAZONAS\n\nA U T U A Ç Ã O\n\nAo(s) ${dataFormatada}, nesta cidade de Manaus-AM, Capital do Estado, autuo a Portaria nº ${this.dados.portaria}, datada de ${this.formatarDataExtenso(this.dados.dataP)}, e demais documentos que a este acompanham, do que para constar, lavro o presente termo.\n\n__________________________\n${esc.nome} - ${esc.posto}\nEscrivão`,
-                    'Termo de Abertura': `TERMO DE ABERTURA\n\nAo(s) ${dataFormatada}, nesta cidade de Manaus-AM, dou início aos trabalhos de instrução do presente ${this.dados.tipo}, referente à Portaria nº ${this.dados.portaria}.\n\n__________________________\n${enc.nome} - ${enc.posto}\nEncarregado`,
-                    'Designação de Escrivão': `DESIGNAÇÃO DE ESCRIVÃO\n\nDesigno o militar ${esc.nome} (${esc.posto}), RG ${esc.rg}, para exercer a função de escrivão nos autos do presente ${this.dados.tipo}.\n\n__________________________\n${enc.nome} - ${enc.posto}`
+                    'Autuação': `AUTUAÇÃO\n\nAos ${dataExt}, nesta Cidade de Manaus, Estado do Amazonas, autuo a Portaria nº ${this.dados.portaria}, de ${dataPort}, e demais documentos que a este junto, do que para constar lavro o presente termo.\n\n__________________________\n${esc.nome} - ${esc.posto}\nEscrivão`,
+                    'Termo de Abertura': `TERMO DE ABERTURA\n\nAos ${dataExt}, nesta Cidade de Manaus, Estado do Amazonas, dou início a presente ${this.dados.tipo} do que para constar lavro o presente termo.\n\n__________________________\n${enc.nome} - ${enc.posto}\nEncarregado`,
+                    'Compromisso de Escrivão': `TERMO DE COMPROMISSO DO ESCRIVÃO\n\nAos ${dataExt}, foi designado pelo Senhor ${enc.posto} ${enc.nome}, Encarregado deste procedimento, o militar ${esc.nome} (CI nº ${esc.rg}), para exercer a função de Escrivão, que prestou compromisso legal de manter o sigilo e cumprir fielmente as determinações legais.\n\n__________________________\nEncarregado`,
+                    'Termo de Encerramento': `TERMO DE ENCERRAMENTO\n\nAos ${dataExt}, na cidade de Manaus, Estado do Amazonas, dei por encerrado os trabalhos do presente ${this.dados.tipo}, procedida em cumprimento ao determinado na portaria nº ${this.dados.portaria}.`
                 };
 
                 const diversos = {
-                    'Ofício de Requisição': `OFÍCIO Nº ${this.dados.numOficio++}/2025-SJD\n\nAo Sr. Comandante,\n\nAssunto: Apresentação de Militar.\n\nSolicito a apresentação do militar ${acu.posto} ${acu.nome} (RG ${acu.rg}) para oitiva a ser realizada no dia ____/____/____, às ____h.\n\n__________________________\nEncarregado`,
-                    'Cota de Juntada': `TERMO DE JUNTADA\n\nFaço a juntada aos autos dos seguintes documentos: __________________.\n\n__________________________\nEscrivão`
+                    'Ofício de Requisição': `OFÍCIO Nº ${this.dados.numOficio}/2023\n\nAo Sr. Comandante,\n\nSolicito a apresentação de militar para fins de oitiva em instrução de ${this.dados.tipo}.\n\n__________________________\nEncarregado`,
+                    'Cota de Juntada': `TERMO DE JUNTADA\n\nAos ${dataExt}, faço a juntada aos presentes autos do documento abaixo descrito.\n\n__________________________\nEscrivão`
                 };
 
                 this.dados.docs = {...padrao, ...diversos};
-                document.getElementById('grid-padrão').innerHTML = Object.keys(padrao).map(k => this.card(k, 'bg-yellow-50 text-yellow-800')).join('');
-                document.getElementById('grid-diversos').innerHTML = Object.keys(diversos).map(k => this.card(k, 'bg-blue-50 text-blue-800')).join('');
+                document.getElementById('grid-padrão').innerHTML = Object.keys(padrao).map(k => this.card(k, 'border-l-yellow-500')).join('');
+                document.getElementById('grid-diversos').innerHTML = Object.keys(diversos).map(k => this.card(k, 'border-l-blue-500')).join('');
             }
 
             card(k, cor) {
-                return `<div onclick="app.editarDoc('${k}')" class="flex justify-between items-center bg-white p-5 rounded-3xl border border-slate-100 hover:shadow-lg cursor-pointer transition-all">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 ${cor} rounded-2xl flex items-center justify-center font-black text-xs">DOC</div>
-                        <h4 class="font-bold text-slate-800 text-sm">${k}</h4>
-                    </div>
-                    <i class="fas fa-edit text-slate-300"></i>
+                return `<div onclick="app.editarDoc('${k}')" class="doc-item ${cor}">
+                    <span class="font-bold text-slate-800 uppercase italic text-sm">${k}</span>
+                    <i class="fas fa-file-pen text-slate-300"></i>
                 </div>`;
-            }
-
-            formatarDataExtenso(data) {
-                if(!data) return "___/___/___";
-                const meses = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
-                const d = new Date(data);
-                return `${d.getDate() + 1} de ${meses[d.getMonth()]} de ${d.getFullYear()}`;
             }
 
             editarDoc(k) {
@@ -301,36 +249,48 @@
                 document.getElementById('modal-edit').style.display = 'flex';
             }
 
-            confirmarEdicao() { this.dados.docs[this.docEditando] = document.getElementById('edit-area').value; this.fecharEditor(); }
+            confirmarEdicao() { this.dados.docs[this.docEditando] = document.getElementById('edit-area').value; document.getElementById('modal-edit').style.display = 'none'; }
             fecharEditor() { document.getElementById('modal-edit').style.display = 'none'; }
 
             gerarRelatorio() {
-                const enc = this.dados.envolvidos.find(x => x.papel === 'Encarregado') || {nome: '______', posto: '____'};
+                const enc = this.dados.envolvidos.find(x => x.papel === 'Encarregado') || {nome: '________________', posto: '____'};
+                const dataExt = this.formatarDataExtenso(new Date().toISOString().split('T')[0]);
                 let r = `POLÍCIA MILITAR DO AMAZONAS\nRELATÓRIO DE ${this.dados.tipo.toUpperCase()}\n\n`;
-                r += `1. PRELIMINARES\nO presente feito foi instaurado via Portaria nº ${this.dados.portaria}, visando apurar: ${this.dados.fatos}.\n\n`;
-                r += `2. DILIGÊNCIAS\nForam qualificados e ouvidos os militares: ${this.dados.envolvidos.map(e => e.nome).join(', ')}.\n\n`;
-                r += `3. CONCLUSÃO\n(Espaço para redação do Encarregado acerca da procedência ou não da acusação).\n\n__________________________\n${enc.nome}\nEncarregado`;
+                r += `I - PRELIMINARES\nO presente procedimento foi instaurado visando apurar: ${this.dados.fatos}.\n\n`;
+                r += `II - DILIGÊNCIAS REALIZADAS\nForam qualificados e ouvidos os envolvidos conforme termos anexos aos autos.\n\n`;
+                r += `III - CONCLUSÃO\nDiante do exposto, este Encarregado conclui que...\n\nQuartel em Manaus-AM, ${dataExt}.\n\n__________________________\n${enc.nome} - ${enc.posto}\nEncarregado`;
                 document.getElementById('relatorio-final').value = r;
             }
 
-            notificar(msg) {
-                const toast = document.createElement('div');
-                toast.className = "fixed bottom-10 right-10 bg-slate-900 text-white px-8 py-4 rounded-3xl shadow-2xl font-bold animate-bounce z-[300]";
-                toast.innerText = msg;
-                document.body.appendChild(toast);
-                setTimeout(() => toast.remove(), 3000);
+            toggleEditRelatorio() {
+                this.editMode = !this.editMode;
+                const area = document.getElementById('relatorio-final');
+                area.readOnly = !this.editMode;
+                if(this.editMode) area.focus();
+                this.notificar(this.editMode ? "Modo de edição ativado" : "Relatório bloqueado para edição");
             }
 
-            abrirBusca() { document.getElementById('modal-busca').style.display = 'flex'; }
-            fecharBusca() { document.getElementById('modal-busca').style.display = 'none'; }
+            notificar(msg) {
+                const t = document.createElement('div');
+                t.className = "fixed bottom-5 right-5 bg-blue-900 text-white p-5 rounded-2xl shadow-2xl font-black text-xs animate-bounce";
+                t.innerText = msg;
+                document.body.appendChild(t);
+                setTimeout(() => t.remove(), 3000);
+            }
 
-            async salvarNoSupabase() {
-                const { error } = await _supabase.from('procedimentos').upsert([{ id_ext: 'SIS-'+Date.now(), tipo: this.dados.tipo, conteudo: this.dados }]);
-                this.notificar(error ? "Falha na nuvem" : "Dados seguros no Supabase!");
+            gerarPDF(tipo) {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const texto = tipo === 'relatorio' ? document.getElementById('relatorio-final').value : this.dados.docs[this.docEditando];
+                doc.setFont("courier", "normal");
+                doc.setFontSize(11);
+                const lines = doc.splitTextToSize(texto, 175);
+                doc.text(lines, 20, 30);
+                doc.save(`${this.dados.tipo}_PMAM.pdf`);
             }
         }
 
-        const app = new SISPRO_V4();
+        const app = new SISPRO_V5();
     </script>
 </body>
 </html>
