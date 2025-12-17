@@ -3,115 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISPRO - PMAM | Sistema de Procedimentos</title>
+    <title>SISPRO - PMAM | Gestão de Procedimentos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        .input-field { @apply w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-900 outline-none transition-all text-sm; }
-        .active-step { @apply bg-yellow-500 text-slate-900 font-bold shadow-md; }
-        .doc-card { @apply p-5 bg-white rounded-xl border border-gray-100 hover:border-yellow-500 cursor-pointer shadow-sm transition-all; }
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        .input-field { @apply w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-900 outline-none bg-white text-sm; }
+        .step-active { @apply border-b-4 border-yellow-500 text-yellow-600 font-bold; }
+        .card-doc { @apply p-4 bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all cursor-pointer relative group; }
     </style>
 </head>
-<body class="flex">
+<body class="min-h-screen">
 
-    <aside class="fixed h-screen w-64 bg-slate-900 text-slate-300 p-6 flex flex-col">
-        <div class="mb-10 text-center border-b border-slate-700 pb-6">
-            <h1 class="text-2xl font-black text-white italic">SISPRO</h1>
-            <p class="text-[10px] tracking-[0.2em] text-yellow-500">PMAM • PROCEDIMENTOS</p>
+    <header class="bg-slate-900 text-white p-4 shadow-xl sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="w-16 h-16">
+                <img src="logo-pmam.png" alt="Logo PMAM" class="w-full h-full object-contain">
+            </div>
+            
+            <div class="text-center flex flex-col items-center">
+                <img src="sispro-mam.png" alt="SISPRO PMAM" class="h-12 mb-1">
+                <span class="text-[10px] tracking-[0.3em] text-yellow-500 uppercase font-bold">Amazonas</span>
+            </div>
+
+            <div>
+                <button onclick="app.salvarNoSupabase()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-all">
+                    <i class="fas fa-cloud-upload-alt"></i> SALVAR NUVEM
+                </button>
+            </div>
         </div>
-        
-        <nav class="flex-1 space-y-2">
-            <button onclick="app.navegar(1)" id="b-1" class="w-full flex items-center gap-3 p-3 rounded-lg active-step"><i class="fas fa-list"></i> 1. Tipo</button>
-            <button onclick="app.navegar(2)" id="b-2" class="w-full flex items-center gap-3 p-3 rounded-lg"><i class="fas fa-user-edit"></i> 2. Qualificação</button>
-            <button onclick="app.navegar(3)" id="b-3" class="w-full flex items-center gap-3 p-3 rounded-lg"><i class="fas fa-file-alt"></i> 3. Documentos</button>
-            <button onclick="app.navegar(4)" id="b-4" class="w-full flex items-center gap-3 p-3 rounded-lg"><i class="fas fa-print"></i> 4. Processo</button>
-        </nav>
+    </header>
 
-        <div class="pt-6 border-t border-slate-700">
-            <button onclick="app.salvarNoSupabase()" class="w-full bg-emerald-600 text-white p-3 rounded-xl font-bold hover:bg-emerald-700 transition-all flex items-center justify-center gap-2">
-                <i class="fas fa-cloud"></i> SALVAR NUVEM
-            </button>
+    <nav class="bg-white border-b border-gray-200 shadow-sm sticky top-[88px] z-40">
+        <div class="max-w-7xl mx-auto flex justify-around">
+            <button onclick="app.navegar(1)" id="btn-1" class="py-4 px-6 step-active">1. TIPO</button>
+            <button onclick="app.navegar(2)" id="btn-2" class="py-4 px-6 text-gray-400">2. QUALIFICAÇÃO</button>
+            <button onclick="app.navegar(3)" id="btn-3" class="py-4 px-6 text-gray-400">3. CONFERÊNCIA</button>
+            <button onclick="app.navegar(4)" id="btn-4" class="py-4 px-6 text-gray-400">4. RELATÓRIO/PDF</button>
         </div>
-    </aside>
+    </nav>
 
-    <main class="ml-64 flex-1 p-10">
+    <main class="max-w-7xl mx-auto p-6 md:p-10">
         
-        <section id="tela-1" class="space-y-6">
-            <h2 class="text-3xl font-black text-slate-800 mb-8">Tipo de Procedimento</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div onclick="app.setTipo('IPM')" class="doc-card text-center py-10">
-                    <i class="fas fa-gavel text-4xl mb-4 text-slate-700"></i>
-                    <h3 class="font-bold text-xl uppercase">IPM</h3>
-                </div>
-                <div onclick="app.setTipo('SINDICÂNCIA')" class="doc-card text-center py-10">
-                    <i class="fas fa-balance-scale text-4xl mb-4 text-slate-700"></i>
-                    <h3 class="font-bold text-xl uppercase">SINDICÂNCIA</h3>
-                </div>
-                <div onclick="app.setTipo('SAD')" class="doc-card text-center py-10">
-                    <i class="fas fa-search text-4xl mb-4 text-slate-700"></i>
-                    <h3 class="font-bold text-xl uppercase">SAD</h3>
-                </div>
+        <section id="tela-1" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div onclick="app.setTipo('Sindicância Administrativa')" class="card-doc text-center py-8 hover:border-yellow-500">
+                <i class="fas fa-balance-scale text-3xl mb-3 text-slate-700"></i>
+                <h3 class="font-bold text-xs uppercase">Sindicância Adm.</h3>
+            </div>
+            <div onclick="app.setTipo('Sindicância Investigativa')" class="card-doc text-center py-8 hover:border-yellow-500">
+                <i class="fas fa-search text-3xl mb-3 text-slate-700"></i>
+                <h3 class="font-bold text-xs uppercase">Sindicância Invest.</h3>
+            </div>
+            <div onclick="app.setTipo('IPM')" class="card-doc text-center py-8 hover:border-yellow-500">
+                <i class="fas fa-gavel text-3xl mb-3 text-slate-700"></i>
+                <h3 class="font-bold text-xs uppercase">IPM</h3>
+            </div>
+            <div onclick="app.setTipo('PARE')" class="card-doc text-center py-8 hover:border-yellow-500">
+                <i class="fas fa-file-signature text-3xl mb-3 text-slate-700"></i>
+                <h3 class="font-bold text-xs uppercase">PARE</h3>
+            </div>
+            <div onclick="app.setTipo('PAD')" class="card-doc text-center py-8 hover:border-yellow-500">
+                <i class="fas fa-shield-alt text-3xl mb-3 text-slate-700"></i>
+                <h3 class="font-bold text-xs uppercase">PAD</h3>
+            </div>
+            
+            <div class="col-span-full mt-6 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <label class="block text-xs font-bold text-slate-500 mb-2 uppercase">Objeto do Procedimento (Resumo dos Fatos)</label>
+                <textarea id="objeto-proc" class="input-field h-24" placeholder="Ex: Apurar a conduta do militar..."></textarea>
             </div>
         </section>
 
         <section id="tela-2" class="hidden space-y-6">
-            <div class="flex justify-between items-end">
-                <h2 class="text-3xl font-black text-slate-800">Qualificação dos Envolvidos</h2>
-                <div class="flex gap-2">
-                    <button onclick="app.abrirModal('Encarregado')" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm">+ Encarregado</button>
-                    <button onclick="app.abrirModal('Escrivão')" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm">+ Escrivão</button>
-                    <button onclick="app.abrirModal('Acusado')" class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm">+ Acusado</button>
-                    <button onclick="app.abrirModal('Testemunha')" class="bg-slate-800 text-white px-4 py-2 rounded-lg text-sm">+ Testemunha</button>
-                </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm flex flex-wrap gap-2">
+                <button onclick="app.modalQualif('Encarregado')" class="bg-slate-800 text-white px-4 py-2 rounded font-bold text-xs">+ ENCARREGADO</button>
+                <button onclick="app.modalQualif('Escrivão')" class="bg-slate-800 text-white px-4 py-2 rounded font-bold text-xs">+ ESCRIVÃO</button>
+                <button onclick="app.modalQualif('Acusado')" class="bg-red-600 text-white px-4 py-2 rounded font-bold text-xs">+ ACUSADO</button>
+                <button onclick="app.modalQualif('Vítima')" class="bg-slate-800 text-white px-4 py-2 rounded font-bold text-xs">+ VÍTIMA</button>
+                <button onclick="app.modalQualif('Testemunha')" class="bg-slate-800 text-white px-4 py-2 rounded font-bold text-xs">+ TESTEMUNHA</button>
             </div>
-
-            <div id="lista-qualificados" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                </div>
+            <div id="lista-envolvidos" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            <button onclick="app.navegar(3)" class="w-full bg-yellow-500 p-4 rounded-xl font-black uppercase text-slate-900 shadow-lg">Confirmar e Gerar Documentos</button>
         </section>
 
-        <section id="tela-3" class="hidden space-y-6">
-            <h2 class="text-3xl font-black text-slate-800">Documentos Padrão</h2>
-            <div id="grid-docs" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <section id="tela-3" class="hidden space-y-8">
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-black text-slate-800">Conferência de Documentos</h2>
+                <button onclick="app.gerarPDFUnificado()" class="bg-emerald-600 text-white px-6 py-2 rounded-lg font-bold text-xs">EXPORTAR TODOS (PDF)</button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="container-documentos">
                 </div>
         </section>
 
         <section id="tela-4" class="hidden space-y-6">
-            <div class="bg-white p-8 rounded-3xl shadow-xl border border-gray-200">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 id="doc-title" class="text-xl font-bold">Visualização do Documento</h3>
-                    <div class="flex gap-2">
-                        <button onclick="app.navegar(3)" class="bg-slate-200 px-6 py-2 rounded-xl font-bold uppercase text-xs">Editar/Voltar</button>
-                        <button onclick="app.exportarPDF()" class="bg-red-600 text-white px-6 py-2 rounded-xl font-bold uppercase text-xs flex items-center gap-2">
-                            <i class="fas fa-file-pdf"></i> Exportar PDF
-                        </button>
-                    </div>
+            <div class="bg-white p-8 rounded-3xl shadow-2xl border border-gray-200">
+                <h3 class="text-xl font-bold mb-4">Relatório Final (Auto-Compilado)</h3>
+                <textarea id="relatorio-editor" class="w-full h-[500px] p-8 bg-slate-50 border-0 rounded-2xl font-mono text-sm leading-relaxed" spellcheck="false"></textarea>
+                
+                <div class="mt-8 flex flex-wrap gap-3 justify-center">
+                    <button onclick="app.salvarNoSupabase()" class="bg-slate-800 text-white px-8 py-3 rounded-xl font-bold uppercase text-xs">Salvar Alterações</button>
+                    <button onclick="app.exportarPDF('Relatório')" class="bg-red-600 text-white px-8 py-3 rounded-xl font-bold uppercase text-xs">Exportar Relatório PDF</button>
                 </div>
-                <textarea id="editor" class="w-full h-[500px] p-10 bg-slate-50 border-0 rounded-2xl font-mono text-sm leading-relaxed" spellcheck="false"></textarea>
             </div>
         </section>
+
     </main>
 
-    <div id="modal-q" class="fixed inset-0 bg-slate-900/90 hidden items-center justify-center z-[100] backdrop-blur-sm">
-        <div class="bg-white w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl">
+    <div id="modal-q" class="fixed inset-0 bg-slate-900/90 hidden items-center justify-center z-[100] backdrop-blur-sm p-4">
+        <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden">
             <div class="p-6 bg-slate-800 text-white flex justify-between">
-                <h3 class="font-bold">Qualificar: <span id="span-papel" class="text-yellow-500"></span></h3>
-                <button onclick="app.fecharModal()"><i class="fas fa-times"></i></button>
+                <h3 class="font-bold uppercase tracking-widest text-sm">Qualificar: <span id="label-papel" class="text-yellow-500"></span></h3>
+                <button onclick="app.fecharModal()"><i class="fas fa-times text-xl"></i></button>
             </div>
-            <div class="p-8 grid grid-cols-2 gap-4">
-                <div class="col-span-2"><label class="text-[10px] font-bold uppercase text-gray-400">Nome Completo</label><input type="text" id="q-nome" class="input-field"></div>
-                <div><label class="text-[10px] font-bold uppercase text-gray-400">RG / Matrícula</label><input type="text" id="q-rg" class="input-field"></div>
-                <div><label class="text-[10px] font-bold uppercase text-gray-400">Posto/Grad</label><input type="text" id="q-posto" class="input-field"></div>
-                <div><label class="text-[10px] font-bold uppercase text-gray-400">Naturalidade</label><input type="text" id="q-natural" class="input-field"></div>
-                <div><label class="text-[10px] font-bold uppercase text-gray-400">Profissão</label><input type="text" id="q-profissao" class="input-field"></div>
-                <div class="col-span-2"><label class="text-[10px] font-bold uppercase text-gray-400">Filiação</label><input type="text" id="q-filiacao" class="input-field"></div>
-                <div class="col-span-2"><label class="text-[10px] font-bold uppercase text-gray-400">Endereço</label><input type="text" id="q-endereco" class="input-field"></div>
-                <div><label class="text-[10px] font-bold uppercase text-gray-400">Início Oitiva</label><input type="time" id="q-inicio" class="input-field"></div>
-                <div><label class="text-[10px] font-bold uppercase text-gray-400">Fim Oitiva</label><input type="time" id="q-fim" class="input-field"></div>
-                <button onclick="app.confirmarQualif()" class="col-span-2 bg-yellow-500 text-slate-900 font-black p-4 rounded-xl mt-4 uppercase">Salvar e Qualificar</button>
+            <div class="p-8 grid grid-cols-2 gap-4 max-h-[70vh] overflow-y-auto">
+                <div class="col-span-2"><label class="text-[10px] font-bold text-gray-400">NOME COMPLETO</label><input type="text" id="q-nome" class="input-field"></div>
+                <div><label class="text-[10px] font-bold text-gray-400">RG / MATRÍCULA</label><input type="text" id="q-rg" class="input-field"></div>
+                <div><label class="text-[10px] font-bold text-gray-400">POSTO / GRADUAÇÃO</label><input type="text" id="q-posto" class="input-field" placeholder="Ex: CAP QOPM"></div>
+                <div><label class="text-[10px] font-bold text-gray-400">NATURALIDADE</label><input type="text" id="q-natural" class="input-field"></div>
+                <div><label class="text-[10px] font-bold text-gray-400">PROFISSÃO</label><input type="text" id="q-profissao" class="input-field"></div>
+                <div class="col-span-2"><label class="text-[10px] font-bold text-gray-400">FILIAÇÃO (PAI E MÃE)</label><input type="text" id="q-filiacao" class="input-field"></div>
+                <div class="col-span-2"><label class="text-[10px] font-bold text-gray-400">ENDEREÇO RESIDENCIAL</label><input type="text" id="q-endereco" class="input-field"></div>
+                <div><label class="text-[10px] font-bold text-gray-400">INÍCIO DA OITIVA</label><input type="time" id="q-inicio" class="input-field"></div>
+                <div><label class="text-[10px] font-bold text-gray-400">FIM DA OITIVA</label><input type="time" id="q-fim" class="input-field"></div>
+                <button onclick="app.confirmarPessoa()" class="col-span-2 bg-yellow-500 text-slate-900 font-black p-4 rounded-xl mt-4 uppercase shadow-lg">Adicionar Envolvido</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-edicao" class="fixed inset-0 bg-black/70 hidden items-center justify-center z-[110] p-6">
+        <div class="bg-white w-full max-w-5xl h-[90vh] rounded-3xl flex flex-col shadow-2xl">
+            <div class="p-6 border-b flex justify-between items-center bg-slate-50 rounded-t-3xl">
+                <h3 class="font-bold text-slate-800" id="edicao-titulo">Editor de Documento</h3>
+                <button onclick="app.fecharEditor()"><i class="fas fa-times text-2xl text-gray-400"></i></button>
+            </div>
+            <textarea id="editor-texto" class="flex-1 p-10 font-mono text-sm leading-relaxed focus:ring-0 border-0 outline-none" spellcheck="false"></textarea>
+            <div class="p-6 border-t flex justify-end gap-3">
+                <button onclick="app.fecharEditor()" class="px-6 py-2 rounded-lg bg-gray-100 font-bold">CANCELAR</button>
+                <button onclick="app.salvarEdicao()" class="px-6 py-2 rounded-lg bg-emerald-600 text-white font-bold">SALVAR ALTERAÇÕES</button>
             </div>
         </div>
     </div>
@@ -121,63 +152,126 @@
         const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6a25qdHN0aXB0Y2JrdnN6aWJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4OTU3NDYsImV4cCI6MjA4MTQ3MTc0Nn0.LN4j37EHqLQpdoS0mNAIW9v-MTgWo8nXoFl1FrhSSHE";
         const _supabase = window.supabase.createClient(SB_URL, SB_KEY);
 
-        class SISPRO {
+        class SISPRO_V3 {
             constructor() {
-                this.dados = { tipo: '', envolvidos: [], id: 'PROC-'+Date.now() };
-                this.papelAtual = '';
+                this.dados = { 
+                    tipo: '', 
+                    objeto: '', 
+                    envolvidos: [], 
+                    documentos: {},
+                    id: 'PROC-'+Date.now() 
+                };
+                this.docAtualKey = '';
             }
 
             navegar(p) {
                 document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
                 document.getElementById(`tela-${p}`).classList.remove('hidden');
-                document.querySelectorAll('nav button').forEach(b => b.classList.remove('active-step'));
-                document.getElementById(`b-${p}`).classList.add('active-step');
-                if(p === 3) this.gerarDocumentos();
+                document.querySelectorAll('nav button').forEach(b => b.classList.remove('step-active', 'text-gray-400'));
+                document.getElementById(`btn-${p}`).classList.add('step-active');
+                if(p === 3) this.gerarGradeDocumentos();
+                if(p === 4) this.compilarRelatorio();
             }
 
             setTipo(t) { this.dados.tipo = t; this.navegar(2); }
 
-            abrirModal(papel) {
+            modalQualif(papel) {
                 this.papelAtual = papel;
-                document.getElementById('span-papel').innerText = papel;
+                document.getElementById('label-papel').innerText = papel;
                 document.getElementById('modal-q').style.display = 'flex';
             }
 
             fecharModal() { document.getElementById('modal-q').style.display = 'none'; }
 
-            confirmarQualif() {
-                const qualificado = {
+            confirmarPessoa() {
+                const p = {
                     papel: this.papelAtual,
                     nome: document.getElementById('q-nome').value,
                     rg: document.getElementById('q-rg').value,
                     posto: document.getElementById('q-posto').value,
                     naturalidade: document.getElementById('q-natural').value,
-                    profissao: document.getElementById('q-profissao').value,
                     filiacao: document.getElementById('q-filiacao').value,
                     endereco: document.getElementById('q-endereco').value,
                     inicio: document.getElementById('q-inicio').value,
                     fim: document.getElementById('q-fim').value
                 };
-                this.dados.envolvidos.push(qualificado);
+                this.dados.envolvidos.push(p);
                 this.renderLista();
                 this.fecharModal();
             }
 
             renderLista() {
-                const list = document.getElementById('lista-qualificados');
+                const list = document.getElementById('lista-envolvidos');
                 list.innerHTML = this.dados.envolvidos.map((e, i) => `
-                    <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 border-yellow-500 flex justify-between items-center">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-yellow-500 flex justify-between">
                         <div>
                             <span class="text-[9px] font-black uppercase text-yellow-600">${e.papel}</span>
                             <h4 class="font-bold text-slate-800">${e.nome}</h4>
                             <p class="text-[10px] text-gray-400">${e.posto} • RG ${e.rg}</p>
                         </div>
-                        <button onclick="app.remover(${i})" class="text-red-300 hover:text-red-500"><i class="fas fa-trash"></i></button>
+                        <button onclick="app.removerPessoa(${i})" class="text-red-300 hover:text-red-500"><i class="fas fa-trash"></i></button>
                     </div>
                 `).join('');
             }
 
-            remover(i) { this.dados.envolvidos.splice(i, 1); this.renderLista(); }
+            removerPessoa(i) { this.dados.envolvidos.splice(i, 1); this.renderLista(); }
+
+            gerarGradeDocumentos() {
+                const grid = document.getElementById('container-documentos');
+                this.dados.objeto = document.getElementById('objeto-proc').value;
+                const enc = this.dados.envolvidos.find(e => e.papel === 'Encarregado') || {nome: '_________', posto: '____'};
+                const esc = this.dados.envolvidos.find(e => e.papel === 'Escrivão') || {nome: '_________', rg: '____'};
+                const acu = this.dados.envolvidos.find(e => e.papel === 'Acusado') || {nome: '_________', rg: '____'};
+                const data = new Date().toLocaleDateString('pt-BR');
+
+                const listaBase = {
+                    'Autuação': `AUTUAÇÃO\n\nAos ${data}, nesta cidade de Manaus-AM, autuo a Portaria do presente ${this.dados.tipo}.\n\n__________________________\n${esc.nome}\nEscrivão`,
+                    'Termo de Compromisso': `TERMO DE COMPROMISSO\n\nO ${esc.posto} ${esc.nome}, designado escrivão, presta compromisso legal de manter o sigilo do ${this.dados.tipo}.\n\n__________________________\n${enc.nome}\nEncarregado`,
+                    '1º Despacho': `DESPACHO Nº 001/2025\n\n1. Designo oitiva do acusado para data oportuna.\n2. Junte-se a Folha de Alterações.\n\n__________________________\n${enc.nome}`,
+                    'Ofício de Requisição': `OFÍCIO Nº 001/2025\n\nAo Sr. Comandante,\nSolicito a apresentação do militar ${acu.nome} para oitiva.\n\n__________________________\nEncarregado`,
+                    'Termo de Juntada': `TERMO DE JUNTADA\n\nFaco a juntada dos documentos em anexo aos autos.\n\n__________________________\nEscrivão`,
+                    'Capa do Processo': `ESTADO DO AMAZONAS\nPOLÍCIA MILITAR\n\n${this.dados.tipo}\n\nEncarregado: ${enc.nome}\nAcusado: ${acu.nome}\nObjeto: ${this.dados.objeto}`
+                };
+
+                this.dados.documentos = listaBase;
+                grid.innerHTML = Object.keys(listaBase).map(key => `
+                    <div class="card-doc hover:border-blue-900">
+                        <h4 class="font-bold text-slate-800 mb-1">${key}</h4>
+                        <p class="text-[10px] text-emerald-600 font-bold uppercase mb-4 italic">Automático</p>
+                        <div class="flex gap-2">
+                            <button onclick="app.abrirEditor('${key}')" class="bg-slate-100 p-2 rounded text-[10px] font-bold hover:bg-yellow-500">EDITAR</button>
+                            <button onclick="app.exportarSimples('${key}')" class="bg-red-50 p-2 rounded text-[10px] font-bold text-red-600 hover:bg-red-100">PDF</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            abrirEditor(key) {
+                this.docAtualKey = key;
+                document.getElementById('edicao-titulo').innerText = key;
+                document.getElementById('editor-texto').value = this.dados.documentos[key];
+                document.getElementById('modal-edicao').style.display = 'flex';
+            }
+
+            salvarEdicao() {
+                this.dados.documentos[this.docAtualKey] = document.getElementById('editor-texto').value;
+                this.fecharEditor();
+            }
+
+            fecharEditor() { document.getElementById('modal-edicao').style.display = 'none'; }
+
+            compilarRelatorio() {
+                const enc = this.dados.envolvidos.find(e => e.papel === 'Encarregado') || {nome: '_________', posto: '____'};
+                const acu = this.dados.envolvidos.find(e => e.papel === 'Acusado') || {nome: '_________', rg: '____'};
+                
+                let rel = `RELATÓRIO FINAL - ${this.dados.tipo}\n\n`;
+                rel += `I - DOS FATOS\nO presente procedimento foi instaurado para apurar: ${this.dados.objeto}.\n\n`;
+                rel += `II - DA INSTRUÇÃO\nForam ouvidos os seguintes militares:\n`;
+                this.dados.envolvidos.forEach(p => rel += `- ${p.nome} (${p.papel})\n`);
+                rel += `\nIII - CONCLUSÃO\nDiante do exposto, este Encarregado conclui que...\n\n__________________________\n${enc.nome}\nEncarregado`;
+                
+                document.getElementById('relatorio-editor').value = rel;
+            }
 
             async salvarNoSupabase() {
                 const { error } = await _supabase.from('procedimentos').upsert([{ 
@@ -185,46 +279,25 @@
                     tipo: this.dados.tipo, 
                     conteudo: this.dados 
                 }]);
-                alert(error ? "Erro ao conectar Supabase" : "Salvo na Nuvem com Sucesso!");
+                alert(error ? "Erro ao salvar" : "Sincronizado com o Supabase!");
             }
 
-            gerarDocumentos() {
-                const container = document.getElementById('grid-docs');
-                const enc = this.dados.envolvidos.find(e => e.papel === 'Encarregado') || {nome: '_________', posto: '____'};
-                const esc = this.dados.envolvidos.find(e => e.papel === 'Escrivão') || {nome: '_________', rg: '____'};
-                const acu = this.dados.envolvidos.find(e => e.papel === 'Acusado') || {nome: '_________', filiacao: '_______'};
-                const hoje = new Date().toLocaleDateString('pt-BR');
-
-                const lista = [
-                    { t: 'Autuação', c: `ESTADO DO AMAZONAS\nPOLÍCIA MILITAR DO AMAZONAS\n\nAUTUAÇÃO\n\nAos ${hoje}, autuo a portaria do presente ${this.dados.tipo}.\n\n__________________________\n${esc.nome}\nEscrivão` },
-                    { t: 'Termo de Compromisso', c: `TERMO DE COMPROMISSO\n\nDesignado o ${esc.posto} ${esc.nome}, este presta compromisso de manter sigilo e fidelidade no presente ${this.dados.tipo}.\n\n__________________________\nEncarregado` },
-                    { t: 'Juntada', c: `TERMO DE JUNTADA\n\nAos ${hoje}, faço a juntada da Folha de Alterações do ${acu.nome} aos autos.\n\n__________________________\nEscrivão` }
-                ];
-
-                container.innerHTML = lista.map(d => `
-                    <div onclick="app.verDoc('${d.t}', \`${d.c}\`)" class="doc-card">
-                        <h4 class="font-bold text-slate-700">${d.t}</h4>
-                        <p class="text-[10px] text-emerald-600 font-bold uppercase mt-1 italic">Preenchido com dados colhidos</p>
-                    </div>
-                `).join('');
-            }
-
-            verDoc(t, c) {
-                document.getElementById('doc-title').innerText = t;
-                document.getElementById('editor').value = c;
-                this.navegar(4);
-            }
-
-            exportarPDF() {
+            exportarPDF(tipo) {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
-                const lines = doc.splitTextToSize(document.getElementById('editor').value, 180);
+                const texto = tipo === 'Relatório' ? document.getElementById('relatorio-editor').value : this.dados.documentos[this.docAtualKey];
+                const lines = doc.splitTextToSize(texto, 180);
                 doc.text(lines, 15, 20);
-                doc.save(`${this.dados.tipo}_Documento.pdf`);
+                doc.save(`${this.dados.tipo}_${tipo}.pdf`);
+            }
+
+            exportarSimples(key) {
+                this.docAtualKey = key;
+                this.exportarPDF(key);
             }
         }
 
-        const app = new SISPRO();
+        const app = new SISPRO_V3();
     </script>
 </body>
-</html>
+                    </html>
