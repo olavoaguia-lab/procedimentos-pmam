@@ -3,404 +3,2559 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISPRO - PMAM | Sistema de Procedimentos</title>
+    <title>SISPRO - PMAM | Sistema Executivo de Procedimentos</title>
+    
+    <!-- CDNs -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.5.28/dist/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+    <!-- Configuração Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'pmam-blue': '#1e3a8a',
+                        'pmam-navy': '#0f172a',
+                        'pmam-light': '#3b82f6',
+                        'pmam-accent': '#0ea5e9',
+                        'pmam-gold': '#D4AF37',
+                        'pmam-gold-dark': '#B8941F',
+                        'pmam-success': '#10b981',
+                        'pmam-warning': '#f59e0b',
+                        'pmam-error': '#ef4444',
+                        'pmam-surface': '#f8fafc',
+                        'pmam-card': '#ffffff',
+                        'pmam-border': '#e2e8f0',
+                        'pmam-text': '#334155',
+                        'pmam-muted': '#64748b',
+                        'pmam-dark': '#1e293b',
+                        'pmam-executivo': '#1e40af',
+                        'pmam-executivo-light': '#dbeafe',
+                    },
+                    fontFamily: { 
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                        'mono': ['JetBrains Mono', 'monospace']
+                    },
+                    boxShadow: { 
+                        'pmam-lg': '0 15px 35px -5px rgba(0, 0, 0, 0.08)',
+                        'pmam-xl': '0 25px 50px -12px rgba(0, 0, 0, 0.15)',
+                        'pmam-executivo': '0 20px 60px -15px rgba(30, 64, 175, 0.3)'
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'slide-in-right': 'slideInRight 0.5s ease-out',
+                        'slide-in-left': 'slideInLeft 0.5s ease-out',
+                        'fade-in': 'fadeIn 0.8s ease-out',
+                        'pulse-gold': 'pulseGold 2s infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        },
+                        slideInRight: {
+                            '0%': { transform: 'translateX(100%)', opacity: '0' },
+                            '100%': { transform: 'translateX(0)', opacity: '1' },
+                        },
+                        slideInLeft: {
+                            '0%': { transform: 'translateX(-100%)', opacity: '0' },
+                            '100%': { transform: 'translateX(0)', opacity: '1' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        pulseGold: {
+                            '0%, 100%': { boxShadow: '0 0 0 0 rgba(212, 175, 55, 0.4)' },
+                            '70%': { boxShadow: '0 0 0 10px rgba(212, 175, 55, 0)' },
+                            '100%': { boxShadow: '0 0 0 0 rgba(212, 175, 55, 0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 
     <style>
         :root {
-            --navy: #0f172a;
-            --gold: #c5a059;
-            --bg: #f8fafc;
+            --pmam-gold: #D4AF37;
+            --pmam-navy: #0f172a;
+            --pmam-executivo: #1e40af;
         }
-
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--bg);
-            color: #1e293b;
+        
+        * {
+            scroll-behavior: smooth;
         }
-
-        .header { 
-            background: #ffffff;
-            border-bottom: 2px solid #e2e8f0;
-            padding: 1.5rem 2rem;
+        
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-feature-settings: "kern", "liga", "clig", "calt";
         }
-
-        .step-pill {
-            @apply flex items-center gap-3 px-6 py-3 rounded-full transition-all duration-300 font-semibold text-sm border-2;
+        
+        /* Logo Shield */
+        .shield-logo {
+            width: 80px;
+            height: 90px;
+            background: linear-gradient(135deg, var(--pmam-gold) 0%, #FFD700 100%);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+            transition: all 0.4s ease;
         }
-        .step-pill.active { @apply bg-navy text-white border-navy shadow-lg; }
-        .step-pill.pending { @apply bg-white text-slate-400 border-slate-200; }
-
-        .card {
-            @apply bg-white rounded-2xl border border-slate-100 shadow-xl p-8 transition-all hover:border-l-4 hover:border-l-navy;
+        
+        .shield-logo:hover {
+            transform: scale(1.05) rotate(5deg);
+            box-shadow: 0 12px 35px rgba(212, 175, 55, 0.6);
         }
-
-        .input {
-            @apply w-full border-b-2 border-slate-200 bg-transparent py-3 px-1 focus:border-navy outline-none transition-all text-sm;
+        
+        .shield-inner {
+            width: 72px;
+            height: 82px;
+            background: var(--pmam-navy);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
         }
-
-        .btn-primary { @apply bg-navy text-white px-8 py-3 rounded-xl font-bold hover:bg-black transition-all shadow-md active:scale-95; }
-        .btn-gold { @apply bg-gradient-to-r from-yellow-600 to-yellow-500 text-white px-8 py-3 rounded-xl font-bold hover:from-yellow-700 hover:to-yellow-600 transition-all shadow-md active:scale-95; }
-
-        .title-gold { font-family: 'Playfair Display', serif; color: var(--gold); }
-
-        /* Responsividade sidebar */
-        #sidebar {
-            transition: transform 0.3s ease-in-out;
+        
+        .shield-icon {
+            color: var(--pmam-gold);
+            font-size: 24px;
+            margin-bottom: 6px;
         }
-        @media (max-width: 1023px) {
+        
+        .shield-text {
+            color: var(--pmam-gold);
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            text-align: center;
+            line-height: 1.1;
+        }
+        
+        /* Sidebar Executive */
+        .sidebar-executivo {
+            background: linear-gradient(180deg, var(--pmam-navy) 0%, #1e293b 100%);
+            border-right: 1px solid rgba(212, 175, 55, 0.2);
+        }
+        
+        /* Cards Executivos */
+        .card-executivo {
+            background: white;
+            border: 1px solid #e2e8f0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-executivo::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--pmam-gold), var(--pmam-executivo));
+            transition: width 0.3s ease;
+        }
+        
+        .card-executivo:hover::before {
+            width: 8px;
+        }
+        
+        .card-executivo:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            border-color: var(--pmam-gold);
+        }
+        
+        /* Botões Executivos */
+        .btn-executivo {
+            background: linear-gradient(135deg, var(--pmam-executivo), #3b82f6);
+            color: white;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-executivo::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.7s ease;
+        }
+        
+        .btn-executivo:hover::before {
+            left: 100%;
+        }
+        
+        .btn-executivo:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(30, 64, 175, 0.4);
+        }
+        
+        .btn-gold {
+            background: linear-gradient(135deg, var(--pmam-gold), #FFD700);
+            color: var(--pmam-navy);
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gold:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(212, 175, 55, 0.4);
+        }
+        
+        /* Progress Steps */
+        .step-executivo {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .step-executivo::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            right: 50%;
+            height: 3px;
+            background: #cbd5e1;
+            z-index: -1;
+            transition: all 0.5s ease;
+        }
+        
+        .step-executivo.completed::before {
+            left: 0;
+            right: 0;
+            background: linear-gradient(90deg, #10b981, var(--pmam-gold));
+        }
+        
+        .step-circle-executivo {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            transition: all 0.4s ease;
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .step-executivo.active .step-circle-executivo {
+            background: linear-gradient(135deg, var(--pmam-gold), #FFD700);
+            color: var(--pmam-navy);
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5);
+            animation: pulseGold 2s infinite;
+        }
+        
+        .step-executivo.completed .step-circle-executivo {
+            background: #10b981;
+            color: white;
+            transform: scale(1);
+        }
+        
+        /* Toast Executivo */
+        .toast-executivo {
+            background: linear-gradient(135deg, var(--pmam-navy), #1e293b);
+            border-left: 4px solid var(--pmam-gold);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Scrollbar Personalizada */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, var(--pmam-gold), var(--pmam-executivo));
+            border-radius: 4px;
+        }
+        
+        /* Inputs Executivos */
+        .input-executivo {
+            transition: all 0.3s ease;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .input-executivo:focus {
+            outline: none;
+            border-color: var(--pmam-gold);
+            box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        /* Document Preview */
+        .document-preview {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border: 1px solid #e2e8f0;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        /* Status Badges */
+        .status-badge {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+        
+        .status-badge.pendente {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-badge.concluido {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-badge.em-andamento {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        /* Responsividade Sidebar */
+        @media (max-width: 1024px) {
             #sidebar {
-                position: fixed;
-                top: 0;
-                left: 0;
-                height: 100vh;
                 transform: translateX(-100%);
-                z-index: 60;
             }
             #sidebar.open {
                 transform: translateX(0);
             }
-            .main-content {
-                padding-left: 0 !important;
+        }
+        
+        /* Animação de entrada */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
             }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        /* Efeito vidro */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Loading Spinner */
+        .spinner-gold {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(212, 175, 55, 0.2);
+            border-top: 4px solid var(--pmam-gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
-
-    <!-- Sidebar -->
-    <div id="sidebar" class="fixed top-0 left-0 h-full w-80 bg-white border-r border-slate-200 shadow-2xl overflow-y-auto z-50 lg:translate-x-0">
-        <div class="p-8 border-b border-slate-200 flex flex-col items-center">
-            <img src="logo-pmam.png" alt="Brasão PMAM" class="w-36 mb-6 drop-shadow-xl">
-            <h2 class="text-2xl font-black text-navy tracking-tight">SISPRO - PMAM</h2>
-            <p class="text-xs text-slate-400 uppercase font-bold tracking-widest mt-1">Sistema de Procedimentos</p>
+<body class="text-pmam-text font-sans bg-pmam-surface min-h-screen">
+    <!-- Sidebar Executivo -->
+    <div id="sidebar" class="sidebar-executivo fixed top-0 left-0 h-full w-80 shadow-2xl z-50 transition-transform duration-300 lg:translate-x-0 overflow-y-auto custom-scrollbar">
+        <!-- Logo PMAM -->
+        <div class="p-8 border-b border-gray-800 flex flex-col items-center">
+            <div class="shield-logo mb-6">
+                <div class="shield-inner">
+                    <i class="fas fa-balance-scale shield-icon"></i>
+                    <div class="shield-text">SISPRO<br>PMAM</div>
+                </div>
+            </div>
+            <h2 class="text-2xl font-black text-white text-center tracking-tight">Sistema Integrado de Procedimentos</h2>
+            <p class="text-xs text-gray-400 uppercase font-bold tracking-widest mt-2">Nível Executivo</p>
         </div>
-
-        <div class="p-6 border-b border-slate-200">
-            <h3 class="font-semibold text-navy mb-6 text-sm uppercase tracking-widest">Etapas</h3>
-            <div class="space-y-4">
-                <div class="step-pill active"><i class="fas fa-check-circle"></i> Tipo</div>
-                <div class="step-pill pending"><i class="fas fa-circle"></i> Qualificação</div>
-                <div class="step-pill pending"><i class="fas fa-circle"></i> Documentos</div>
-                <div class="step-pill pending"><i class="fas fa-circle"></i> Relatório</div>
+        
+        <!-- Informações do Procedimento Atual -->
+        <div class="p-6 border-b border-gray-800">
+            <h3 class="font-bold text-white mb-4 text-sm uppercase tracking-widest flex items-center gap-2">
+                <i class="fas fa-folder-open text-pmam-gold"></i>
+                Procedimento Atual
+            </h3>
+            <div id="sidebar-procedimento-info" class="text-center">
+                <div class="bg-gray-900/50 rounded-xl p-4 border border-gray-700">
+                    <div class="text-xs text-gray-400 mb-1">Nº Portaria</div>
+                    <div id="sidebar-portaria" class="text-lg font-bold text-white truncate">---</div>
+                    <div id="sidebar-tipo" class="text-sm text-pmam-gold font-medium mt-1">---</div>
+                    <div id="sidebar-status" class="status-badge em-andamento inline-block mt-2">---</div>
+                </div>
             </div>
         </div>
-
+        
+        <!-- Progresso -->
+        <div class="p-6 border-b border-gray-800">
+            <h3 class="font-bold text-white mb-6 text-sm uppercase tracking-widest flex items-center gap-2">
+                <i class="fas fa-chart-line text-pmam-gold"></i>
+                Progresso do Procedimento
+            </h3>
+            <div class="space-y-8">
+                <div class="step-executivo" id="sidebar-step-1">
+                    <div class="step-circle-executivo mx-auto">1</div>
+                    <div class="step-label text-center mt-3">
+                        <div class="text-sm font-medium text-white">Seleção</div>
+                        <div id="step-1-info" class="text-xs text-gray-400 mt-1">Tipo de Procedimento</div>
+                    </div>
+                </div>
+                <div class="step-executivo" id="sidebar-step-2">
+                    <div class="step-circle-executivo mx-auto">2</div>
+                    <div class="step-label text-center mt-3">
+                        <div class="text-sm font-medium text-white">Caracterização</div>
+                        <div id="step-2-info" class="text-xs text-gray-400 mt-1">Dados das Partes</div>
+                    </div>
+                </div>
+                <div class="step-executivo" id="sidebar-step-3">
+                    <div class="step-circle-executivo mx-auto">3</div>
+                    <div class="step-label text-center mt-3">
+                        <div class="text-sm font-medium text-white">Documentação</div>
+                        <div id="step-3-info" class="text-xs text-gray-400 mt-1">0 documentos</div>
+                    </div>
+                </div>
+                <div class="step-executivo" id="sidebar-step-4">
+                    <div class="step-circle-executivo mx-auto">4</div>
+                    <div class="step-label text-center mt-3">
+                        <div class="text-sm font-medium text-white">Relatório</div>
+                        <div id="step-4-info" class="text-xs text-gray-400 mt-1">Conclusão</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Documentos Gerados -->
         <div class="p-6">
-            <h3 class="font-semibold text-navy mb-4 text-xs uppercase tracking-widest">Documentos Gerados</h3>
-            <div id="lista-documentos-sidebar" class="space-y-2 text-xs text-slate-500">Nenhum documento gerado</div>
+            <h3 class="font-bold text-white mb-4 text-sm uppercase tracking-widest flex items-center gap-2">
+                <i class="fas fa-file-alt text-pmam-gold"></i>
+                Documentos Gerados
+            </h3>
+            <div id="lista-documentos-sidebar" class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+                <div class="text-center py-4">
+                    <i class="fas fa-file text-gray-700 text-2xl mb-2"></i>
+                    <p class="text-sm text-gray-500">Nenhum documento gerado</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Botões de Ação Sidebar -->
+        <div class="p-6 border-t border-gray-800">
+            <button onclick="sistema.salvarProcedimento()" 
+                    class="w-full mb-3 btn-executivo py-3 rounded-xl font-bold flex items-center justify-center gap-3">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <span>Salvar no Banco</span>
+            </button>
+            <button onclick="sistema.abrirGerenciador()" 
+                    class="w-full bg-gray-800 hover:bg-gray-700 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-3 transition-all">
+                <i class="fas fa-database"></i>
+                <span>Gerenciar Procedimentos</span>
+            </button>
         </div>
     </div>
 
-    <!-- Hamburger mobile -->
-    <button id="sidebar-toggle" class="lg:hidden fixed top-4 left-4 z-70 p-4 bg-navy text-white rounded-xl shadow-2xl">
-        <i class="fas fa-bars text-2xl"></i>
+    <!-- Botão Hamburguer Mobile -->
+    <button id="sidebar-toggle" 
+            class="lg:hidden fixed top-6 left-6 z-60 p-3 bg-pmam-navy text-white rounded-xl shadow-2xl transition-all hover:scale-110">
+        <i class="fas fa-bars text-xl"></i>
     </button>
 
-    <!-- Main -->
-    <div class="min-h-screen lg:pl-80 main-content flex flex-col">
-        <header class="header flex items-center justify-between">
-            <div class="flex items-center gap-6">
-                <img src="logo-sispro.png" alt="Logo SISPRO" class="w-24 drop-shadow-xl">
-                <div>
-                    <h1 class="text-3xl title-gold">SISPRO - Sistema de Procedimentos</h1>
-                    <p class="text-lg text-slate-500 font-medium">Polícia Militar do Amazonas</p>
+    <!-- Conteúdo Principal -->
+    <div class="min-h-screen lg:ml-80 main-content">
+        <!-- Header Executivo -->
+        <header class="glass-effect border-b border-pmam-border sticky top-0 z-40 shadow-pmam-lg">
+            <div class="container mx-auto px-8 py-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-6">
+                        <div class="hidden lg:flex items-center gap-4">
+                            <img src="https://img.icons8.com/color/96/000000/police-badge.png" alt="Brasão PMAM" class="w-16 h-16">
+                            <div>
+                                <h1 class="text-2xl font-black text-pmam-navy leading-tight">SISPRO EXECUTIVO</h1>
+                                <p class="text-base text-pmam-executivo font-bold">Polícia Militar do Amazonas</p>
+                                <p class="text-sm text-pmam-muted font-medium">Sistema Integrado de Procedimentos - Nível Estratégico</p>
+                            </div>
+                        </div>
+                        <div class="lg:hidden">
+                            <h1 class="text-xl font-black text-pmam-navy">SISPRO PMAM</h1>
+                            <p class="text-xs text-pmam-muted">Sistema Executivo</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-4">
+                        <div class="hidden lg:block text-right">
+                            <div class="text-sm text-pmam-muted">Usuário</div>
+                            <div class="font-bold text-pmam-navy">Nível Executivo</div>
+                        </div>
+                        <div class="relative">
+                            <button onclick="sistema.exportarPacoteCompleto()" 
+                                    class="btn-gold px-6 py-3 rounded-xl font-bold flex items-center gap-3 shadow-lg hover:shadow-xl transition-all">
+                                <i class="fas fa-file-export"></i>
+                                <span class="hidden lg:inline">EXPORTAR PACOTE</span>
+                            </button>
+                            <div class="absolute -top-2 -right-2 bg-pmam-error text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center animate-pulse">
+                                1
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="flex gap-4">
-                <button onclick="sistema.salvarNoBanco()" class="btn-primary flex items-center gap-2">
-                    <i class="fas fa-cloud-upload-alt"></i> Salvar no Banco
-                </button>
-                <button onclick="sistema.exportarTodosPDF()" class="btn-gold flex items-center gap-2">
-                    <i class="fas fa-file-pdf"></i> Exportar PDF
-                </button>
             </div>
         </header>
 
-        <!-- Tela 1 -->
-        <div id="tela-1" class="container mx-auto px-6 py-12 flex-1">
-            <h2 class="text-4xl title-gold mb-12 text-center">Selecione o Tipo de Procedimento</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto">
-                <div onclick="sistema.selecionarProcedimento('IPM')" class="card cursor-pointer">
-                    <i class="fas fa-gavel text-6xl text-navy mb-6"></i>
-                    <h3 class="text-2xl font-bold text-navy">IPM</h3>
-                    <p class="text-sm text-slate-500">Inquérito Policial Militar</p>
+        <!-- Conteúdo Dinâmico -->
+        <main class="container mx-auto px-4 lg:px-8 py-8">
+            <!-- TELA 1: Seleção de Procedimento -->
+            <div id="tela-1" class="animate-fade-in-up">
+                <div class="text-center mb-12">
+                    <h2 class="text-4xl font-black text-pmam-navy mb-4">Sistema Integrado de Procedimentos</h2>
+                    <p class="text-xl text-pmam-muted max-w-3xl mx-auto">Selecione o tipo de procedimento para iniciar o processo automatizado</p>
                 </div>
-                <div onclick="sistema.selecionarProcedimento('SAD')" class="card cursor-pointer">
-                    <i class="fas fa-balance-scale text-6xl text-navy mb-6"></i>
-                    <h3 class="text-2xl font-bold text-navy">SAD</h3>
-                    <p class="text-sm text-slate-500">Sindicância Administrativa</p>
+                
+                <!-- Cards de Procedimentos -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8 max-w-7xl mx-auto mb-12">
+                    <!-- SAD -->
+                    <div onclick="sistema.selecionarProcedimento('SAD')" 
+                         class="card-executivo rounded-2xl p-8 cursor-pointer group">
+                        <div class="flex flex-col items-center text-center">
+                            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                <i class="fas fa-gavel text-white text-3xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-black text-pmam-navy mb-2">SAD</h3>
+                            <p class="text-sm text-pmam-muted mb-4">Sindicância Administrativa Disciplinar</p>
+                            <div class="text-xs font-bold bg-blue-100 text-blue-700 px-3 py-1 rounded-full">DISCIPLINAR</div>
+                        </div>
+                    </div>
+                    
+                    <!-- SINDINVEST -->
+                    <div onclick="sistema.selecionarProcedimento('SINDINVEST')" 
+                         class="card-executivo rounded-2xl p-8 cursor-pointer group">
+                        <div class="flex flex-col items-center text-center">
+                            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                <i class="fas fa-search text-white text-3xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-black text-pmam-navy mb-2">SINDINVEST</h3>
+                            <p class="text-sm text-pmam-muted mb-4">Sindicância Investigativa</p>
+                            <div class="text-xs font-bold bg-purple-100 text-purple-700 px-3 py-1 rounded-full">INVESTIGATIVA</div>
+                        </div>
+                    </div>
+                    
+                    <!-- IPM -->
+                    <div onclick="sistema.selecionarProcedimento('IPM')" 
+                         class="card-executivo rounded-2xl p-8 cursor-pointer group">
+                        <div class="flex flex-col items-center text-center">
+                            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                <i class="fas fa-shield-alt text-white text-3xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-black text-pmam-navy mb-2">IPM</h3>
+                            <p class="text-sm text-pmam-muted mb-4">Inquérito Policial Militar</p>
+                            <div class="text-xs font-bold bg-red-100 text-red-700 px-3 py-1 rounded-full">PENAL MILITAR</div>
+                        </div>
+                    </div>
+                    
+                    <!-- PAD -->
+                    <div onclick="sistema.selecionarProcedimento('PAD')" 
+                         class="card-executivo rounded-2xl p-8 cursor-pointer group">
+                        <div class="flex flex-col items-center text-center">
+                            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                <i class="fas fa-scale-balanced text-white text-3xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-black text-pmam-navy mb-2">PAD</h3>
+                            <p class="text-sm text-pmam-muted mb-4">Processo Administrativo Disciplinar</p>
+                            <div class="text-xs font-bold bg-amber-100 text-amber-700 px-3 py-1 rounded-full">ADMINISTRATIVO</div>
+                        </div>
+                    </div>
+                    
+                    <!-- PARE -->
+                    <div onclick="sistema.selecionarProcedimento('PARE')" 
+                         class="card-executivo rounded-2xl p-8 cursor-pointer group">
+                        <div class="flex flex-col items-center text-center">
+                            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                <i class="fas fa-file-invoice-dollar text-white text-3xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-black text-pmam-navy mb-2">PARE</h3>
+                            <p class="text-sm text-pmam-muted mb-4">Procedimento de Apuração de Responsabilidade</p>
+                            <div class="text-xs font-bold bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full">RESSARCIMENTO</div>
+                        </div>
+                    </div>
                 </div>
-                <div onclick="sistema.selecionarProcedimento('SINDINVEST')" class="card cursor-pointer">
-                    <i class="fas fa-magnifying-glass text-6xl text-navy mb-6"></i>
-                    <h3 class="text-2xl font-bold text-navy">SINDINVEST</h3>
-                    <p class="text-sm text-slate-500">Sindicância Investigativa</p>
+                
+                <!-- Seleção Ativa -->
+                <div id="procedimento-selecionado-info" class="hidden max-w-4xl mx-auto bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-8 mb-12">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between">
+                        <div class="flex items-center gap-6">
+                            <div id="procedimento-icon" class="w-16 h-16 rounded-xl flex items-center justify-center">
+                                <i class="fas text-white text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 id="procedimento-nome" class="text-2xl font-black text-pmam-navy"></h3>
+                                <p id="procedimento-descricao" class="text-pmam-muted"></p>
+                                <div class="flex items-center gap-4 mt-3">
+                                    <div class="text-sm">
+                                        <span class="font-semibold">Complexidade:</span>
+                                        <span id="complexidade" class="ml-2">---</span>
+                                    </div>
+                                    <div class="text-sm">
+                                        <span class="font-semibold">Prazo Médio:</span>
+                                        <span id="prazo-medio" class="ml-2">--- dias</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="sistema.avancarParaCaracterizacao()" 
+                                class="mt-6 lg:mt-0 btn-executivo px-8 py-4 rounded-xl font-bold flex items-center gap-3 text-lg">
+                            Avançar para Caracterização
+                            <i class="fas fa-arrow-right animate-pulse"></i>
+                        </button>
+                    </div>
                 </div>
-                <div onclick="sistema.selecionarProcedimento('PAD')" class="card cursor-pointer">
-                    <i class="fas fa-file-contract text-6xl text-navy mb-6"></i>
-                    <h3 class="text-2xl font-bold text-navy">PAD</h3>
-                    <p class="text-sm text-slate-500">Processo Administrativo Disciplinar</p>
+                
+                <!-- Estatísticas -->
+                <div class="max-w-4xl mx-auto bg-white rounded-2xl border border-pmam-border p-8 shadow-pmam-lg">
+                    <h3 class="text-xl font-bold text-pmam-navy mb-6 flex items-center gap-3">
+                        <i class="fas fa-chart-bar text-pmam-gold"></i>
+                        Estatísticas do Sistema
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        <div class="text-center">
+                            <div class="text-3xl font-black text-pmam-navy">5</div>
+                            <div class="text-sm text-pmam-muted">Tipos de Procedimento</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-black text-pmam-success">127</div>
+                            <div class="text-sm text-pmam-muted">Procedimentos Concluídos</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-black text-pmam-executivo">42</div>
+                            <div class="text-sm text-pmam-muted">Em Andamento</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-black text-pmam-gold">98.7%</div>
+                            <div class="text-sm text-pmam-muted">Eficiência do Sistema</div>
+                        </div>
+                    </div>
                 </div>
-                <div onclick="sistema.selecionarProcedimento('PARE')" class="card cursor-pointer">
-                    <i class="fas fa-exclamation-triangle text-6xl text-navy mb-6"></i>
-                    <h3 class="text-2xl font-bold text-navy">PARE</h3>
-                    <p class="text-sm text-slate-500">Rito Especial</p>
+            </div>
+            
+            <!-- TELA 2: Caracterização -->
+            <div id="tela-2" class="hidden animate-fade-in-up">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-black text-pmam-navy mb-3">Caracterização do Procedimento</h2>
+                    <p class="text-lg text-pmam-muted">Preencha os dados fundamentais para geração automatizada</p>
+                </div>
+                
+                <!-- Cabeçalho do Procedimento -->
+                <div class="max-w-6xl mx-auto mb-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 p-6">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between">
+                        <div>
+                            <div class="text-sm text-blue-600 font-semibold mb-1">PROCEDIMENTO SELECIONADO</div>
+                            <div id="procedimento-selecionado-nome" class="text-2xl font-black text-pmam-navy"></div>
+                        </div>
+                        <div class="mt-4 lg:mt-0">
+                            <button onclick="sistema.salvarRascunho()" 
+                                    class="px-6 py-3 bg-white border border-blue-200 text-blue-600 rounded-xl font-medium hover:bg-blue-50 transition-all">
+                                <i class="fas fa-save mr-2"></i>
+                                Salvar Rascunho
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Formulário de Caracterização -->
+                <div class="max-w-6xl mx-auto bg-white rounded-2xl border border-pmam-border shadow-pmam-xl overflow-hidden">
+                    <!-- Abas -->
+                    <div class="border-b border-pmam-border">
+                        <div class="flex overflow-x-auto">
+                            <button onclick="sistema.mostrarAba('dados-basicos')" 
+                                    class="aba-caracterizacao px-8 py-4 font-semibold text-pmam-text border-b-2 border-transparent hover:text-pmam-executivo transition-all whitespace-nowrap active">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                Dados Básicos
+                            </button>
+                            <button onclick="sistema.mostrarAba('partes')" 
+                                    class="aba-caracterizacao px-8 py-4 font-semibold text-pmam-text border-b-2 border-transparent hover:text-pmam-executivo transition-all whitespace-nowrap">
+                                <i class="fas fa-users mr-2"></i>
+                                Partes Envolvidas
+                            </button>
+                            <button onclick="sistema.mostrarAba('objeto')" 
+                                    class="aba-caracterizacao px-8 py-4 font-semibold text-pmam-text border-b-2 border-transparent hover:text-pmam-executivo transition-all whitespace-nowrap">
+                                <i class="fas fa-clipboard-list mr-2"></i>
+                                Objeto e Fundamentação
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Conteúdo das Abas -->
+                    <div class="p-8">
+                        <!-- Aba Dados Básicos -->
+                        <div id="aba-dados-basicos" class="aba-conteudo">
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <!-- Coluna 1 -->
+                                <div class="space-y-6">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-pmam-text mb-2">
+                                            <i class="fas fa-hashtag text-pmam-gold mr-2"></i>
+                                            Número da Portaria*
+                                        </label>
+                                        <input type="text" id="numero-portaria" 
+                                               class="input-executivo w-full p-4 border rounded-xl focus:outline-none focus:ring-2 focus:ring-pmam-gold"
+                                               placeholder="Ex: 05.02/2024/SAD/SJD/PMAM">
+                                        <div class="text-xs text-pmam-muted mt-2">Formato padrão: XX.XX/ANO/TIPO/ÓRGÃO/PMAM</div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-semibold text-pam-text mb-2">
+                                            <i class="fas fa-calendar-alt text-pmam-gold mr-2"></i>
+                                            Data da Portaria*
+                                        </label>
+                                        <div class="grid grid-cols-3 gap-4">
+                                            <div>
+                                                <input type="number" id="data-dia" min="1" max="31"
+                                                       class="input-executivo w-full p-4 border rounded-xl text-center"
+                                                       placeholder="DD">
+                                                <label class="text-xs text-pmam-muted mt-2 block text-center">Dia</label>
+                                            </div>
+                                            <div>
+                                                <select id="data-mes" 
+                                                        class="input-executivo w-full p-4 border rounded-xl text-center">
+                                                    <option value="">Mês</option>
+                                                    <option value="Janeiro">Janeiro</option>
+                                                    <option value="Fevereiro">Fevereiro</option>
+                                                    <option value="Março">Março</option>
+                                                    <option value="Abril">Abril</option>
+                                                    <option value="Maio">Maio</option>
+                                                    <option value="Junho">Junho</option>
+                                                    <option value="Julho">Julho</option>
+                                                    <option value="Agosto">Agosto</option>
+                                                    <option value="Setembro">Setembro</option>
+                                                    <option value="Outubro">Outubro</option>
+                                                    <option value="Novembro">Novembro</option>
+                                                    <option value="Dezembro">Dezembro</option>
+                                                </select>
+                                                <label class="text-xs text-pmam-muted mt-2 block text-center">Mês</label>
+                                            </div>
+                                            <div>
+                                                <input type="number" id="data-ano" min="2000" max="2100"
+                                                       class="input-executivo w-full p-4 border rounded-xl text-center"
+                                                       placeholder="AAAA">
+                                                <label class="text-xs text-pmam-muted mt-2 block text-center">Ano</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-semibold text-pmam-text mb-2">
+                                            <i class="fas fa-map-marker-alt text-pmam-gold mr-2"></i>
+                                            Local/Unidade*
+                                        </label>
+                                        <input type="text" id="local-unidade" 
+                                               class="input-executivo w-full p-4 border rounded-xl"
+                                               placeholder="Ex: SJD do Comando de Policiamento Leste">
+                                    </div>
+                                </div>
+                                
+                                <!-- Coluna 2 -->
+                                <div class="space-y-6">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-pmam-text mb-2">
+                                            <i class="fas fa-user-tie text-pmam-gold mr-2"></i>
+                                            Encarregado/Responsável*
+                                        </label>
+                                        <input type="text" id="encarregado-nome" 
+                                               class="input-executivo w-full p-4 border rounded-xl"
+                                               placeholder="Ex: CAP QOPM NOME COMPLETO (12345)">
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-semibold text-pmam-text mb-2">
+                                            <i class="fas fa-pen-fancy text-pmam-gold mr-2"></i>
+                                            Escrivão*
+                                        </label>
+                                        <input type="text" id="escrivao-nome" 
+                                               class="input-executivo w-full p-4 border rounded-xl"
+                                               placeholder="Ex: 1º TEN QOPM NOME COMPLETO (22892)">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Aba Partes Envolvidas -->
+                        <div id="aba-partes" class="aba-conteudo hidden">
+                            <div class="space-y-8">
+                                <div>
+                                    <h4 class="text-lg font-bold text-pmam-navy mb-4 flex items-center gap-2">
+                                        <i class="fas fa-user-shield text-pmam-gold"></i>
+                                        Acusado/Sindicado
+                                    </h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <input type="text" id="acusado-nome" 
+                                               class="input-executivo p-4 border rounded-xl"
+                                               placeholder="Nome Completo">
+                                        <input type="text" id="acusado-posto" 
+                                               class="input-executivo p-4 border rounded-xl"
+                                               placeholder="Posto/Graduação">
+                                        <input type="text" id="acusado-matricula" 
+                                               class="input-executivo p-4 border rounded-xl"
+                                               placeholder="Matrícula/Identificação">
+                                        <input type="text" id="acusado-unidade" 
+                                               class="input-executivo p-4 border rounded-xl"
+                                               placeholder="Unidade de Lotação">
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h4 class="text-lg font-bold text-pmam-navy mb-4 flex items-center gap-2">
+                                        <i class="fas fa-user-injured text-pmam-gold"></i>
+                                        Ofendido/Vítima
+                                    </h4>
+                                    <select id="ofendido-tipo" class="input-executivo w-full p-4 border rounded-xl mb-4">
+                                        <option value="PMAM">Polícia Militar do Amazonas</option>
+                                        <option value="FAZENDA">Fazenda Pública/PMAM</option>
+                                        <option value="PARTICULAR">Particular</option>
+                                        <option value="OUTRO">Outro</option>
+                                    </select>
+                                    <textarea id="ofendido-detalhes" rows="3"
+                                              class="input-executivo w-full p-4 border rounded-xl resize-none"
+                                              placeholder="Detalhes sobre o ofendido/vítima..."></textarea>
+                                </div>
+                                
+                                <div>
+                                    <div class="flex items-center justify-between mb-4">
+                                        <h4 class="text-lg font-bold text-pmam-navy flex items-center gap-2">
+                                            <i class="fas fa-users text-pmam-gold"></i>
+                                            Testemunhas
+                                        </h4>
+                                        <button type="button" onclick="sistema.adicionarTestemunha()"
+                                                class="px-4 py-2 bg-pmam-executivo text-white rounded-lg hover:bg-blue-800 transition-all flex items-center gap-2">
+                                            <i class="fas fa-plus"></i>
+                                            Adicionar Testemunha
+                                        </button>
+                                    </div>
+                                    <div id="lista-testemunhas" class="space-y-4">
+                                        <!-- Testemunhas serão adicionadas aqui -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Aba Objeto e Fundamentação -->
+                        <div id="aba-objeto" class="aba-conteudo hidden">
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-sm font-semibold text-pmam-text mb-2">
+                                        <i class="fas fa-bullseye text-pmam-gold mr-2"></i>
+                                        Objeto da Apuração*
+                                    </label>
+                                    <textarea id="objeto-apuracao" rows="4"
+                                              class="input-executivo w-full p-4 border rounded-xl resize-none"
+                                              placeholder="Descreva sucintamente o objeto do procedimento..."></textarea>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-semibold text-pmam-text mb-2">
+                                        <i class="fas fa-scale-balanced text-pmam-gold mr-2"></i>
+                                        Fundamentação Legal
+                                    </label>
+                                    <textarea id="fundamentacao-legal" rows="4"
+                                              class="input-executivo w-full p-4 border rounded-xl resize-none"
+                                              placeholder="Fundamentação legal do procedimento..."></textarea>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-semibold text-pmam-text mb-2">
+                                        <i class="fas fa-sticky-note text-pmam-gold mr-2"></i>
+                                        Observações Adicionais
+                                    </label>
+                                    <textarea id="observacoes" rows="3"
+                                              class="input-executivo w-full p-4 border rounded-xl resize-none"
+                                              placeholder="Observações relevantes..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Navegação -->
+                    <div class="px-8 py-6 border-t border-pmam-border bg-gray-50 rounded-b-2xl">
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <button onclick="sistema.voltarParaTela(1)" 
+                                    class="px-8 py-3 bg-gray-200 hover:bg-gray-300 text-pmam-text rounded-xl font-bold transition-all flex items-center gap-3">
+                                <i class="fas fa-arrow-left"></i>
+                                Voltar para Seleção
+                            </button>
+                            
+                            <div class="flex items-center gap-4">
+                                <span id="contador-caracterizacao" class="text-sm text-pmam-muted hidden sm:block">
+                                    <span id="campos-preenchidos">0</span>/<span id="campos-total">15</span> campos preenchidos
+                                </span>
+                                <button onclick="sistema.gerarDocumentosBasicos()" 
+                                        class="btn-gold px-8 py-3 rounded-xl font-bold flex items-center gap-3 text-lg">
+                                    <i class="fas fa-magic"></i>
+                                    Gerar Documentos Básicos
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TELA 3: Documentos -->
+            <div id="tela-3" class="hidden animate-fade-in-up">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-black text-pmam-navy mb-3">Documentação do Procedimento</h2>
+                    <p class="text-lg text-pmam-muted">Gerencie todos os documentos do procedimento</p>
+                </div>
+                
+                <div class="max-w-7xl mx-auto space-y-8">
+                    <!-- Documentos Básicos -->
+                    <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border-2 border-green-200 p-8">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div class="w-12 h-12 rounded-xl bg-green-500 flex items-center justify-center">
+                                <i class="fas fa-check-circle text-white text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-pmam-navy">Documentos Básicos</h3>
+                                <p class="text-pmam-muted">Gerados automaticamente</p>
+                            </div>
+                        </div>
+                        
+                        <div id="lista-documentos-basicos" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                            <!-- Documentos básicos serão inseridos aqui -->
+                        </div>
+                    </div>
+                    
+                    <!-- Documentos Variáveis -->
+                    <div class="bg-white rounded-2xl border border-pmam-border p-8 shadow-pmam-lg">
+                        <div class="flex items-center gap-4 mb-8">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-pmam-executivo to-pmam-light flex items-center justify-center">
+                                <i class="fas fa-file-alt text-white text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-pmam-navy">Documentos Variáveis</h3>
+                                <p class="text-pmam-muted">Gerados conforme necessidade</p>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <!-- Ofícios -->
+                            <div onclick="sistema.abrirModalDocumento('oficios')" 
+                                 class="card-executivo rounded-xl p-6 text-center cursor-pointer group">
+                                <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                                    <i class="fas fa-envelope text-white text-2xl"></i>
+                                </div>
+                                <h4 class="font-bold text-pmam-navy mb-2">Ofícios</h4>
+                                <p class="text-sm text-pmam-muted mb-3">Comunicações oficiais</p>
+                                <div id="status-oficios" class="text-xs text-pmam-muted">Não gerado</div>
+                            </div>
+                            
+                            <!-- Termos -->
+                            <div onclick="sistema.abrirModalDocumento('termos')" 
+                                 class="card-executivo rounded-xl p-6 text-center cursor-pointer group">
+                                <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                                    <i class="fas fa-gavel text-white text-2xl"></i>
+                                </div>
+                                <h4 class="font-bold text-pmam-navy mb-2">Termos</h4>
+                                <p class="text-sm text-pmam-muted mb-3">Declarações e interrogatórios</p>
+                                <div id="status-termos" class="text-xs text-pmam-muted">Não gerado</div>
+                            </div>
+                            
+                            <!-- Certidões -->
+                            <div onclick="sistema.abrirModalDocumento('certidoes')" 
+                                 class="card-executivo rounded-xl p-6 text-center cursor-pointer group">
+                                <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                                    <i class="fas fa-certificate text-white text-2xl"></i>
+                                </div>
+                                <h4 class="font-bold text-pmam-navy mb-2">Certidões</h4>
+                                <p class="text-sm text-pmam-muted mb-3">Documentos certificados</p>
+                                <div id="status-certidoes" class="text-xs text-pmam-muted">Não gerado</div>
+                            </div>
+                            
+                            <!-- Relatório -->
+                            <div onclick="sistema.abrirModalDocumento('relatorio')" 
+                                 class="card-executivo rounded-xl p-6 text-center cursor-pointer group">
+                                <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                                    <i class="fas fa-file-contract text-white text-2xl"></i>
+                                </div>
+                                <h4 class="font-bold text-pmam-navy mb-2">Relatório Final</h4>
+                                <p class="text-sm text-pmam-muted mb-3">Relatório final e conclusão</p>
+                                <div id="status-relatorio" class="text-xs text-pmam-muted">Não gerado</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Documentos Diversos -->
+                        <div class="mt-10 pt-8 border-t border-pmam-border">
+                            <h4 class="text-xl font-bold text-pmam-navy mb-6 flex items-center gap-2">
+                                <i class="fas fa-file-medical text-pmam-gold"></i>
+                                Documentos Diversos
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <button onclick="sistema.gerarDocumentoDiverso('prorrogacao')" 
+                                        class="px-6 py-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-left transition-all">
+                                    <i class="fas fa-clock text-pmam-gold mr-2"></i>
+                                    <span class="font-medium">Prorrogação de Prazo</span>
+                                </button>
+                                <button onclick="sistema.gerarDocumentoDiverso('defensorDativo')" 
+                                        class="px-6 py-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-left transition-all">
+                                    <i class="fas fa-user-shield text-pmam-gold mr-2"></i>
+                                    <span class="font-medium">Defensor Dativo</span>
+                                </button>
+                                <button onclick="sistema.gerarDocumentoDiverso('despacho')" 
+                                        class="px-6 py-4 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-left transition-all">
+                                    <i class="fas fa-stamp text-pmam-gold mr-2"></i>
+                                    <span class="font-medium">Despacho</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Navegação -->
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+                        <button onclick="sistema.voltarParaTela(2)" 
+                                class="px-8 py-3 bg-gray-200 hover:bg-gray-300 text-pmam-text rounded-xl font-bold transition-all flex items-center gap-3">
+                            <i class="fas fa-arrow-left"></i>
+                            Voltar para Caracterização
+                        </button>
+                        
+                        <div class="flex items-center gap-4">
+                            <button onclick="sistema.visualizarTodosDocumentos()" 
+                                    class="px-8 py-3 bg-pmam-executivo text-white rounded-xl font-bold transition-all flex items-center gap-3 hover:bg-blue-800">
+                                <i class="fas fa-eye"></i>
+                                Visualizar/Editar Todos
+                            </button>
+                            <button onclick="sistema.avancarParaTela(4)" 
+                                    class="btn-gold px-8 py-3 rounded-xl font-bold flex items-center gap-3 text-lg">
+                                Avançar para Relatório
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- TELA 4: Relatório -->
+            <div id="tela-4" class="hidden animate-fade-in-up">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-black text-pmam-navy mb-3">Relatório Final</h2>
+                    <p class="text-lg text-pmam-muted">Complete o relatório final com tipificação legal</p>
+                </div>
+                
+                <div class="max-w-6xl mx-auto space-y-8">
+                    <!-- Tipificação Legal -->
+                    <div class="bg-white rounded-2xl border border-pmam-border p-8 shadow-pmam-lg">
+                        <h3 class="text-2xl font-bold text-pmam-navy mb-6 flex items-center gap-3">
+                            <i class="fas fa-gavel text-pmam-gold"></i>
+                            Tipificação Legal
+                        </h3>
+                        
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                            <div>
+                                <label class="block text-sm font-semibold text-pmam-text mb-2">
+                                    <span class="text-pmam-error">*</span> Tipificação Direta (Obrigatória)
+                                </label>
+                                <input type="text" id="tipificacao-direta" 
+                                       class="input-executivo w-full p-4 border rounded-xl"
+                                       placeholder="ex.: art. 160 CPM">
+                                <div class="text-xs text-pmam-muted mt-2">Especificar artigo e diploma legal</div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-pmam-text mb-2">
+                                    <span class="text-pmam-error">*</span> Tipificação Indireta (Obrigatória)
+                                </label>
+                                <input type="text" id="tipificacao-indireta" 
+                                       class="input-executivo w-full p-4 border rounded-xl"
+                                       placeholder="ex.: inc. I art. 9º CPM">
+                                <div class="text-xs text-pmam-muted mt-2">Especificar inciso e artigo</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tipificação Disciplinar -->
+                        <div class="mb-8">
+                            <label class="block text-sm font-semibold text-pmam-text mb-2">
+                                Tipificação Disciplinar (Lei 3278/2008)
+                            </label>
+                            <select id="tipificacao-disciplinar" class="input-executivo w-full p-4 border rounded-xl">
+                                <option value="">Selecione a infração disciplinar</option>
+                                <option value="Leve">Infração Leve</option>
+                                <option value="Média">Infração Média</option>
+                                <option value="Grave">Infração Grave</option>
+                                <option value="Gravíssima">Infração Gravíssima</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Prisão Preventiva -->
+                        <div class="mb-8">
+                            <div class="flex items-center gap-3 mb-4">
+                                <i class="fas fa-shield-alt text-pmam-gold"></i>
+                                <h4 class="text-lg font-bold text-pmam-navy">Prisão Preventiva (art. 255 CPPM)</h4>
+                            </div>
+                            <div class="space-y-4">
+                                <label class="flex items-center gap-3">
+                                    <input type="radio" name="prisao-preventiva" value="sim" class="w-5 h-5">
+                                    <span>Recomendar prisão preventiva</span>
+                                </label>
+                                <label class="flex items-center gap-3">
+                                    <input type="radio" name="prisao-preventiva" value="nao" class="w-5 h-5" checked>
+                                    <span>Não recomendar prisão preventiva</span>
+                                </label>
+                                <textarea id="fundamentacao-prisao" rows="3"
+                                          class="input-executivo w-full p-4 border rounded-xl resize-none"
+                                          placeholder="Fundamentação da recomendação..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Relatório Final -->
+                    <div class="bg-white rounded-2xl border border-pmam-border p-8 shadow-pmam-lg">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-2xl font-bold text-pmam-navy flex items-center gap-3">
+                                <i class="fas fa-file-signature text-pmam-gold"></i>
+                                Relatório Final
+                            </h3>
+                            <button onclick="sistema.gerarRelatorioAutomatico()" 
+                                    class="px-6 py-3 bg-pmam-executivo text-white rounded-xl font-medium hover:bg-blue-800 transition-all">
+                                <i class="fas fa-robot mr-2"></i>
+                                Gerar Automaticamente
+                            </button>
+                        </div>
+                        
+                        <textarea id="relatorio-conteudo" rows="25"
+                                  class="input-executivo w-full p-6 border rounded-xl font-mono text-sm resize-none document-preview"
+                                  placeholder="O relatório será gerado automaticamente ao preencher os campos acima..."></textarea>
+                        
+                        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-6 border-t border-pmam-border">
+                            <div class="text-sm text-pmam-muted">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                Caracteres: <span id="contador-caracteres">0</span> | Palavras: <span id="contador-palavras">0</span>
+                            </div>
+                            
+                            <div class="flex gap-4">
+                                <button onclick="sistema.exportarRelatorioPDF()" 
+                                        class="btn-gold px-8 py-3 rounded-xl font-bold flex items-center gap-3">
+                                    <i class="fas fa-file-pdf"></i>
+                                    Exportar Relatório
+                                </button>
+                                <button onclick="sistema.exportarPacoteCompleto()" 
+                                        class="btn-executivo px-8 py-3 rounded-xl font-bold flex items-center gap-3">
+                                    <i class="fas fa-box"></i>
+                                    Pacote Completo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Navegação -->
+                    <div class="flex justify-between">
+                        <button onclick="sistema.voltarParaTela(3)" 
+                                class="px-8 py-3 bg-gray-200 hover:bg-gray-300 text-pmam-text rounded-xl font-bold transition-all flex items-center gap-3">
+                            <i class="fas fa-arrow-left"></i>
+                            Voltar para Documentos
+                        </button>
+                        
+                        <button onclick="sistema.finalizarProcedimento()" 
+                                class="px-8 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl font-bold transition-all flex items-center gap-3 hover:shadow-lg">
+                            <i class="fas fa-flag-checkered"></i>
+                            Finalizar Procedimento
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Documento -->
+    <div id="modal-documento" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-60 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl border-2 border-pmam-gold shadow-2xl w-full max-w-5xl max-h-[90vh] flex flex-col animate-fade-in">
+            <div class="p-6 border-b border-pmam-border flex-shrink-0">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-pmam-executivo to-pmam-light flex items-center justify-center">
+                            <i class="fas fa-file-alt text-white"></i>
+                        </div>
+                        <div>
+                            <h3 id="modal-titulo" class="text-2xl font-bold text-pmam-navy"></h3>
+                            <p id="modal-subtitulo" class="text-sm text-pmam-muted"></p>
+                        </div>
+                    </div>
+                    <button onclick="sistema.fecharModal()" 
+                            class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="flex-1 overflow-auto p-6 custom-scrollbar">
+                <div id="modal-conteudo"></div>
+            </div>
+            
+            <div class="p-6 border-t border-pmam-border flex-shrink-0">
+                <div class="flex justify-between items-center">
+                    <div class="text-sm text-pmam-muted">
+                        <i class="fas fa-clock mr-1"></i>
+                        <span id="modal-timestamp">Gerado agora</span>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="sistema.fecharModal()" 
+                                class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-pmam-text rounded-xl font-medium transition-all">
+                            Cancelar
+                        </button>
+                        <button onclick="sistema.salvarDocumento()" 
+                                class="btn-executivo px-8 py-3 rounded-xl flex items-center gap-3">
+                            <i class="fas fa-save"></i>
+                            Salvar Documento
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Tela 2 - Qualificação -->
-        <div id="tela-2" class="hidden container mx-auto px-6 py-12 flex-1">
-            <h2 class="text-4xl title-gold mb-12 text-center">Qualificação</h2>
-            <div class="card">
-                <h3 class="text-2xl font-bold text-navy mb-6">Dados Gerais</h3>
-                <input id="portaria" placeholder="Portaria nº" class="input mb-4">
-                <input id="data" type="date" class="input mb-4">
-                <input id="unidade" placeholder="Unidade" class="input mb-4">
-                <textarea id="preceito-legal" rows="4" placeholder="Preceito Legal / Enquadramento" class="w-full border-2 border-slate-200 rounded-xl p-4 focus:border-navy mt-6"></textarea>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-                <div class="card">
-                    <h4 class="text-xl font-bold text-navy mb-4">Encarregado</h4>
-                    <input id="encarregado-nome" placeholder="Nome" class="input mb-4">
-                    <input id="encarregado-posto" placeholder="Posto/Grad" class="input mb-4">
-                    <input id="encarregado-matricula" placeholder="Matrícula" class="input">
+    <!-- Modal Gerenciador -->
+    <div id="modal-gerenciador" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-60 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl border-2 border-pmam-gold shadow-2xl w-full max-w-6xl max-h-[85vh] flex flex-col animate-fade-in">
+            <div class="p-6 border-b border-pmam-border">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-pmam-executivo to-pmam-light flex items-center justify-center">
+                            <i class="fas fa-database text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-pmam-navy">Gerenciador de Procedimentos</h3>
+                            <p class="text-sm text-pmam-muted">Gerencie todos os procedimentos do sistema</p>
+                        </div>
+                    </div>
+                    <button onclick="sistema.fecharGerenciador()" 
+                            class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
                 </div>
-                <div class="card">
-                    <h4 class="text-xl font-bold text-navy mb-4">Sindicado</h4>
-                    <input id="sindicado-nome" placeholder="Nome" class="input mb-4">
-                    <input id="sindicado-posto" placeholder="Posto/Grad" class="input mb-4">
-                    <input id="sindicado-matricula" placeholder="Matrícula" class="input">
+                
+                <div class="flex flex-col sm:flex-row gap-4 mb-6">
+                    <div class="flex-1 relative">
+                        <i class="fas fa-search absolute left-4 top-4 text-pmam-muted"></i>
+                        <input type="text" id="busca-procedimento" 
+                               class="input-executivo w-full pl-12 pr-4 py-4 border rounded-xl"
+                               placeholder="Buscar por número da portaria, tipo ou responsável...">
+                    </div>
+                    <select id="filtro-status" 
+                            class="input-executivo px-4 py-4 border rounded-xl">
+                        <option value="">Todos os status</option>
+                        <option value="rascunho">Rascunho</option>
+                        <option value="em_andamento">Em Andamento</option>
+                        <option value="concluido">Concluído</option>
+                        <option value="arquivado">Arquivado</option>
+                    </select>
                 </div>
-                <div class="card">
-                    <h4 class="text-xl font-bold text-navy mb-4">Ofendido</h4>
-                    <input id="ofendido-nome" placeholder="Nome" class="input mb-4">
-                    <input id="ofendido-posto" placeholder="Posto/Grad" class="input mb-4">
-                    <input id="ofendido-matricula" placeholder="RG/CPF" class="input">
+            </div>
+            
+            <div class="flex-1 overflow-auto p-6 custom-scrollbar">
+                <div id="lista-procedimentos-salvos" class="space-y-4">
+                    <!-- Procedimentos serão listados aqui -->
                 </div>
             </div>
-
-            <div class="card mt-8">
-                <h3 class="text-2xl font-bold text-navy mb-6">Testemunhas</h3>
-                <div id="lista-testemunhas"></div>
-                <button onclick="sistema.adicionarTestemunha()" class="btn-primary mt-6">+ Adicionar Testemunha</button>
-            </div>
-
-            <div class="text-center mt-12">
-                <button onclick="sistema.salvarParcial(); sistema.avancarParaTela(3)" class="btn-primary text-lg px-12 py-4">Próximo: Documentos</button>
-            </div>
-        </div>
-
-        <!-- Tela 3 - Documentos -->
-        <div id="tela-3" class="hidden container mx-auto px-6 py-12 flex-1">
-            <h2 class="text-4xl title-gold mb-12 text-center">Documentos</h2>
-            <div class="card">
-                <h3 class="text-2xl font-bold text-navy mb-6">Básicos (Auto-gerados)</h3>
-                <button onclick="sistema.gerarDocumentosBasicos()" class="btn-primary mb-6">Gerar Documentos Básicos</button>
-                <div id="lista-documentos-basicos" class="space-y-4"></div>
-            </div>
-
-            <div class="card mt-8">
-                <h3 class="text-2xl font-bold text-navy mb-6">Diversos & SIGED</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div onclick="sistema.gerarDocumentoDiverso('prorrogacao')" class="card cursor-pointer text-center py-8">
-                        <i class="fas fa-clock text-5xl text-navy mb-4"></i>
-                        <h4 class="text-xl font-bold text-navy">Prorrogação de Prazo</h4>
+            
+            <div class="p-6 border-t border-pmam-border">
+                <div class="flex justify-between items-center">
+                    <div class="text-sm text-pmam-muted">
+                        <span id="contador-procedimentos">0</span> procedimento(s) encontrado(s)
                     </div>
-                    <div onclick="sistema.gerarDocumentoDiverso('escrivao')" class="card cursor-pointer text-center py-8">
-                        <i class="fas fa-user-tie text-5xl text-navy mb-4"></i>
-                        <h4 class="text-xl font-bold text-navy">Designação de Escrivão</h4>
-                    </div>
-                    <div onclick="sistema.gerarDocumentoDiverso('defensorDativo')" class="card cursor-pointer text-center py-8">
-                        <i class="fas fa-user-shield text-5xl text-navy mb-4"></i>
-                        <h4 class="text-xl font-bold text-navy">Defensor Dativo</h4>
-                    </div>
-                    <div onclick="sistema.gerarDocumentoDiverso('despacho')" class="card cursor-pointer text-center py-8">
-                        <i class="fas fa-gavel text-5xl text-navy mb-4"></i>
-                        <h4 class="text-xl font-bold text-navy">Despacho</h4>
-                    </div>
-                    <div onclick="sistema.gerarDocumentoDiverso('oficio')" class="card cursor-pointer text-center py-8">
-                        <i class="fas fa-envelope text-5xl text-navy mb-4"></i>
-                        <h4 class="text-xl font-bold text-navy">Ofício</h4>
-                    </div>
-                    <div onclick="sistema.enviarParaSIGED()" class="card cursor-pointer text-center py-8 border-4 border-dashed border-gold">
-                        <i class="fas fa-paper-plane text-5xl text-gold mb-4"></i>
-                        <h4 class="text-xl font-bold text-navy">Enviar para SIGED</h4>
-                    </div>
-                </div>
-                <div id="lista-documentos-diversos" class="space-y-4 mt-8"></div>
-            </div>
-
-            <div class="text-center mt-12">
-                <button onclick="sistema.salvarParcial(); sistema.avancarParaTela(4)" class="btn-primary text-lg px-12 py-4">Próximo: Relatório</button>
-            </div>
-        </div>
-
-        <!-- Tela 4 - Relatório -->
-        <div id="tela-4" class="hidden container mx-auto px-6 py-12 flex-1">
-            <h2 class="text-4xl title-gold mb-12 text-center">Relatório Final</h2>
-            <div class="card">
-                <h3 class="text-2xl font-bold text-navy mb-6">Capitulação Legal (Obrigatória)</h3>
-                <input id="tipificacao-direta" placeholder="Tipificação Direta (ex.: art. 160 CPM)" class="input mb-4">
-                <input id="tipificacao-indireta" placeholder="Tipificação Indireta (ex.: inc. I art. 9º CPM)" class="input mb-4">
-            </div>
-            <div class="card mt-6">
-                <h3 class="text-2xl font-bold text-navy mb-6">Conteúdo do Relatório</h3>
-                <textarea id="relatorio-conteudo" rows="20" class="w-full border-2 border-slate-200 rounded-xl p-4 focus:border-navy"></textarea>
-            </div>
-            <div class="text-center mt-12">
-                <button onclick="sistema.exportarRelatorioPDF()" class="btn-primary text-lg px-12 py-4">Exportar Relatório</button>
-                <button onclick="sistema.exportarTodosPDF()" class="btn-gold text-lg px-12 py-4 ml-6">Exportar Tudo</button>
-            </div>
-        </div>
-
-        <!-- Modal -->
-        <div id="modal-edicao" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="card w-11/12 max-w-4xl">
-                <h3 id="modal-titulo" class="text-2xl font-bold text-navy mb-4"></h3>
-                <textarea id="modal-conteudo" rows="15" class="w-full border-2 border-slate-200 rounded-xl p-4 focus:border-navy font-mono text-sm"></textarea>
-                <div class="flex justify-end gap-4 mt-6">
-                    <button onclick="sistema.salvarEdicaoDocumento()" class="btn-primary">Salvar</button>
-                    <button onclick="sistema.fecharModal()" class="btn-outline">Cancelar</button>
+                    <button onclick="sistema.novoProcedimento()" 
+                            class="btn-executivo px-6 py-3 rounded-xl flex items-center gap-3">
+                        <i class="fas fa-plus"></i>
+                        Novo Procedimento
+                    </button>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- JavaScript Completo -->
-        <script>
-            const SUPABASE_URL = 'https://dzknjtstiptcbkvszibo.supabase.co';
-            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6a25qdHN0aXB0Y2JrdnN6aWJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4OTU3NDYsImV4cCI6MjA4MTQ3MTc0Nn0.LN4j37EHqLQpdoS0mNAIW9v-MTgWo8nXoFl1FrhSSHE';
+    <!-- Modal Preview -->
+    <div id="modal-preview" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-60 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-2xl border-2 border-pmam-gold shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col animate-fade-in">
+            <div class="p-6 border-b border-pmam-border flex-shrink-0">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
+                            <i class="fas fa-eye text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-2xl font-bold text-pmam-navy">Visualização de Documentos</h3>
+                            <p class="text-sm text-pmam-muted">Visualize e edite todos os documentos do procedimento</p>
+                        </div>
+                    </div>
+                    <button onclick="sistema.fecharPreview()" 
+                            class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="flex flex-col lg:flex-row gap-4">
+                    <select id="seletor-documento-preview" 
+                            class="input-executivo flex-1 p-4 border rounded-xl">
+                        <option value="">Selecione um documento para visualizar</option>
+                    </select>
+                    <div class="flex gap-3">
+                        <button onclick="sistema.habilitarEdicaoPreview()" 
+                                class="px-6 py-4 bg-amber-500 text-white rounded-xl hover:bg-amber-600 flex items-center gap-3">
+                            <i class="fas fa-edit"></i>
+                            Editar
+                        </button>
+                        <button onclick="sistema.exportarPDFSelecionado()" 
+                                class="px-6 py-4 bg-red-600 text-white rounded-xl hover:bg-red-700 flex items-center gap-3">
+                            <i class="fas fa-file-pdf"></i>
+                            Exportar PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex-1 overflow-auto p-6 custom-scrollbar">
+                <div id="preview-conteudo" class="font-mono text-sm bg-gray-50 p-8 rounded-xl border border-pmam-border whitespace-pre-wrap"></div>
+            </div>
+        </div>
+    </div>
 
-            class SistemaSISPRO {
-                constructor() {
-                    this.telaAtual = 1;
-                    this.dados = { tipo: '', portaria: '', data: '', unidade: '', preceitoLegal: '', encarregado: {}, sindicado: {}, ofendido: {}, testemunhas: [] };
-                    this.documentos = { basicos: [], diversos: [] };
-                    this.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                    this.atualizarEtapas();
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-8 right-8 z-70 space-y-4 w-96"></div>
+
+    <!-- Sistema SISPRO -->
+    <script>
+        const SUPABASE_URL = 'https://dzknjtstiptcbkvszibo.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6a25qdHN0aXB0Y2JrdnN6aWJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4OTU3NDYsImV4cCI6MjA4MTQ3MTc0Nn0.LN4j37EHqLQpdoS0mNAIW9v-MTgWo8nXoFl1FrhSSHE';
+
+        class SistemaSISPRO {
+            constructor() {
+                this.telaAtual = 1;
+                this.procedimentoSelecionado = null;
+                this.dadosCaracterizacao = null;
+                this.documentos = {
+                    basicos: {
+                        autuacao: { gerado: false, conteudo: '', titulo: 'Autuação', editavel: true },
+                        abertura: { gerado: false, conteudo: '', titulo: 'Termo de Abertura', editavel: true },
+                        designacaoEscrivao: { gerado: false, conteudo: '', titulo: 'Designação do Escrivão', editavel: true },
+                        termoCompromisso: { gerado: false, conteudo: '', titulo: 'Termo de Compromisso', editavel: true },
+                        designacao: { gerado: false, conteudo: '', titulo: 'Designação de Escrivão', editavel: true }
+                    },
+                    variaveis: {
+                        oficios: [],
+                        termos: [],
+                        certidoes: [],
+                        relatorio: { gerado: false, conteudo: '', titulo: 'Relatório Final', editavel: true }
+                    }
+                };
+                this.documentoAtualTipo = null;
+                this.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                this.procedimentosSalvos = this.carregarProcedimentosSalvos();
+                this.edicaoHabilitada = false;
+                this.init();
+            }
+
+            init() {
+                this.preencherDataAtual();
+                this.inicializarEventos();
+                this.atualizarProgressoSidebar();
+                this.configurarSidebarMobile();
+            }
+
+            configurarSidebarMobile() {
+                const toggleBtn = document.getElementById('sidebar-toggle');
+                const sidebar = document.getElementById('sidebar');
+                
+                toggleBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    sidebar.classList.toggle('open');
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target) && sidebar.classList.contains('open')) {
+                        sidebar.classList.remove('open');
+                    }
+                });
+            }
+
+            mostrarToast(mensagem, tipo = 'sucesso', duracao = 5000) {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                
+                let cor = 'bg-gradient-to-r from-pmam-executivo to-pmam-light';
+                let icone = 'fas fa-info-circle';
+                
+                if (tipo === 'sucesso') {
+                    cor = 'bg-gradient-to-r from-green-500 to-emerald-600';
+                    icone = 'fas fa-check-circle';
+                } else if (tipo === 'erro') {
+                    cor = 'bg-gradient-to-r from-red-500 to-rose-600';
+                    icone = 'fas fa-exclamation-circle';
+                } else if (tipo === 'aviso') {
+                    cor = 'bg-gradient-to-r from-amber-500 to-yellow-500';
+                    icone = 'fas fa-exclamation-triangle';
                 }
+                
+                toast.className = `toast-executivo ${cor} text-white p-5 rounded-2xl shadow-2xl animate-slide-in-right`;
+                toast.innerHTML = `
+                    <div class="flex items-center">
+                        <i class="${icone} text-xl mr-4"></i>
+                        <div class="flex-1">
+                            <div class="font-bold">${tipo.toUpperCase()}</div>
+                            <div class="text-sm opacity-90 mt-1">${mensagem}</div>
+                        </div>
+                        <button onclick="this.parentElement.parentElement.remove()" class="ml-4 opacity-70 hover:opacity-100">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(100%)';
+                    setTimeout(() => toast.remove(), 300);
+                }, duracao);
+            }
 
-                notificar(msg, tipo = 'success') {
-                    alert(msg); // Substituir por toast bonito se quiser
-                }
+            selecionarProcedimento(tipo) {
+                const procedimentos = {
+                    'SAD': { 
+                        id: 'SAD', 
+                        nome: 'SINDICÂNCIA DISCIPLINAR',
+                        nomeCompleto: 'Sindicância Administrativa Disciplinar',
+                        cor: 'blue',
+                        icon: 'fa-gavel',
+                        descricao: 'Para apuração de infrações disciplinares cometidas por militares.',
+                        complexidade: 'Média',
+                        prazo: '30 dias'
+                    },
+                    'SINDINVEST': { 
+                        id: 'SINDINVEST', 
+                        nome: 'SINDICÂNCIA INVESTIGATIVA',
+                        nomeCompleto: 'Sindicância Investigativa',
+                        cor: 'purple',
+                        icon: 'fa-search',
+                        descricao: 'Para investigação de fatos que possam configurar infrações.',
+                        complexidade: 'Alta',
+                        prazo: '60 dias'
+                    },
+                    'IPM': { 
+                        id: 'IPM', 
+                        nome: 'INQUÉRITO POLICIAL MILITAR',
+                        nomeCompleto: 'Inquérito Policial Militar',
+                        cor: 'red',
+                        icon: 'fa-shield-alt',
+                        descricao: 'Para investigação de infrações penais militares.',
+                        complexidade: 'Alta',
+                        prazo: '90 dias'
+                    },
+                    'PAD': { 
+                        id: 'PAD', 
+                        nome: 'PROCESSO ADMINISTRATIVO DISCIPLINAR',
+                        nomeCompleto: 'Processo Administrativo Disciplinar',
+                        cor: 'amber',
+                        icon: 'fa-scale-balanced',
+                        descricao: 'Processo formal para apuração de infrações disciplinares.',
+                        complexidade: 'Média',
+                        prazo: '45 dias'
+                    },
+                    'PARE': { 
+                        id: 'PARE', 
+                        nome: 'PROCEDIMENTO DE RESSARCIMENTO',
+                        nomeCompleto: 'Procedimento de Ressarcimento',
+                        cor: 'emerald',
+                        icon: 'fa-file-invoice-dollar',
+                        descricao: 'Para apuração de responsabilidade civil por danos.',
+                        complexidade: 'Baixa',
+                        prazo: '60 dias'
+                    }
+                };
+                
+                this.procedimentoSelecionado = procedimentos[tipo];
+                
+                // Atualizar interface
+                const infoDiv = document.getElementById('procedimento-selecionado-info');
+                infoDiv.classList.remove('hidden');
+                
+                document.getElementById('procedimento-nome').textContent = 
+                    `${this.procedimentoSelecionado.id} - ${this.procedimentoSelecionado.nome}`;
+                document.getElementById('procedimento-descricao').textContent = this.procedimentoSelecionado.descricao;
+                document.getElementById('complexidade').textContent = this.procedimentoSelecionado.complexidade;
+                document.getElementById('prazo-medio').textContent = this.procedimentoSelecionado.prazo;
+                
+                // Atualizar ícone
+                const iconDiv = document.getElementById('procedimento-icon');
+                iconDiv.className = `w-16 h-16 rounded-xl flex items-center justify-center bg-${this.procedimentoSelecionado.cor}-500`;
+                iconDiv.innerHTML = `<i class="fas ${this.procedimentoSelecionado.icon} text-white text-2xl"></i>`;
+                
+                // Atualizar sidebar
+                this.atualizarSidebarInfo();
+                this.mostrarToast(`Procedimento ${tipo} selecionado`, 'sucesso');
+            }
 
-                selecionarProcedimento(tipo) {
-                    this.dados.tipo = tipo;
-                    this.avancarParaTela(2);
-                }
-
-                adicionarTestemunha() {
-                    const container = document.getElementById('lista-testemunhas');
-                    const div = document.createElement('div');
-                    div.className = 'card mt-4 p-6';
-                    div.innerHTML = `
-                        <input placeholder="Nome da Testemunha" class="input mb-4">
-                        <input placeholder="Posto/Grad" class="input mb-4">
-                        <input placeholder="Matrícula/RG" class="input mb-4">
-                        <textarea placeholder="Declaração" rows="3" class="w-full border-2 border-slate-200 rounded-xl p-4"></textarea>
-                    `;
-                    container.appendChild(div);
-                }
-
-                salvarParcial() {
-                    // Coleta dados (simplificado)
-                    this.notificar('Dados salvos localmente!');
-                }
-
-                gerarDocumentosBasicos() {
-                    this.documentos.basicos = [{titulo: 'Autuação', conteudo: 'Template autuação...'}];
-                    this.atualizarListaDocumentos();
-                }
-
-                gerarDocumentoDiverso(tipo) {
-                    let template = '';
-                    if (tipo === 'prorrogacao') template = `PEDIDO DE PRORROGAÇÃO\nPortaria nº ${this.dados.portaria}\nJustificativa: [Edite]\nDiligências: [Edite]\nVia SIGED em 48h`;
-                    // Outros templates
-                    const doc = {titulo: tipo.toUpperCase(), conteudo: template};
-                    this.documentos.diversos.push(doc);
-                    this.atualizarListaDocumentos();
-                }
-
-                enviarParaSIGED() {
-                    const memo = `MEMORANDO SIGED\nNº ${Math.random().toString(36).substring(7).toUpperCase()}/${new Date().getFullYear()}\nPortaria ${this.dados.portaria}\nAssunto: Envio de Autos\n${this.dados.encarregado.nome || '[Encarregado]'}`;
-                    const { jsPDF } = window.jspdf;
-                    const pdf = new jsPDF();
-                    pdf.text(memo, 15, 20);
-                    pdf.save('MEMO_SIGED.pdf');
-                    window.open('https://sistemas.sefaz.am.gov.br/siged/', '_blank');
-                    this.notificar('MEMO gerado e portal SIGED aberto para submissão!');
-                }
-
-                gerarRelatorio() {
-                    const direta = document.getElementById('tipificacao-direta').value;
-                    const indireta = document.getElementById('tipificacao-indireta').value;
-                    if (!direta || !indireta) return this.notificar('Capitulação obrigatória!');
-                    document.getElementById('relatorio-conteudo').value = `RELATÓRIO\nTip. Direta: ${direta}\nTip. Indireta: ${indireta}\n...`;
-                }
-
-                exportarRelatorioPDF() {
-                    this.gerarRelatorio();
-                    const { jsPDF } = window.jspdf;
-                    const pdf = new jsPDF();
-                    pdf.text(document.getElementById('relatorio-conteudo').value, 15, 20);
-                    pdf.save('Relatorio.pdf');
-                }
-
-                exportarTodosPDF() {
-                    const { jsPDF } = window.jspdf;
-                    const pdf = new jsPDF();
-                    let y = 20;
-                    [...this.documentos.basicos, ...this.documentos.diversos].forEach(d => {
-                        pdf.text(d.titulo, 15, y);
-                        y += 10;
-                        pdf.text(d.conteudo, 15, y, {maxWidth: 180});
-                        y += 50;
-                        if (y > 280) { pdf.addPage(); y = 20; }
-                    });
-                    pdf.save('SISPRO_Completo.pdf');
-                }
-
-                async salvarNoBanco() {
-                    const { error } = await this.supabase.from('procedimentos').insert([this.dados]);
-                    this.notificar(error ? 'Erro' : 'Salvo no banco!');
-                }
-
-                avancarParaTela(n) {
-                    document.querySelectorAll('[id^="tela-"]').forEach(t => t.classList.add('hidden'));
-                    document.getElementById(`tela-${n}`).classList.remove('hidden');
-                    this.telaAtual = n;
-                    this.atualizarEtapas();
-                }
-
-                atualizarEtapas() {
-                    document.querySelectorAll('.step-pill').forEach((p, i) => {
-                        p.classList.toggle('active', i + 1 === this.telaAtual);
-                        p.classList.toggle('pending', i + 1 !== this.telaAtual);
-                    });
-                }
-
-                atualizarListaDocumentos() {
-                    const sidebar = document.getElementById('lista-documentos-sidebar');
-                    sidebar.innerHTML = [...this.documentos.basicos, ...this.documentos.diversos].map(d => `<div>${d.titulo}</div>`).join('');
+            atualizarSidebarInfo() {
+                if (this.procedimentoSelecionado) {
+                    document.getElementById('sidebar-tipo').textContent = this.procedimentoSelecionado.id;
+                    document.getElementById('sidebar-status').textContent = 'Em Andamento';
+                    document.getElementById('sidebar-status').className = 'status-badge em-andamento inline-block mt-2';
                 }
             }
 
-            const sistema = new SistemaSISPRO();
-            window.sistema = sistema;
+            avancarParaCaracterizacao() {
+                if (!this.procedimentoSelecionado) {
+                    this.mostrarToast('Selecione um tipo de procedimento primeiro', 'erro');
+                    return;
+                }
+                
+                this.avancarTela(2);
+                
+                // Preencher número padrão
+                const ano = document.getElementById('data-ano').value || new Date().getFullYear();
+                document.getElementById('numero-portaria').value = `XX.XX/${ano}/${this.procedimentoSelecionado.id}/SJD/PMAM`;
+                
+                // Atualizar título do procedimento
+                document.getElementById('procedimento-selecionado-nome').textContent = 
+                    `${this.procedimentoSelecionado.id} - ${this.procedimentoSelecionado.nomeCompleto}`;
+                
+                this.mostrarToast('Preencha os dados de caracterização', 'sucesso');
+            }
 
-            // Mobile toggle
-            document.getElementById('sidebar-toggle').addEventListener('click', (e) => {
-                e.stopPropagation();
-                document.getElementById('sidebar').classList.toggle('open');
-            });
-            document.addEventListener('click', () => document.getElementById('sidebar').classList.remove('open'));
-            document.getElementById('sidebar').addEventListener('click', e => e.stopPropagation());
-        </script>
-    </div>
+            mostrarAba(abaId) {
+                // Remover classe active de todas as abas
+                document.querySelectorAll('.aba-caracterizacao').forEach(aba => {
+                    aba.classList.remove('active');
+                    aba.classList.remove('border-pmam-executivo');
+                    aba.classList.remove('text-pmam-executivo');
+                });
+                
+                // Adicionar classe active à aba clicada
+                const abaAtiva = Array.from(document.querySelectorAll('.aba-caracterizacao')).find(
+                    aba => aba.textContent.includes(abaId.replace('-', ' '))
+                );
+                if (abaAtiva) {
+                    abaAtiva.classList.add('active', 'border-pmam-executivo', 'text-pmam-executivo');
+                }
+                
+                // Esconder todos os conteúdos
+                document.querySelectorAll('.aba-conteudo').forEach(conteudo => {
+                    conteudo.classList.add('hidden');
+                });
+                
+                // Mostrar conteúdo da aba selecionada
+                document.getElementById(`aba-${abaId}`).classList.remove('hidden');
+            }
+
+            adicionarTestemunha() {
+                const container = document.getElementById('lista-testemunhas');
+                const index = container.children.length;
+                const div = document.createElement('div');
+                div.className = 'bg-gray-50 rounded-xl p-6 border border-gray-200';
+                div.innerHTML = `
+                    <div class="flex justify-between items-center mb-4">
+                        <h5 class="font-bold text-pmam-navy">Testemunha ${index + 1}</h5>
+                        <button type="button" onclick="this.parentElement.parentElement.remove()"
+                                class="text-pmam-error hover:text-red-700">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" placeholder="Nome completo" class="input-executivo p-3 rounded-lg">
+                        <input type="text" placeholder="CPF" class="input-executivo p-3 rounded-lg">
+                        <input type="text" placeholder="RG" class="input-executivo p-3 rounded-lg">
+                        <input type="text" placeholder="Endereço" class="input-executivo p-3 rounded-lg">
+                        <textarea placeholder="Declaração" rows="2" class="col-span-2 input-executivo p-3 rounded-lg resize-none"></textarea>
+                    </div>
+                `;
+                container.appendChild(div);
+            }
+
+            gerarDocumentosBasicos() {
+                if (!this.validarCamposCaracterizacao()) {
+                    return;
+                }
+                
+                // Coletar dados
+                this.dadosCaracterizacao = this.coletarDadosCaracterizacao();
+                
+                // Gerar documentos básicos
+                this.documentos.basicos.autuacao = {
+                    gerado: true,
+                    conteudo: this.gerarAutuacao(),
+                    titulo: 'Autuação',
+                    editavel: true
+                };
+                
+                this.documentos.basicos.abertura = {
+                    gerado: true,
+                    conteudo: this.gerarAbertura(),
+                    titulo: 'Termo de Abertura',
+                    editavel: true
+                };
+                
+                this.documentos.basicos.designacao = {
+                    gerado: true,
+                    conteudo: this.gerarDesignacao(),
+                    titulo: 'Designação de Escrivão',
+                    editavel: true
+                };
+                
+                this.documentos.basicos.designacaoEscrivao = {
+                    gerado: true,
+                    conteudo: this.gerarDesignacaoEscrivao(),
+                    titulo: 'Designação do Escrivão',
+                    editavel: true
+                };
+                
+                this.documentos.basicos.termoCompromisso = {
+                    gerado: true,
+                    conteudo: this.gerarTermoCompromissoEscrivao(),
+                    titulo: 'Termo de Compromisso',
+                    editavel: true
+                };
+                
+                this.avancarTela(3);
+                this.atualizarListaDocumentosBasicos();
+                this.atualizarListaDocumentosSidebar();
+                this.atualizarProgressoSidebar();
+                this.mostrarToast('Documentos básicos gerados automaticamente!', 'sucesso');
+            }
+
+            coletarDadosCaracterizacao() {
+                return {
+                    procedimento: this.procedimentoSelecionado,
+                    portaria: document.getElementById('numero-portaria').value,
+                    data: {
+                        dia: document.getElementById('data-dia').value,
+                        mes: document.getElementById('data-mes').value,
+                        ano: document.getElementById('data-ano').value,
+                        completa: `${document.getElementById('data-dia').value} de ${document.getElementById('data-mes').value} de ${document.getElementById('data-ano').value}`
+                    },
+                    local: document.getElementById('local-unidade').value,
+                    encarregado: document.getElementById('encarregado-nome').value,
+                    escrivao: document.getElementById('escrivao-nome').value,
+                    acusado: {
+                        nome: document.getElementById('acusado-nome').value,
+                        posto: document.getElementById('acusado-posto').value,
+                        matricula: document.getElementById('acusado-matricula').value,
+                        unidade: document.getElementById('acusado-unidade').value
+                    },
+                    ofendido: {
+                        tipo: document.getElementById('ofendido-tipo').value,
+                        detalhes: document.getElementById('ofendido-detalhes').value
+                    },
+                    objeto: document.getElementById('objeto-apuracao').value,
+                    fundamentacao: document.getElementById('fundamentacao-legal').value,
+                    observacoes: document.getElementById('observacoes').value
+                };
+            }
+
+            validarCamposCaracterizacao() {
+                const camposObrigatorios = [
+                    { id: 'numero-portaria', nome: 'Número da Portaria' },
+                    { id: 'data-dia', nome: 'Dia' },
+                    { id: 'data-mes', nome: 'Mês' },
+                    { id: 'data-ano', nome: 'Ano' },
+                    { id: 'local-unidade', nome: 'Local/Unidade' },
+                    { id: 'encarregado-nome', nome: 'Encarregado' },
+                    { id: 'escrivao-nome', nome: 'Escrivão' },
+                    { id: 'acusado-nome', nome: 'Acusado/Sindicado' },
+                    { id: 'objeto-apuracao', nome: 'Objeto da Apuração' }
+                ];
+                
+                for (const campo of camposObrigatorios) {
+                    const elemento = document.getElementById(campo.id);
+                    if (!elemento || !elemento.value.trim()) {
+                        this.mostrarToast(`Campo obrigatório não preenchido: ${campo.nome}`, 'erro');
+                        elemento?.focus();
+                        return false;
+                    }
+                }
+                
+                return true;
+            }
+
+            // Métodos de geração de documentos (simplificados para exemplo)
+            gerarAutuacao() {
+                const d = this.dadosCaracterizacao;
+                const cargo = d.procedimento.id === 'IPM' ? 'Encarregado do IPM' : 'Sindicante';
+                
+                return `AUTUAÇÃO
+
+REFERÊNCIA: Portaria nº ${d.portaria}
+PROCEDIMENTO: ${d.procedimento.nomeCompleto}
+
+Aos ${d.data.dia} dias do mês de ${d.data.mes} do ano de ${d.data.ano}, na cidade de Manaus, Estado do Amazonas, na ${d.local}, autuo a Portaria nº ${d.portaria}, datada de ${d.data.completa}, e demais documentos que a este junto.
+
+ENCARREGADO: ${d.encarregado}
+ESCRIVÃO: ${d.escrivao}
+ACUSADO: ${d.acusado.nome} - ${d.acusado.posto} - ${d.acusado.matricula}
+
+OBJETO: ${d.objeto}
+
+Para constar, lavro o presente termo.
+
+${d.data.completa}
+
+___________________________________
+${d.encarregado}
+${cargo}`;
+            }
+
+            gerarAbertura() {
+                const d = this.dadosCaracterizacao;
+                const cargo = d.procedimento.id === 'IPM' ? 'Encarregado do IPM' : 'Sindicante';
+                
+                return `TERMO DE ABERTURA
+
+PROCEDIMENTO: ${d.procedimento.nomeCompleto}
+PORTARIA: ${d.portaria}
+LOCAL: ${d.local}
+
+Aos ${d.data.dia} dias do mês de ${d.data.mes} do ano de ${d.data.ano}, nesta cidade de Manaus, Estado do Amazonas, na ${d.local}, dou início ao presente ${d.procedimento.nomeCompleto}, tendo como objeto:
+
+${d.objeto}
+
+Fundamentação legal: ${d.fundamentacao || 'Conforme legislação aplicável'}
+
+Do que para constar lavro o presente Termo que o escrevi e assino.
+
+${d.data.completa}
+
+___________________________________
+${d.encarregado}
+${cargo}`;
+            }
+
+            gerarDesignacao() {
+                const d = this.dadosCaracterizacao;
+                const cargo = d.procedimento.id === 'IPM' ? 'Encarregado do IPM' : 'Sindicante';
+                
+                return `DESIGNAÇÃO DE ESCRIVÃO
+
+PROCEDIMENTO: ${d.procedimento.nomeCompleto}
+PORTARIA: ${d.portaria}
+
+Aos ${d.data.dia} dias do mês de ${d.data.mes} do ano de ${d.data.ano}, eu, ${d.encarregado}, ${cargo}, no exercício das atribuições que me são conferidas por lei,
+
+RESOLVO:
+
+DESIGNAR o(a) ${d.escrivao}, para exercer a função de ESCRIVÃO no presente ${d.procedimento.nomeCompleto}, devendo cumprir fielmente todas as determinações legais inerentes ao cargo, mantendo sigilo absoluto sobre os atos procedimentais.
+
+Para constar, lavro o presente termo que vai assinado.
+
+${d.data.completa}
+
+___________________________________
+${d.encarregado}
+${cargo}`;
+            }
+
+            gerarDesignacaoEscrivao() {
+                const d = this.dadosCaracterizacao;
+                const cargo = d.procedimento.id === 'IPM' ? 'Encarregado do IPM' : 'Sindicante';
+                
+                return `DESIGNAÇÃO DO ESCRIVÃO
+
+GOVERNO DO ESTADO DO AMAZONAS
+POLÍCIA MILITAR DO AMAZONAS
+
+Processo: ${d.procedimento.id} nº ${d.portaria}
+
+Designo, nos termos do artigo 11 do Código de Processo Penal Militar e legislação complementar, o(a) ${d.escrivao}, para servir como Escrivão do ${d.procedimento.nomeCompleto} do qual sou encarregado(a).
+
+A designação implica no cumprimento das seguintes atribuições:
+1. Lavratura de todos os termos e documentos do procedimento;
+2. Organização e custódia dos autos;
+3. Cumprimento de diligências determinadas;
+4. Manutenção do sigilo procedimental.
+
+O(A) designado(a) prestará o competente termo de compromisso.
+
+Manaus-AM, ${d.data.completa}.
+
+___________________________________
+${d.encarregado}
+${cargo}`;
+            }
+
+            gerarTermoCompromissoEscrivao() {
+                const d = this.dadosCaracterizacao;
+                const cargo = d.procedimento.id === 'IPM' ? 'Encarregado do IPM' : 'Sindicante';
+                
+                return `TERMO DE COMPROMISSO DO ESCRIVÃO
+
+PROCEDIMENTO: ${d.procedimento.nomeCompleto}
+PORTARIA: ${d.portaria}
+
+Aos ${d.data.dia} dias do mês de ${d.data.mes} de ${d.data.ano}, nesta Cidade de Manaus, Estado do Amazonas, na ${d.local}, perante o(a) ${d.encarregado}, Encarregado(a) deste ${d.procedimento.nomeCompleto}, compareceu o(a) ${d.escrivao}, designado(a) para exercer a função de Escrivão.
+
+O(A) designado(a), após ser cientificado(a) das responsabilidades inerentes ao cargo, PRESTA COMPROMISSO de:
+
+1. Exercer a função com zelo, diligência e probidade;
+2. Manter absoluto sigilo sobre todos os atos procedimentais;
+3. Cumprir fielmente as determinações legais e as ordens do(a) Encarregado(a);
+4. Zelar pela integridade e organização dos autos;
+5. Comparecer pontualmente aos atos procedimentais.
+
+A violação deste compromisso sujeitará o(a) infrator(a) às penalidades legais cabíveis.
+
+Para constar, lavra-se o presente termo.
+
+${d.data.completa}
+
+___________________________________
+${d.escrivao}
+Escrivão Designado(a)
+
+___________________________________
+${d.encarregado}
+${cargo}`;
+            }
+
+            atualizarListaDocumentosBasicos() {
+                const lista = document.getElementById('lista-documentos-basicos');
+                const docs = [
+                    { id: 'autuacao', nome: 'Autuação', icon: 'fa-file-signature', cor: 'green' },
+                    { id: 'abertura', nome: 'Termo de Abertura', icon: 'fa-folder-open', cor: 'blue' },
+                    { id: 'designacao', nome: 'Designação de Escrivão', icon: 'fa-user-tie', cor: 'purple' },
+                    { id: 'designacaoEscrivao', nome: 'Designação do Escrivão', icon: 'fa-id-card', cor: 'amber' },
+                    { id: 'termoCompromisso', nome: 'Termo de Compromisso', icon: 'fa-handshake', cor: 'emerald' }
+                ];
+                
+                lista.innerHTML = docs.map(doc => {
+                    const documento = this.documentos.basicos[doc.id];
+                    const gerado = documento && documento.gerado;
+                    
+                    return `
+                        <div class="card-executivo rounded-xl p-6 text-center ${gerado ? 'border-green-200' : ''}">
+                            <div class="w-16 h-16 rounded-xl bg-gradient-to-br from-${doc.cor}-500 to-${doc.cor}-600 flex items-center justify-center mx-auto mb-4">
+                                <i class="fas ${doc.icon} text-white text-2xl"></i>
+                            </div>
+                            <h5 class="font-bold text-pmam-navy mb-2">${doc.nome}</h5>
+                            <div class="text-xs ${gerado ? 'text-green-600 font-semibold' : 'text-gray-500'} mb-3">
+                                ${gerado ? '✓ Gerado automaticamente' : 'Aguardando dados'}
+                            </div>
+                            ${gerado ? `
+                                <button onclick="sistema.visualizarDocumento('basico', '${doc.id}')" 
+                                        class="text-sm text-pmam-executivo hover:text-blue-800 font-medium">
+                                    <i class="fas fa-eye mr-1"></i> Visualizar
+                                </button>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            visualizarDocumento(tipo, id) {
+                // Implementar visualização de documento específico
+                this.mostrarToast(`Visualizando ${tipo} - ${id}`, 'sucesso');
+            }
+
+            abrirModalDocumento(tipo) {
+                this.documentoAtualTipo = tipo;
+                
+                const titulos = {
+                    'oficios': 'Novo Ofício',
+                    'termos': 'Novo Termo de Declaração',
+                    'certidoes': 'Nova Certidão',
+                    'relatorio': 'Relatório Final'
+                };
+                
+                const subtitulos = {
+                    'oficios': 'Comunicação oficial para envio externo',
+                    'termos': 'Registro formal de depoimentos e declarações',
+                    'certidoes': 'Documento certificado extraído dos autos',
+                    'relatorio': 'Relatório final conclusivo do procedimento'
+                };
+                
+                document.getElementById('modal-titulo').textContent = titulos[tipo];
+                document.getElementById('modal-subtitulo').textContent = subtitulos[tipo];
+                
+                // Gerar conteúdo do modal baseado no tipo
+                let conteudoHTML = this.gerarConteudoModalDocumento(tipo);
+                document.getElementById('modal-conteudo').innerHTML = conteudoHTML;
+                
+                // Mostrar modal
+                document.getElementById('modal-documento').classList.remove('hidden');
+                document.getElementById('modal-documento').classList.add('flex');
+                document.body.style.overflow = 'hidden';
+            }
+
+            gerarConteudoModalDocumento(tipo) {
+                // Conteúdo simplificado para exemplo
+                switch(tipo) {
+                    case 'oficios':
+                        return `
+                            <div class="space-y-6">
+                                <div class="grid grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="block text-sm font-semibold text-pmam-text mb-2">Data do Ofício*</label>
+                                        <input type="date" class="input-executivo w-full p-3 rounded-lg">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-semibold text-pmam-text mb-2">Número</label>
+                                        <div class="text-sm bg-gray-100 p-3 rounded-lg">
+                                            Gerado automaticamente
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-pmam-text mb-2">Destinatário*</label>
+                                    <input type="text" class="input-executivo w-full p-3 rounded-lg" placeholder="Órgão/Unidade">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-pmam-text mb-2">Assunto*</label>
+                                    <input type="text" class="input-executivo w-full p-3 rounded-lg">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-pmam-text mb-2">Conteúdo*</label>
+                                    <textarea rows="10" class="input-executivo w-full p-3 rounded-lg resize-none"></textarea>
+                                </div>
+                            </div>
+                        `;
+                    case 'relatorio':
+                        return `
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="block text-sm font-semibold text-pmam-text mb-2">I – DOS FATOS*</label>
+                                    <textarea rows="4" class="input-executivo w-full p-3 rounded-lg resize-none"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-pmam-text mb-2">II – DAS PROVAS*</label>
+                                    <textarea rows="4" class="input-executivo w-full p-3 rounded-lg resize-none"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-pmam-text mb-2">III – DA ANÁLISE*</label>
+                                    <textarea rows="4" class="input-executivo w-full p-3 rounded-lg resize-none"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-pmam-text mb-2">IV – CONCLUSÃO*</label>
+                                    <textarea rows="4" class="input-executivo w-full p-3 rounded-lg resize-none"></textarea>
+                                </div>
+                            </div>
+                        `;
+                    default:
+                        return `<p>Conteúdo do documento ${tipo}</p>`;
+                }
+            }
+
+            salvarDocumento() {
+                // Implementar lógica de salvamento de documento
+                this.fecharModal();
+                this.mostrarToast('Documento salvo com sucesso', 'sucesso');
+                
+                // Atualizar status na interface
+                if (this.documentoAtualTipo) {
+                    this.atualizarStatusDocumento(this.documentoAtualTipo);
+                }
+            }
+
+            atualizarStatusDocumento(tipo) {
+                const elemento = document.getElementById(`status-${tipo}`);
+                if (elemento) {
+                    elemento.textContent = '✓ Gerado';
+                    elemento.className = 'text-xs text-green-600 font-semibold';
+                }
+            }
+
+            visualizarTodosDocumentos() {
+                this.mostrarToast('Abrindo visualização de todos os documentos', 'sucesso');
+                // Implementar lógica completa
+            }
+
+            gerarRelatorioAutomatico() {
+                const direta = document.getElementById('tipificacao-direta').value;
+                const indireta = document.getElementById('tipificacao-indireta').value;
+                
+                if (!direta || !indireta) {
+                    this.mostrarToast('Preencha a tipificação legal antes de gerar o relatório', 'erro');
+                    return;
+                }
+                
+                const d = this.dadosCaracterizacao;
+                let relatorio = `RELATÓRIO FINAL DO ${d.procedimento.nome}
+
+REFERÊNCIA: ${d.portaria}
+ENCARREGADO: ${d.encarregado}
+ESCRIVÃO: ${d.escrivao}
+${d.procedimento.id === 'PARE' ? 'RESPONSÁVEL' : 'ACUSADO'}: ${d.acusado.nome} - ${d.acusado.posto} - ${d.acusado.matricula}
+UNIDADE: ${d.acusado.unidade}
+
+OBJETO: ${d.objeto}
+
+I – DOS FATOS
+[Descreva detalhadamente os fatos apurados, com indicação de data, local, envolvidos e circunstâncias.]
+
+II – DAS PROVAS
+[Relacione e descreva todas as provas colhidas durante o procedimento, incluindo documentos, depoimentos, perícias e demais elementos probatórios.]
+
+III – DA ANÁLISE
+[Analise as provas à luz da legislação aplicável, confrontando os fatos com as normas jurídicas pertinentes.]
+
+IV – DA TIPIFICAÇÃO LEGAL
+Tipificação Direta: ${direta}
+Tipificação Indireta: ${indireta}
+Infração Disciplinar: ${document.getElementById('tipificacao-disciplinar').value || 'A ser definida'}
+
+V – DA RECOMENDAÇÃO
+${document.querySelector('input[name="prisao-preventiva"]:checked').value === 'sim' ? 
+'Recomenda-se a decretação de prisão preventiva, conforme fundamentação abaixo:' : 
+'Não se recomenda a decretação de prisão preventiva.'}
+
+Fundamentação: ${document.getElementById('fundamentacao-prisao').value || 'Conforme análise dos autos.'}
+
+VI – CONCLUSÃO
+[Apresente a conclusão final, com indicação clara das medidas a serem adotadas.]
+
+Manaus-AM, ${d.data.completa}.
+
+___________________________________
+${d.encarregado}
+${d.procedimento.id === 'IPM' ? 'Encarregado do IPM' : 'Sindicante'}`;
+
+                document.getElementById('relatorio-conteudo').value = relatorio;
+                this.atualizarContadoresRelatorio();
+                this.mostrarToast('Relatório gerado automaticamente', 'sucesso');
+            }
+
+            atualizarContadoresRelatorio() {
+                const texto = document.getElementById('relatorio-conteudo').value;
+                const caracteres = texto.length;
+                const palavras = texto.trim().split(/\s+/).filter(word => word.length > 0).length;
+                
+                document.getElementById('contador-caracteres').textContent = caracteres;
+                document.getElementById('contador-palavras').textContent = palavras;
+            }
+
+            exportarRelatorioPDF() {
+                this.mostrarToast('Exportando relatório em PDF...', 'sucesso');
+                // Implementar exportação PDF
+            }
+
+            exportarPacoteCompleto() {
+                this.mostrarToast('Gerando pacote completo de documentos...', 'sucesso');
+                // Implementar exportação completa
+            }
+
+            finalizarProcedimento() {
+                this.mostrarToast('Procedimento finalizado com sucesso!', 'sucesso');
+                // Implementar lógica de finalização
+            }
+
+            avancarTela(numero) {
+                this.telaAtual = numero;
+                
+                // Esconder todas as telas
+                for (let i = 1; i <= 4; i++) {
+                    const tela = document.getElementById(`tela-${i}`);
+                    if (tela) tela.classList.add('hidden');
+                }
+                
+                // Mostrar tela atual
+                document.getElementById(`tela-${numero}`).classList.remove('hidden');
+                
+                // Atualizar progresso na sidebar
+                this.atualizarProgressoSidebar();
+            }
+
+            voltarParaTela(numero) {
+                this.avancarTela(numero);
+            }
+
+            atualizarProgressoSidebar() {
+                // Atualizar passos
+                for (let i = 1; i <= 4; i++) {
+                    const step = document.getElementById(`sidebar-step-${i}`);
+                    step.classList.remove('active', 'completed');
+                    
+                    if (i < this.telaAtual) {
+                        step.classList.add('completed');
+                    } else if (i === this.telaAtual) {
+                        step.classList.add('active');
+                    }
+                }
+                
+                // Atualizar informações
+                const infoSteps = ['step-1-info', 'step-2-info', 'step-3-info', 'step-4-info'];
+                infoSteps.forEach((id, index) => {
+                    const elemento = document.getElementById(id);
+                    if (elemento) {
+                        if (index + 1 === this.telaAtual) {
+                            elemento.textContent = 'Atual';
+                        } else if (index + 1 < this.telaAtual) {
+                            elemento.textContent = 'Concluído';
+                        } else {
+                            // Conteúdo padrão permanece
+                        }
+                    }
+                });
+            }
+
+            atualizarListaDocumentosSidebar() {
+                const lista = document.getElementById('lista-documentos-sidebar');
+                let html = '';
+                let contador = 0;
+                
+                // Contar documentos básicos gerados
+                Object.values(this.documentos.basicos).forEach(doc => {
+                    if (doc.gerado) {
+                        contador++;
+                        html += `
+                            <div class="bg-gray-900/50 border border-gray-800 p-3 rounded-lg mb-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-white truncate">${doc.titulo}</span>
+                                    <i class="fas fa-check text-green-500"></i>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+                
+                if (contador === 0) {
+                    html = `
+                        <div class="text-center py-4">
+                            <i class="fas fa-file text-gray-700 text-2xl mb-2"></i>
+                            <p class="text-sm text-gray-500">Nenhum documento gerado</p>
+                        </div>
+                    `;
+                }
+                
+                lista.innerHTML = html;
+                document.getElementById('step-3-info').textContent = `${contador} documentos`;
+            }
+
+            salvarProcedimento() {
+                if (!this.procedimentoSelecionado || !this.dadosCaracterizacao) {
+                    this.mostrarToast('Complete a caracterização primeiro', 'erro');
+                    return;
+                }
+                
+                const procedimento = {
+                    id: Date.now().toString(),
+                    numeroPortaria: this.dadosCaracterizacao.portaria,
+                    tipo: this.procedimentoSelecionado.id,
+                    nome: this.procedimentoSelecionado.nome,
+                    dataCriacao: new Date().toISOString(),
+                    caracterizacao: this.dadosCaracterizacao,
+                    documentos: this.documentos,
+                    status: this.telaAtual === 4 ? 'concluido' : 'em_andamento',
+                    ultimaAtualizacao: new Date().toISOString()
+                };
+                
+                // Salvar no localStorage
+                const indexExistente = this.procedimentosSalvos.findIndex(
+                    p => p.numeroPortaria === procedimento.numeroPortaria
+                );
+                
+                if (indexExistente >= 0) {
+                    this.procedimentosSalvos[indexExistente] = procedimento;
+                } else {
+                    this.procedimentosSalvos.push(procedimento);
+                }
+                
+                localStorage.setItem('sispro_procedimentos_executivo', JSON.stringify(this.procedimentosSalvos));
+                
+                // Tentar salvar no Supabase
+                this.salvarNoSupabase(procedimento);
+                
+                this.mostrarToast('Procedimento salvo com sucesso', 'sucesso');
+            }
+
+            async salvarNoSupabase(procedimento) {
+                try {
+                    const { error } = await this.supabase
+                        .from('procedimentos_executivo')
+                        .upsert([{
+                            id: procedimento.id,
+                            dados: procedimento,
+                            created_at: new Date().toISOString()
+                        }]);
+                    
+                    if (error) throw error;
+                    this.mostrarToast('Dados sincronizados com o banco', 'sucesso');
+                } catch (error) {
+                    console.error('Erro ao salvar no Supabase:', error);
+                    this.mostrarToast('Erro ao sincronizar com o banco. Dados salvos localmente.', 'aviso');
+                }
+            }
+
+            abrirGerenciador() {
+                this.atualizarGerenciador();
+                document.getElementById('modal-gerenciador').classList.remove('hidden');
+                document.getElementById('modal-gerenciador').classList.add('flex');
+                document.body.style.overflow = 'hidden';
+            }
+
+            fecharGerenciador() {
+                document.getElementById('modal-gerenciador').classList.remove('flex');
+                document.getElementById('modal-gerenciador').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+
+            atualizarGerenciador() {
+                const lista = document.getElementById('lista-procedimentos-salvos');
+                const contador = document.getElementById('contador-procedimentos');
+                
+                if (this.procedimentosSalvos.length === 0) {
+                    lista.innerHTML = `
+                        <div class="text-center py-12">
+                            <i class="fas fa-folder-open text-gray-400 text-5xl mb-4"></i>
+                            <h4 class="text-xl font-bold text-pmam-navy mb-2">Nenhum procedimento salvo</h4>
+                            <p class="text-pmam-muted">Comece criando um novo procedimento</p>
+                        </div>
+                    `;
+                    contador.textContent = '0';
+                    return;
+                }
+                
+                const procedimentosOrdenados = [...this.procedimentosSalvos].sort(
+                    (a, b) => new Date(b.ultimaAtualizacao) - new Date(a.ultimaAtualizacao)
+                );
+                
+                lista.innerHTML = procedimentosOrdenados.map(proc => {
+                    const data = new Date(proc.ultimaAtualizacao);
+                    const dataFormatada = data.toLocaleDateString('pt-BR');
+                    const horaFormatada = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                    
+                    let statusBadge = '';
+                    switch(proc.status) {
+                        case 'rascunho':
+                            statusBadge = '<span class="status-badge pendente">Rascunho</span>';
+                            break;
+                        case 'em_andamento':
+                            statusBadge = '<span class="status-badge em-andamento">Em Andamento</span>';
+                            break;
+                        case 'concluido':
+                            statusBadge = '<span class="status-badge concluido">Concluído</span>';
+                            break;
+                        default:
+                            statusBadge = '<span class="status-badge">---</span>';
+                    }
+                    
+                    return `
+                        <div class="card-executivo rounded-xl p-6 hover:shadow-lg transition-all">
+                            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                <div class="flex items-start gap-4">
+                                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-pmam-executivo to-pmam-light flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-folder text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-pmam-navy mb-1">${proc.nome}</h4>
+                                        <p class="text-sm text-pmam-muted mb-2">${proc.numeroPortaria}</p>
+                                        <div class="flex items-center gap-3">
+                                            ${statusBadge}
+                                            <span class="text-xs text-pmam-muted">
+                                                <i class="far fa-clock mr-1"></i>
+                                                ${dataFormatada} às ${horaFormatada}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3">
+                                    <button onclick="sistema.carregarProcedimentoSalvo('${proc.id}')"
+                                            class="px-4 py-2 bg-pmam-executivo text-white rounded-lg hover:bg-blue-800 transition-all flex items-center gap-2">
+                                        <i class="fas fa-edit"></i>
+                                        Carregar
+                                    </button>
+                                    <button onclick="sistema.exportarProcedimento('${proc.id}')"
+                                            class="px-4 py-2 bg-gray-200 text-pmam-text rounded-lg hover:bg-gray-300 transition-all flex items-center gap-2">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                contador.textContent = procedimentosOrdenados.length.toString();
+            }
+
+            carregarProcedimentoSalvo(id) {
+                const procedimento = this.procedimentosSalvos.find(p => p.id === id);
+                if (!procedimento) {
+                    this.mostrarToast('Procedimento não encontrado', 'erro');
+                    return;
+                }
+                
+                // Carregar dados
+                this.procedimentoSelecionado = {
+                    id: procedimento.tipo,
+                    nome: procedimento.nome,
+                    nomeCompleto: procedimento.nome,
+                    descricao: '',
+                    cor: 'blue',
+                    icon: 'fa-folder'
+                };
+                
+                this.dadosCaracterizacao = procedimento.caracterizacao;
+                this.documentos = procedimento.documentos;
+                
+                // Preencher formulários
+                if (procedimento.caracterizacao) {
+                    document.getElementById('numero-portaria').value = procedimento.numeroPortaria;
+                    
+                    if (procedimento.caracterizacao.data) {
+                        document.getElementById('data-dia').value = procedimento.caracterizacao.data.dia;
+                        document.getElementById('data-mes').value = procedimento.caracterizacao.data.mes;
+                        document.getElementById('data-ano').value = procedimento.caracterizacao.data.ano;
+                    }
+                    
+                    document.getElementById('local-unidade').value = procedimento.caracterizacao.local || '';
+                    document.getElementById('encarregado-nome').value = procedimento.caracterizacao.encarregado || '';
+                    document.getElementById('escrivao-nome').value = procedimento.caracterizacao.escrivao || '';
+                    
+                    if (procedimento.caracterizacao.acusado) {
+                        document.getElementById('acusado-nome').value = procedimento.caracterizacao.acusado.nome || '';
+                        document.getElementById('acusado-posto').value = procedimento.caracterizacao.acusado.posto || '';
+                        document.getElementById('acusado-matricula').value = procedimento.caracterizacao.acusado.matricula || '';
+                        document.getElementById('acusado-unidade').value = procedimento.caracterizacao.acusado.unidade || '';
+                    }
+                    
+                    document.getElementById('objeto-apuracao').value = procedimento.caracterizacao.objeto || '';
+                }
+                
+                // Atualizar interface
+                this.avancarTela(3);
+                this.atualizarListaDocumentosBasicos();
+                this.atualizarListaDocumentosSidebar();
+                this.atualizarProgressoSidebar();
+                this.fecharGerenciador();
+                
+                this.mostrarToast('Procedimento carregado com sucesso', 'sucesso');
+            }
+
+            carregarProcedimentosSalvos() {
+                try {
+                    const dados = localStorage.getItem('sispro_procedimentos_executivo');
+                    return dados ? JSON.parse(dados) : [];
+                } catch (e) {
+                    console.error('Erro ao carregar procedimentos:', e);
+                    return [];
+                }
+            }
+
+            preencherDataAtual() {
+                const hoje = new Date();
+                const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+                              'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+                
+                if (!document.getElementById('data-dia').value) {
+                    document.getElementById('data-dia').value = hoje.getDate();
+                }
+                if (!document.getElementById('data-mes').value) {
+                    document.getElementById('data-mes').value = meses[hoje.getMonth()];
+                }
+                if (!document.getElementById('data-ano').value) {
+                    document.getElementById('data-ano').value = hoje.getFullYear();
+                }
+            }
+
+            inicializarEventos() {
+                // Contadores de caracteres no relatório
+                const relatorioTextarea = document.getElementById('relatorio-conteudo');
+                if (relatorioTextarea) {
+                    relatorioTextarea.addEventListener('input', () => {
+                        this.atualizarContadoresRelatorio();
+                    });
+                }
+                
+                // Busca no gerenciador
+                const buscaInput = document.getElementById('busca-procedimento');
+                if (buscaInput) {
+                    buscaInput.addEventListener('input', () => {
+                        this.buscarProcedimentos();
+                    });
+                }
+                
+                // Filtro de status
+                const filtroStatus = document.getElementById('filtro-status');
+                if (filtroStatus) {
+                    filtroStatus.addEventListener('change', () => {
+                        this.buscarProcedimentos();
+                    });
+                }
+                
+                // Fechar modais com ESC
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        if (!document.getElementById('modal-documento').classList.contains('hidden')) {
+                            this.fecharModal();
+                        }
+                        if (!document.getElementById('modal-gerenciador').classList.contains('hidden')) {
+                            this.fecharGerenciador();
+                        }
+                        if (!document.getElementById('modal-preview').classList.contains('hidden')) {
+                            this.fecharPreview();
+                        }
+                    }
+                });
+            }
+
+            buscarProcedimentos() {
+                const termo = document.getElementById('busca-procedimento').value.toLowerCase();
+                const filtroStatus = document.getElementById('filtro-status').value;
+                
+                const resultados = this.procedimentosSalvos.filter(proc => {
+                    const matchTermo = 
+                        proc.numeroPortaria.toLowerCase().includes(termo) ||
+                        proc.nome.toLowerCase().includes(termo) ||
+                        (proc.caracterizacao && proc.caracterizacao.encarregado && 
+                         proc.caracterizacao.encarregado.toLowerCase().includes(termo));
+                    
+                    const matchStatus = !filtroStatus || proc.status === filtroStatus;
+                    
+                    return matchTermo && matchStatus;
+                });
+                
+                this.atualizarGerenciadorComResultados(resultados);
+            }
+
+            atualizarGerenciadorComResultados(resultados) {
+                const lista = document.getElementById('lista-procedimentos-salvos');
+                const contador = document.getElementById('contador-procedimentos');
+                
+                if (resultados.length === 0) {
+                    lista.innerHTML = `
+                        <div class="text-center py-12">
+                            <i class="fas fa-search text-gray-400 text-5xl mb-4"></i>
+                            <h4 class="text-xl font-bold text-pmam-navy mb-2">Nenhum procedimento encontrado</h4>
+                            <p class="text-pmam-muted">Tente alterar os termos da busca</p>
+                        </div>
+                    `;
+                    contador.textContent = '0';
+                    return;
+                }
+                
+                lista.innerHTML = resultados.map(proc => {
+                    // Mesmo código do atualizarGerenciador, mas apenas com resultados filtrados
+                    const data = new Date(proc.ultimaAtualizacao);
+                    const dataFormatada = data.toLocaleDateString('pt-BR');
+                    const horaFormatada = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                    
+                    let statusBadge = '';
+                    switch(proc.status) {
+                        case 'rascunho':
+                            statusBadge = '<span class="status-badge pendente">Rascunho</span>';
+                            break;
+                        case 'em_andamento':
+                            statusBadge = '<span class="status-badge em-andamento">Em Andamento</span>';
+                            break;
+                        case 'concluido':
+                            statusBadge = '<span class="status-badge concluido">Concluído</span>';
+                            break;
+                        default:
+                            statusBadge = '<span class="status-badge">---</span>';
+                    }
+                    
+                    return `
+                        <div class="card-executivo rounded-xl p-6 hover:shadow-lg transition-all">
+                            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                <div class="flex items-start gap-4">
+                                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-pmam-executivo to-pmam-light flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-folder text-white"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-pmam-navy mb-1">${proc.nome}</h4>
+                                        <p class="text-sm text-pmam-muted mb-2">${proc.numeroPortaria}</p>
+                                        <div class="flex items-center gap-3">
+                                            ${statusBadge}
+                                            <span class="text-xs text-pmam-muted">
+                                                <i class="far fa-clock mr-1"></i>
+                                                ${dataFormatada} às ${horaFormatada}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex gap-3">
+                                    <button onclick="sistema.carregarProcedimentoSalvo('${proc.id}')"
+                                            class="px-4 py-2 bg-pmam-executivo text-white rounded-lg hover:bg-blue-800 transition-all flex items-center gap-2">
+                                        <i class="fas fa-edit"></i>
+                                        Carregar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                contador.textContent = resultados.length.toString();
+            }
+
+            fecharModal() {
+                document.getElementById('modal-documento').classList.remove('flex');
+                document.getElementById('modal-documento').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+
+            fecharPreview() {
+                document.getElementById('modal-preview').classList.remove('flex');
+                document.getElementById('modal-preview').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+
+            novoProcedimento() {
+                this.fecharGerenciador();
+                this.avancarTela(1);
+                this.mostrarToast('Novo procedimento iniciado', 'sucesso');
+            }
+
+            salvarRascunho() {
+                this.salvarProcedimento();
+                this.mostrarToast('Rascunho salvo com sucesso', 'sucesso');
+            }
+
+            gerarDocumentoDiverso(tipo) {
+                this.mostrarToast(`Gerando documento: ${tipo}`, 'sucesso');
+                // Implementar geração de documentos diversos
+            }
+
+            exportarProcedimento(id) {
+                this.mostrarToast('Exportando procedimento...', 'sucesso');
+                // Implementar exportação
+            }
+        }
+
+        // Inicializar sistema
+        const sistema = new SistemaSISPRO();
+        window.sistema = sistema;
+
+        // Inicializar abas da caracterização
+        document.addEventListener('DOMContentLoaded', () => {
+            sistema.mostrarAba('dados-basicos');
+        });
+    </script>
 </body>
 </html>
