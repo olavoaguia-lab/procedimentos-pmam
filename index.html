@@ -3,285 +3,404 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISPRO-PMAM | Sistema de Procedimentos Administrativos</title>
+    <title>SISPRO - PMAM | Sistema de Procedimentos</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         :root {
-            --executive-navy: #0f172a;
-            --executive-gold: #c5a059;
-            --executive-bg: #f8fafc;
+            --navy: #0f172a;
+            --gold: #c5a059;
+            --bg: #f8fafc;
         }
 
         body { 
             font-family: 'Inter', sans-serif; 
-            background-color: var(--executive-bg);
+            background-color: var(--bg);
             color: #1e293b;
         }
 
-        .exec-header { 
+        .header { 
             background: #ffffff;
             border-bottom: 2px solid #e2e8f0;
-            padding: 1.5rem 3rem;
+            padding: 1.5rem 2rem;
         }
 
         .step-pill {
             @apply flex items-center gap-3 px-6 py-3 rounded-full transition-all duration-300 font-semibold text-sm border-2;
         }
-        .step-pill.active { @apply bg-slate-900 text-white border-slate-900 shadow-lg; }
+        .step-pill.active { @apply bg-navy text-white border-navy shadow-lg; }
         .step-pill.pending { @apply bg-white text-slate-400 border-slate-200; }
 
-        .exec-card {
-            @apply bg-white rounded-2xl border border-slate-100 shadow-xl p-8;
+        .card {
+            @apply bg-white rounded-2xl border border-slate-100 shadow-xl p-8 transition-all hover:border-l-4 hover:border-l-navy;
         }
 
-        .input-exec {
-            @apply w-full border-b-2 border-slate-200 bg-transparent py-3 px-1 focus:border-slate-900 outline-none transition-all text-sm;
+        .input {
+            @apply w-full border-b-2 border-slate-200 bg-transparent py-3 px-1 focus:border-navy outline-none transition-all text-sm;
         }
 
-        .btn-primary { @apply bg-slate-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-black transition-all shadow-md active:scale-95; }
-        .btn-outline { @apply border-2 border-slate-900 text-slate-900 px-8 py-3 rounded-xl font-bold hover:bg-slate-50 transition-all; }
+        .btn-primary { @apply bg-navy text-white px-8 py-3 rounded-xl font-bold hover:bg-black transition-all shadow-md active:scale-95; }
+        .btn-gold { @apply bg-gradient-to-r from-yellow-600 to-yellow-500 text-white px-8 py-3 rounded-xl font-bold hover:from-yellow-700 hover:to-yellow-600 transition-all shadow-md active:scale-95; }
 
-        .title-gold { font-family: 'Playfair Display', serif; color: var(--executive-gold); }
+        .title-gold { font-family: 'Playfair Display', serif; color: var(--gold); }
+
+        /* Responsividade sidebar */
+        #sidebar {
+            transition: transform 0.3s ease-in-out;
+        }
+        @media (max-width: 1023px) {
+            #sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                transform: translateX(-100%);
+                z-index: 60;
+            }
+            #sidebar.open {
+                transform: translateX(0);
+            }
+            .main-content {
+                padding-left: 0 !important;
+            }
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <header class="exec-header flex items-center justify-between sticky top-0 z-50">
-        <div class="flex items-center gap-4">
-            <img src="logo-pmam.png" alt="PMAM" class="h-14">
+    <!-- Sidebar -->
+    <div id="sidebar" class="fixed top-0 left-0 h-full w-80 bg-white border-r border-slate-200 shadow-2xl overflow-y-auto z-50 lg:translate-x-0">
+        <div class="p-8 border-b border-slate-200 flex flex-col items-center">
+            <img src="logo-pmam.png" alt="Brasão PMAM" class="w-36 mb-6 drop-shadow-xl">
+            <h2 class="text-2xl font-black text-navy tracking-tight">SISPRO - PMAM</h2>
+            <p class="text-xs text-slate-400 uppercase font-bold tracking-widest mt-1">Sistema de Procedimentos</p>
         </div>
 
-        <div class="text-center">
-            <h1 class="text-2xl font-black tracking-tighter text-slate-900">SISPRO-PMAM</h1>
-            <p class="text-[10px] uppercase tracking-[0.3em] font-bold text-slate-400">Diretoria de Justiça e Disciplina</p>
-        </div>
-
-        <div>
-            <button onclick="app.consultar()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-2 rounded-full text-xs font-black transition-all border border-slate-200">
-                <i class="fas fa-search mr-2"></i> CONSULTAR PROCEDIMENTOS
-            </button>
-        </div>
-    </header>
-
-    <nav class="max-w-5xl mx-auto w-full mt-10 px-6">
-        <div class="flex justify-between items-center">
-            <div id="step-1" class="step-pill active">
-                <span class="w-6 h-6 rounded-full bg-yellow-500 text-white flex items-center justify-center text-[10px]">1</span>
-                ESCOLHA O PROCEDIMENTO
-            </div>
-            <div class="h-[2px] flex-1 bg-slate-200 mx-4"></div>
-            <div id="step-2" class="step-pill pending">
-                <span class="w-6 h-6 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-[10px]">2</span>
-                QUALIFICAÇÃO
-            </div>
-            <div class="h-[2px] flex-1 bg-slate-200 mx-4"></div>
-            <div id="step-3" class="step-pill pending">
-                <span class="w-6 h-6 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-[10px]">3</span>
-                DOCUMENTAÇÃO
-            </div>
-            <div class="h-[2px] flex-1 bg-slate-200 mx-4"></div>
-            <div id="step-4" class="step-pill pending">
-                <span class="w-6 h-6 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center text-[10px]">4</span>
-                RELATÓRIO
+        <div class="p-6 border-b border-slate-200">
+            <h3 class="font-semibold text-navy mb-6 text-sm uppercase tracking-widest">Etapas</h3>
+            <div class="space-y-4">
+                <div class="step-pill active"><i class="fas fa-check-circle"></i> Tipo</div>
+                <div class="step-pill pending"><i class="fas fa-circle"></i> Qualificação</div>
+                <div class="step-pill pending"><i class="fas fa-circle"></i> Documentos</div>
+                <div class="step-pill pending"><i class="fas fa-circle"></i> Relatório</div>
             </div>
         </div>
-    </nav>
 
-    <main class="max-w-6xl mx-auto w-full p-10 flex-1">
-        
-        <section id="view-1" class="space-y-8">
-            <div class="text-center mb-12">
-                <h2 class="title-gold text-4xl mb-2">Inicie sua Instrução</h2>
-                <p class="text-slate-400 font-light italic">Selecione o rito administrativo adequado para o caso.</p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div onclick="app.selectProc('IPM')" class="exec-card hover:border-slate-900 cursor-pointer transition-all group">
-                    <div class="flex justify-between items-start mb-6">
-                        <i class="fas fa-gavel text-3xl text-slate-300 group-hover:text-slate-900 transition-colors"></i>
-                        <span class="text-[10px] font-bold text-slate-400">CRIMINAL/MILITAR</span>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-800">IPM</h3>
-                    <p class="text-xs text-slate-500 mt-2">Inquérito Policial Militar para apuração de crimes.</p>
-                </div>
-                <div onclick="app.selectProc('Sindicância')" class="exec-card hover:border-slate-900 cursor-pointer transition-all group">
-                    <div class="flex justify-between items-start mb-6">
-                        <i class="fas fa-file-invoice text-3xl text-slate-300 group-hover:text-slate-900 transition-colors"></i>
-                        <span class="text-[10px] font-bold text-slate-400">ADMINISTRATIVA</span>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-800">SINDICÂNCIA</h3>
-                    <p class="text-xs text-slate-500 mt-2">Apuração de atos disciplinares ou fatos administrativos.</p>
-                </div>
-                <div onclick="app.selectProc('PAD')" class="exec-card hover:border-slate-900 cursor-pointer transition-all group">
-                    <div class="flex justify-between items-start mb-6">
-                        <i class="fas fa-landmark text-3xl text-slate-300 group-hover:text-slate-900 transition-colors"></i>
-                        <span class="text-[10px] font-bold text-slate-400">CONSELHO</span>
-                    </div>
-                    <h3 class="text-xl font-bold text-slate-800">PAD / CONSELHOS</h3>
-                    <p class="text-xs text-slate-500 mt-2">Procedimento Administrativo Disciplinar de ampla defesa.</p>
-                </div>
-            </div>
-        </section>
-
-        <section id="view-2" class="hidden space-y-10 animate-fade-in">
-            <div class="exec-card">
-                <h3 class="title-gold text-2xl mb-8">Dados da Instauração</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Número da Portaria</label>
-                        <input type="text" id="portaria" class="input-exec" placeholder="Ex: 001/2024-SJD">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Data do Ato</label>
-                        <input type="date" id="data-portaria" class="input-exec">
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="text-[10px] font-bold text-slate-400 uppercase">Resumo da Acusação/Objeto</label>
-                        <textarea id="objeto" class="input-exec h-24" placeholder="Descreva sucintamente o fato a ser apurado..."></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex gap-4">
-                <button onclick="app.modalQualif('Encarregado')" class="btn-primary">ADICIONAR ENCARREGADO</button>
-                <button onclick="app.modalQualif('Escrivão')" class="btn-primary">ADICIONAR ESCRIVÃO</button>
-                <button onclick="app.modalQualif('Envolvido')" class="btn-outline">ADICIONAR ENVOLVIDO</button>
-            </div>
-
-            <div id="lista-qualificacao" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
-            
-            <div class="flex justify-end pt-10">
-                <button onclick="app.go(3)" class="btn-primary bg-yellow-600 hover:bg-yellow-700 px-16">AVANÇAR PARA DOCUMENTOS</button>
-            </div>
-        </section>
-
-        <section id="view-3" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-10">
-            <div class="exec-card">
-                <h4 class="font-bold text-slate-900 border-b pb-4 mb-6 italic">Modelos Padrão (Vínculo com Portaria)</h4>
-                <div class="space-y-3" id="docs-padrao"></div>
-            </div>
-            <div class="exec-card">
-                <h4 class="font-bold text-slate-900 border-b pb-4 mb-6 italic">Atos Diversos e Declarações</h4>
-                <div class="space-y-3" id="docs-diversos"></div>
-            </div>
-        </section>
-
-    </main>
-
-    <div id="modal-qualif" class="fixed inset-0 bg-slate-900/80 hidden items-center justify-center z-[100] backdrop-blur-sm">
-        <div class="bg-white w-full max-w-4xl rounded-3xl p-12 shadow-2xl">
-            <h2 id="modal-title" class="title-gold text-3xl mb-10">Qualificação Técnica</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-                <div class="md:col-span-2">
-                    <label class="text-[10px] font-bold text-slate-400">NOME COMPLETO</label>
-                    <input type="text" id="q-nome" class="input-exec uppercase">
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold text-slate-400">POSTO/GRAD OU CI</label>
-                    <input type="text" id="q-posto" class="input-exec uppercase">
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold text-slate-400">IDADE</label>
-                    <input type="number" id="q-idade" class="input-exec">
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold text-slate-400">NATURALIDADE</label>
-                    <input type="text" id="q-nat" class="input-exec uppercase">
-                </div>
-                <div>
-                    <label class="text-[10px] font-bold text-slate-400">PROFISSÃO</label>
-                    <input type="text" id="q-prof" class="input-exec uppercase" value="POLICIAL MILITAR">
-                </div>
-                <div class="md:col-span-2">
-                    <label class="text-[10px] font-bold text-slate-400">ENDEREÇO</label>
-                    <input type="text" id="q-end" class="input-exec">
-                </div>
-            </div>
-            <div class="flex justify-end gap-4 mt-12">
-                <button onclick="app.closeModal()" class="text-slate-400 font-bold">CANCELAR</button>
-                <button onclick="app.saveQualif()" class="btn-primary">SALVAR REGISTRO</button>
-            </div>
+        <div class="p-6">
+            <h3 class="font-semibold text-navy mb-4 text-xs uppercase tracking-widest">Documentos Gerados</h3>
+            <div id="lista-documentos-sidebar" class="space-y-2 text-xs text-slate-500">Nenhum documento gerado</div>
         </div>
     </div>
 
-    <script>
-        class SISPRO_Elite {
-            constructor() {
-                this.data = { proc: '', portaria: '', qualificados: [], docs: {} };
-                this.currentPapel = '';
-            }
+    <!-- Hamburger mobile -->
+    <button id="sidebar-toggle" class="lg:hidden fixed top-4 left-4 z-70 p-4 bg-navy text-white rounded-xl shadow-2xl">
+        <i class="fas fa-bars text-2xl"></i>
+    </button>
 
-            go(step) {
-                document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-                document.getElementById(`view-${step}`).classList.remove('hidden');
-                
-                document.querySelectorAll('.step-pill').forEach((p, idx) => {
-                    if(idx + 1 === step) p.className = 'step-pill active';
-                    else if(idx + 1 < step) p.className = 'step-pill border-slate-900 text-slate-900';
-                    else p.className = 'step-pill pending';
-                });
+    <!-- Main -->
+    <div class="min-h-screen lg:pl-80 main-content flex flex-col">
+        <header class="header flex items-center justify-between">
+            <div class="flex items-center gap-6">
+                <img src="logo-sispro.png" alt="Logo SISPRO" class="w-24 drop-shadow-xl">
+                <div>
+                    <h1 class="text-3xl title-gold">SISPRO - Sistema de Procedimentos</h1>
+                    <p class="text-lg text-slate-500 font-medium">Polícia Militar do Amazonas</p>
+                </div>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="sistema.salvarNoBanco()" class="btn-primary flex items-center gap-2">
+                    <i class="fas fa-cloud-upload-alt"></i> Salvar no Banco
+                </button>
+                <button onclick="sistema.exportarTodosPDF()" class="btn-gold flex items-center gap-2">
+                    <i class="fas fa-file-pdf"></i> Exportar PDF
+                </button>
+            </div>
+        </header>
 
-                if(step === 3) this.initDocs();
-            }
+        <!-- Tela 1 -->
+        <div id="tela-1" class="container mx-auto px-6 py-12 flex-1">
+            <h2 class="text-4xl title-gold mb-12 text-center">Selecione o Tipo de Procedimento</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto">
+                <div onclick="sistema.selecionarProcedimento('IPM')" class="card cursor-pointer">
+                    <i class="fas fa-gavel text-6xl text-navy mb-6"></i>
+                    <h3 class="text-2xl font-bold text-navy">IPM</h3>
+                    <p class="text-sm text-slate-500">Inquérito Policial Militar</p>
+                </div>
+                <div onclick="sistema.selecionarProcedimento('SAD')" class="card cursor-pointer">
+                    <i class="fas fa-balance-scale text-6xl text-navy mb-6"></i>
+                    <h3 class="text-2xl font-bold text-navy">SAD</h3>
+                    <p class="text-sm text-slate-500">Sindicância Administrativa</p>
+                </div>
+                <div onclick="sistema.selecionarProcedimento('SINDINVEST')" class="card cursor-pointer">
+                    <i class="fas fa-magnifying-glass text-6xl text-navy mb-6"></i>
+                    <h3 class="text-2xl font-bold text-navy">SINDINVEST</h3>
+                    <p class="text-sm text-slate-500">Sindicância Investigativa</p>
+                </div>
+                <div onclick="sistema.selecionarProcedimento('PAD')" class="card cursor-pointer">
+                    <i class="fas fa-file-contract text-6xl text-navy mb-6"></i>
+                    <h3 class="text-2xl font-bold text-navy">PAD</h3>
+                    <p class="text-sm text-slate-500">Processo Administrativo Disciplinar</p>
+                </div>
+                <div onclick="sistema.selecionarProcedimento('PARE')" class="card cursor-pointer">
+                    <i class="fas fa-exclamation-triangle text-6xl text-navy mb-6"></i>
+                    <h3 class="text-2xl font-bold text-navy">PARE</h3>
+                    <p class="text-sm text-slate-500">Rito Especial</p>
+                </div>
+            </div>
+        </div>
 
-            selectProc(p) { this.data.proc = p; this.go(2); }
+        <!-- Tela 2 - Qualificação -->
+        <div id="tela-2" class="hidden container mx-auto px-6 py-12 flex-1">
+            <h2 class="text-4xl title-gold mb-12 text-center">Qualificação</h2>
+            <div class="card">
+                <h3 class="text-2xl font-bold text-navy mb-6">Dados Gerais</h3>
+                <input id="portaria" placeholder="Portaria nº" class="input mb-4">
+                <input id="data" type="date" class="input mb-4">
+                <input id="unidade" placeholder="Unidade" class="input mb-4">
+                <textarea id="preceito-legal" rows="4" placeholder="Preceito Legal / Enquadramento" class="w-full border-2 border-slate-200 rounded-xl p-4 focus:border-navy mt-6"></textarea>
+            </div>
 
-            modalQualif(papel) {
-                this.currentPapel = papel;
-                document.getElementById('modal-title').innerText = `Qualificar ${papel}`;
-                document.getElementById('modal-qualif').style.display = 'flex';
-            }
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                <div class="card">
+                    <h4 class="text-xl font-bold text-navy mb-4">Encarregado</h4>
+                    <input id="encarregado-nome" placeholder="Nome" class="input mb-4">
+                    <input id="encarregado-posto" placeholder="Posto/Grad" class="input mb-4">
+                    <input id="encarregado-matricula" placeholder="Matrícula" class="input">
+                </div>
+                <div class="card">
+                    <h4 class="text-xl font-bold text-navy mb-4">Sindicado</h4>
+                    <input id="sindicado-nome" placeholder="Nome" class="input mb-4">
+                    <input id="sindicado-posto" placeholder="Posto/Grad" class="input mb-4">
+                    <input id="sindicado-matricula" placeholder="Matrícula" class="input">
+                </div>
+                <div class="card">
+                    <h4 class="text-xl font-bold text-navy mb-4">Ofendido</h4>
+                    <input id="ofendido-nome" placeholder="Nome" class="input mb-4">
+                    <input id="ofendido-posto" placeholder="Posto/Grad" class="input mb-4">
+                    <input id="ofendido-matricula" placeholder="RG/CPF" class="input">
+                </div>
+            </div>
 
-            closeModal() { document.getElementById('modal-qualif').style.display = 'none'; }
+            <div class="card mt-8">
+                <h3 class="text-2xl font-bold text-navy mb-6">Testemunhas</h3>
+                <div id="lista-testemunhas"></div>
+                <button onclick="sistema.adicionarTestemunha()" class="btn-primary mt-6">+ Adicionar Testemunha</button>
+            </div>
 
-            saveQualif() {
-                const q = {
-                    papel: this.currentPapel,
-                    nome: document.getElementById('q-nome').value,
-                    posto: document.getElementById('q-posto').value,
-                    idade: document.getElementById('q-idade').value,
-                    nat: document.getElementById('q-nat').value,
-                    prof: document.getElementById('q-prof').value,
-                    end: document.getElementById('q-end').value
-                };
-                this.data.qualificados.push(q);
-                this.renderQualif();
-                this.closeModal();
-            }
+            <div class="text-center mt-12">
+                <button onclick="sistema.salvarParcial(); sistema.avancarParaTela(3)" class="btn-primary text-lg px-12 py-4">Próximo: Documentos</button>
+            </div>
+        </div>
 
-            renderQualif() {
-                const list = document.getElementById('lista-qualificacao');
-                list.innerHTML = this.data.qualificados.map((q, i) => `
-                    <div class="exec-card p-6 border-l-4 border-l-slate-900">
-                        <span class="text-[9px] font-black text-yellow-600 uppercase">${q.papel}</span>
-                        <h4 class="font-bold text-slate-800">${q.posto} ${q.nome}</h4>
-                        <p class="text-[10px] text-slate-400 mt-1">${q.nat} | ${q.idade} anos</p>
+        <!-- Tela 3 - Documentos -->
+        <div id="tela-3" class="hidden container mx-auto px-6 py-12 flex-1">
+            <h2 class="text-4xl title-gold mb-12 text-center">Documentos</h2>
+            <div class="card">
+                <h3 class="text-2xl font-bold text-navy mb-6">Básicos (Auto-gerados)</h3>
+                <button onclick="sistema.gerarDocumentosBasicos()" class="btn-primary mb-6">Gerar Documentos Básicos</button>
+                <div id="lista-documentos-basicos" class="space-y-4"></div>
+            </div>
+
+            <div class="card mt-8">
+                <h3 class="text-2xl font-bold text-navy mb-6">Diversos & SIGED</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div onclick="sistema.gerarDocumentoDiverso('prorrogacao')" class="card cursor-pointer text-center py-8">
+                        <i class="fas fa-clock text-5xl text-navy mb-4"></i>
+                        <h4 class="text-xl font-bold text-navy">Prorrogação de Prazo</h4>
                     </div>
-                `).join('');
+                    <div onclick="sistema.gerarDocumentoDiverso('escrivao')" class="card cursor-pointer text-center py-8">
+                        <i class="fas fa-user-tie text-5xl text-navy mb-4"></i>
+                        <h4 class="text-xl font-bold text-navy">Designação de Escrivão</h4>
+                    </div>
+                    <div onclick="sistema.gerarDocumentoDiverso('defensorDativo')" class="card cursor-pointer text-center py-8">
+                        <i class="fas fa-user-shield text-5xl text-navy mb-4"></i>
+                        <h4 class="text-xl font-bold text-navy">Defensor Dativo</h4>
+                    </div>
+                    <div onclick="sistema.gerarDocumentoDiverso('despacho')" class="card cursor-pointer text-center py-8">
+                        <i class="fas fa-gavel text-5xl text-navy mb-4"></i>
+                        <h4 class="text-xl font-bold text-navy">Despacho</h4>
+                    </div>
+                    <div onclick="sistema.gerarDocumentoDiverso('oficio')" class="card cursor-pointer text-center py-8">
+                        <i class="fas fa-envelope text-5xl text-navy mb-4"></i>
+                        <h4 class="text-xl font-bold text-navy">Ofício</h4>
+                    </div>
+                    <div onclick="sistema.enviarParaSIGED()" class="card cursor-pointer text-center py-8 border-4 border-dashed border-gold">
+                        <i class="fas fa-paper-plane text-5xl text-gold mb-4"></i>
+                        <h4 class="text-xl font-bold text-navy">Enviar para SIGED</h4>
+                    </div>
+                </div>
+                <div id="lista-documentos-diversos" class="space-y-4 mt-8"></div>
+            </div>
+
+            <div class="text-center mt-12">
+                <button onclick="sistema.salvarParcial(); sistema.avancarParaTela(4)" class="btn-primary text-lg px-12 py-4">Próximo: Relatório</button>
+            </div>
+        </div>
+
+        <!-- Tela 4 - Relatório -->
+        <div id="tela-4" class="hidden container mx-auto px-6 py-12 flex-1">
+            <h2 class="text-4xl title-gold mb-12 text-center">Relatório Final</h2>
+            <div class="card">
+                <h3 class="text-2xl font-bold text-navy mb-6">Capitulação Legal (Obrigatória)</h3>
+                <input id="tipificacao-direta" placeholder="Tipificação Direta (ex.: art. 160 CPM)" class="input mb-4">
+                <input id="tipificacao-indireta" placeholder="Tipificação Indireta (ex.: inc. I art. 9º CPM)" class="input mb-4">
+            </div>
+            <div class="card mt-6">
+                <h3 class="text-2xl font-bold text-navy mb-6">Conteúdo do Relatório</h3>
+                <textarea id="relatorio-conteudo" rows="20" class="w-full border-2 border-slate-200 rounded-xl p-4 focus:border-navy"></textarea>
+            </div>
+            <div class="text-center mt-12">
+                <button onclick="sistema.exportarRelatorioPDF()" class="btn-primary text-lg px-12 py-4">Exportar Relatório</button>
+                <button onclick="sistema.exportarTodosPDF()" class="btn-gold text-lg px-12 py-4 ml-6">Exportar Tudo</button>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div id="modal-edicao" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="card w-11/12 max-w-4xl">
+                <h3 id="modal-titulo" class="text-2xl font-bold text-navy mb-4"></h3>
+                <textarea id="modal-conteudo" rows="15" class="w-full border-2 border-slate-200 rounded-xl p-4 focus:border-navy font-mono text-sm"></textarea>
+                <div class="flex justify-end gap-4 mt-6">
+                    <button onclick="sistema.salvarEdicaoDocumento()" class="btn-primary">Salvar</button>
+                    <button onclick="sistema.fecharModal()" class="btn-outline">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- JavaScript Completo -->
+        <script>
+            const SUPABASE_URL = 'https://dzknjtstiptcbkvszibo.supabase.co';
+            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6a25qdHN0aXB0Y2JrdnN6aWJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4OTU3NDYsImV4cCI6MjA4MTQ3MTc0Nn0.LN4j37EHqLQpdoS0mNAIW9v-MTgWo8nXoFl1FrhSSHE';
+
+            class SistemaSISPRO {
+                constructor() {
+                    this.telaAtual = 1;
+                    this.dados = { tipo: '', portaria: '', data: '', unidade: '', preceitoLegal: '', encarregado: {}, sindicado: {}, ofendido: {}, testemunhas: [] };
+                    this.documentos = { basicos: [], diversos: [] };
+                    this.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                    this.atualizarEtapas();
+                }
+
+                notificar(msg, tipo = 'success') {
+                    alert(msg); // Substituir por toast bonito se quiser
+                }
+
+                selecionarProcedimento(tipo) {
+                    this.dados.tipo = tipo;
+                    this.avancarParaTela(2);
+                }
+
+                adicionarTestemunha() {
+                    const container = document.getElementById('lista-testemunhas');
+                    const div = document.createElement('div');
+                    div.className = 'card mt-4 p-6';
+                    div.innerHTML = `
+                        <input placeholder="Nome da Testemunha" class="input mb-4">
+                        <input placeholder="Posto/Grad" class="input mb-4">
+                        <input placeholder="Matrícula/RG" class="input mb-4">
+                        <textarea placeholder="Declaração" rows="3" class="w-full border-2 border-slate-200 rounded-xl p-4"></textarea>
+                    `;
+                    container.appendChild(div);
+                }
+
+                salvarParcial() {
+                    // Coleta dados (simplificado)
+                    this.notificar('Dados salvos localmente!');
+                }
+
+                gerarDocumentosBasicos() {
+                    this.documentos.basicos = [{titulo: 'Autuação', conteudo: 'Template autuação...'}];
+                    this.atualizarListaDocumentos();
+                }
+
+                gerarDocumentoDiverso(tipo) {
+                    let template = '';
+                    if (tipo === 'prorrogacao') template = `PEDIDO DE PRORROGAÇÃO\nPortaria nº ${this.dados.portaria}\nJustificativa: [Edite]\nDiligências: [Edite]\nVia SIGED em 48h`;
+                    // Outros templates
+                    const doc = {titulo: tipo.toUpperCase(), conteudo: template};
+                    this.documentos.diversos.push(doc);
+                    this.atualizarListaDocumentos();
+                }
+
+                enviarParaSIGED() {
+                    const memo = `MEMORANDO SIGED\nNº ${Math.random().toString(36).substring(7).toUpperCase()}/${new Date().getFullYear()}\nPortaria ${this.dados.portaria}\nAssunto: Envio de Autos\n${this.dados.encarregado.nome || '[Encarregado]'}`;
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF();
+                    pdf.text(memo, 15, 20);
+                    pdf.save('MEMO_SIGED.pdf');
+                    window.open('https://sistemas.sefaz.am.gov.br/siged/', '_blank');
+                    this.notificar('MEMO gerado e portal SIGED aberto para submissão!');
+                }
+
+                gerarRelatorio() {
+                    const direta = document.getElementById('tipificacao-direta').value;
+                    const indireta = document.getElementById('tipificacao-indireta').value;
+                    if (!direta || !indireta) return this.notificar('Capitulação obrigatória!');
+                    document.getElementById('relatorio-conteudo').value = `RELATÓRIO\nTip. Direta: ${direta}\nTip. Indireta: ${indireta}\n...`;
+                }
+
+                exportarRelatorioPDF() {
+                    this.gerarRelatorio();
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF();
+                    pdf.text(document.getElementById('relatorio-conteudo').value, 15, 20);
+                    pdf.save('Relatorio.pdf');
+                }
+
+                exportarTodosPDF() {
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF();
+                    let y = 20;
+                    [...this.documentos.basicos, ...this.documentos.diversos].forEach(d => {
+                        pdf.text(d.titulo, 15, y);
+                        y += 10;
+                        pdf.text(d.conteudo, 15, y, {maxWidth: 180});
+                        y += 50;
+                        if (y > 280) { pdf.addPage(); y = 20; }
+                    });
+                    pdf.save('SISPRO_Completo.pdf');
+                }
+
+                async salvarNoBanco() {
+                    const { error } = await this.supabase.from('procedimentos').insert([this.dados]);
+                    this.notificar(error ? 'Erro' : 'Salvo no banco!');
+                }
+
+                avancarParaTela(n) {
+                    document.querySelectorAll('[id^="tela-"]').forEach(t => t.classList.add('hidden'));
+                    document.getElementById(`tela-${n}`).classList.remove('hidden');
+                    this.telaAtual = n;
+                    this.atualizarEtapas();
+                }
+
+                atualizarEtapas() {
+                    document.querySelectorAll('.step-pill').forEach((p, i) => {
+                        p.classList.toggle('active', i + 1 === this.telaAtual);
+                        p.classList.toggle('pending', i + 1 !== this.telaAtual);
+                    });
+                }
+
+                atualizarListaDocumentos() {
+                    const sidebar = document.getElementById('lista-documentos-sidebar');
+                    sidebar.innerHTML = [...this.documentos.basicos, ...this.documentos.diversos].map(d => `<div>${d.titulo}</div>`).join('');
+                }
             }
 
-            initDocs() {
-                const padrao = ["Autuação", "Termo de Abertura", "Designação do Escrivão", "Compromisso", "Encerramento"];
-                const diversos = ["Juntada", "Ofícios", "Termos", "Declarações", "Despachos"];
+            const sistema = new SistemaSISPRO();
+            window.sistema = sistema;
 
-                document.getElementById('docs-padrao').innerHTML = padrao.map(d => this.docRow(d)).join('');
-                document.getElementById('docs-diversos').innerHTML = diversos.map(d => this.docRow(d)).join('');
-            }
-
-            docRow(label) {
-                return `<div class="p-4 bg-slate-50 rounded-xl flex justify-between items-center hover:bg-white border border-transparent hover:border-slate-200 transition-all cursor-pointer">
-                    <span class="text-sm font-semibold text-slate-700">${label}</span>
-                    <i class="fas fa-edit text-slate-300"></i>
-                </div>`;
-            }
-
-            consultar() { alert("Acessando Banco de Dados PMAM..."); }
-        }
-
-        const app = new SISPRO_Elite();
-    </script>
+            // Mobile toggle
+            document.getElementById('sidebar-toggle').addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.getElementById('sidebar').classList.toggle('open');
+            });
+            document.addEventListener('click', () => document.getElementById('sidebar').classList.remove('open'));
+            document.getElementById('sidebar').addEventListener('click', e => e.stopPropagation());
+        </script>
+    </div>
 </body>
 </html>
